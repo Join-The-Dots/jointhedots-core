@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "noUnusedLocals": false,
+    "sourceMap": true,
+    "outDir": "scripts/esm"
+  },
+  "include": [
+    "scripts"
+  ],
+  "exclude": [
+    "scripts/esm"
+  ]
+}

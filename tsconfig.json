@@ -1,0 +1,57 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": [
+      "dom",
+      "dom.iterable"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strictNullChecks": false,
+    "strict": false,
+    "downlevelIteration": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "jsx": "react",
+    "paths": {
+      "services/*": [
+        "src/core/services/*"
+      ],
+      "components": [
+        "./src/components"
+      ],
+      "components/*": [
+        "./src/components/*"
+      ],
+      "editors": [
+        "./src/editors"
+      ],
+      "editors/*": [
+        "./src/editors/*"
+      ],
+      "core": [
+        "./src/core"
+      ],
+      "core/*": [
+        "./src/core/*"
+      ],
+      "react-application-frame": [
+        "src/components/ViewsFrame"
+      ],
+      "runtime": [
+        "./src/runtime"
+      ],
+      "runtime/*": [
+        "./src/runtime/*"
+      ]
+    }
+  },
+  "include": [
+    "src"
+  ]
+}

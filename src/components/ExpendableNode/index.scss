@@ -1,0 +1,18 @@
+.InSlick-ExpendableNode {
+   &>.Label {
+      display: flex;
+      flex-direction: row;
+      cursor: pointer;
+      align-items: center;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+
+      &>:first-child {
+         min-width: 20px;
+      }
+   }
+
+   &>.Content {
+      padding-left: 10px;
+   }
+}

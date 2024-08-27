@@ -1,0 +1,6 @@
+{
+  "window.title": "LiveDoc",
+  "terminal.integrated.env.windows": {
+    "Path": "${env:PATH};node_modules/.bin"
+ },
+}
