@@ -1,0 +1,10 @@
+{
+   "id": "std:mermaid",
+   "type": "view",
+   "title": "Mermaid Graph",
+   "icon": "bi:layout-sidebar-inset-reverse",
+   "attachments": {
+      "expression": "./expression",
+      "editor": "./editor"
+   }
+}

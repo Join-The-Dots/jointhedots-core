@@ -1,5 +1,5 @@
 import React from "react"
-import { MapLike } from "core/types/common"
+import { MapLike } from "core/common"
 import { stopPropagation } from "./event.utils"
 
 export type DragPropsType = {

@@ -1,6 +1,6 @@
-import { MapLike } from "core/types/common"
+import { MapLike } from "core/common"
 
-export function getLocationQuery(): MapLike<string> {
+export function useLocationQuery(): MapLike<string> {
    const { search } = window.location
    const query = {}
    if (search.startsWith("?")) {

@@ -1,4 +1,4 @@
-import { MapLike } from "core/types/common"
+import { MapLike } from "core/common"
 import { JSONSchema7Type, JSONSchema7Version, JSONSchema7TypeName } from "json-schema"
 
 export type JSONSchema7Definition = JSONSchema
@@ -123,19 +123,22 @@ export type JSONSchema7TypeNameCustom =
 export type JSONSchemaCustom = {
 
    // Information
-   $error?: string | Error
-   doc?: DocumentationSchema
+   title?: string
    icon?: string
+   doc?: DocumentationSchema
+   $error?: string | Error
 
    // Programming interface
    args?: JSONSchema[]
    placeholder?: boolean // require a placeholder structure when empty
-   attachments?: MapLike<string>
+   attachments?: MapLike<ResourceLink>
 
    // Component related schema
    docking?: DockingSchema
    template?: TemplateSchema // descriptor to create a valid expression for this schema
 }
+
+export type ResourceLink = string
 
 export type TemplateSchema = {
    title?: string

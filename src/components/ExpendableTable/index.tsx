@@ -2,7 +2,7 @@ import React from 'react'
 import Stack from 'components/Stack'
 import Icon from 'components/Icon'
 import "./style.scss"
-import { useAsyncState } from 'core/host/hooks/useAsyncState'
+import { useAsyncState } from 'components/hooks/useAsyncState'
 
 const ListTableContext = React.createContext<number>(0)
 

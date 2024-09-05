@@ -293,10 +293,10 @@ export async function open_workspace(path: string, enables?: FeatureID[]): Promi
                const file = make_relative_path(Process.cwd(), Path.dirname(path), parts[0])
                let ref = entryfiles[name]
                if (!ref) {
-                  ref = "addon_" + compute_hashID(file)
+                  ref = make_filename("addon_" + compute_hashID(file))
                   ws.entries[ref] = file
                }
-               manifest.attachments[name] = `${ref}.js#${parts[1] || "default"}`
+               manifest.attachments[name] = `/${ref}.js#${parts[1] || "default"}`
                console.log(`+ attachment: ${id}#${name} -> ${manifest.attachments[name]}`)
             }
          }
@@ -310,4 +310,8 @@ export function compute_hashID(identity: string): string {
    const hasher = Crypto.createHash("sha256")
    hasher.write(identity)
    return hasher.digest().toString("base64url")
+}
+
+export function make_filename(pattern: string) {
+   return pattern.split(/[^a-zA-Z0-9]/).filter(x => x.length > 0).join("_")
 }

@@ -5,7 +5,7 @@ import Process from "node:process"
 import Yargs from "yargs"
 import * as esbuild from 'esbuild'
 import { sassPlugin } from 'esbuild-sass-plugin'
-import { open_workspace, update_workspace_collections } from "./workspace.js"
+import { make_filename, open_workspace, update_workspace_collections } from "./workspace.js"
 import postcss from 'postcss'
 import copyAssets from 'postcss-copy-assets'
 import express from 'express'
@@ -225,10 +225,6 @@ async function serve(port: number, context: esbuild.BuildContext, storage: Stora
    app.listen(port, () => {
       console.log(`Server is running at http://localhost:${port}`)
    })
-}
-
-function make_filename(pattern: string) {
-   return pattern.split(/[^a-zA-Z0-9]/).filter(x => x.length > 0).join("_")
 }
 
 function write_html_content(name: string, entry: string, importmap: any, hotreload: boolean) {

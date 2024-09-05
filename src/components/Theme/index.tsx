@@ -1,4 +1,4 @@
-import { getLocationQuery } from "core/host/browser-infos";
+import { useLocationQuery } from "components/hooks/useLocationQuery";
 import React from "react";
 
 export enum ThemeLighting {
@@ -38,7 +38,7 @@ setGlobalTheme(getDefaultTheme())
 export const ThemeContext = React.createContext<ThemeProvider>(ThemeProvider.globalTheme)
 
 function getDefaultTheme(): ThemeProvider {
-   const query = getLocationQuery()
+   const query = useLocationQuery()
    if (query.theme) {
       return query.theme === "dark" ? DarkTheme : LightTheme
    }

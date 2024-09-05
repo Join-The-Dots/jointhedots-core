@@ -1,4 +1,4 @@
-import { MapLike } from "core/types/common"
+import { MapLike } from "core/common"
 import { JSONSchema } from "./json-schema"
 import { JSONSchema7TypeName } from "json-schema"
 export * from "./json-schema"
