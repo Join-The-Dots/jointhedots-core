@@ -1,71 +1,62 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-
-import type {SettingName} from '../appSettings';
-
 import * as React from 'react';
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react';
+import { createContext, useContext } from 'react';
+import { useLocalStorage } from 'components/hooks/useLocalStorage';
 
-import {DEFAULT_SETTINGS, INITIAL_SETTINGS} from '../appSettings';
+export type SettingsType = {
+  isAutocomplete: boolean
+  isCharLimit: boolean
+  isCharLimitUtf8: boolean
+  isCollab: boolean
+  isMaxLength: boolean
+  shouldUseLexicalContextMenu: boolean
+  tableCellBackgroundColor: boolean
+  tableCellMerge: boolean
 
-type SettingsContextShape = {
-  setOption: (name: SettingName, value: boolean) => void;
-  settings: Record<SettingName, boolean>;
+  showTableOfContents: boolean
+  showComments: boolean
+  showSideView: null | "markdown" | "treeview" | "treeview-extended"
+}
+
+export const EDITOR_DEFAULT_SETTINGS: SettingsType = {
+  isAutocomplete: true,
+  isCharLimit: false,
+  isCharLimitUtf8: false,
+  isCollab: false,
+  isMaxLength: false,
+  shouldUseLexicalContextMenu: true,
+  tableCellBackgroundColor: true,
+  tableCellMerge: true,
+  
+  showTableOfContents: false,
+  showComments: false,
+  showSideView: null,
+}
+
+export type SettingsContextShape = {
+  settings: SettingsType
+  setSettings(changes: Partial<SettingsType>);
 };
 
-const Context: React.Context<SettingsContextShape> = createContext({
-  setOption: (name: SettingName, value: boolean) => {
-    return;
-  },
-  settings: INITIAL_SETTINGS,
-});
-
-export const SettingsContext = ({
-  children,
-}: {
-  children: ReactNode;
-}): JSX.Element => {
-  const [settings, setSettings] = useState(INITIAL_SETTINGS);
-
-  const setOption = useCallback((setting: SettingName, value: boolean) => {
-    setSettings((options) => ({
-      ...options,
-      [setting]: value,
-    }));
-    setURLParam(setting, value);
-  }, []);
-
-  const contextValue = useMemo(() => {
-    return {setOption, settings};
-  }, [setOption, settings]);
-
-  return <Context.Provider value={contextValue}>{children}</Context.Provider>;
-};
+export const SettingsContext: React.Context<SettingsContextShape> = createContext(null);
 
 export const useSettings = (): SettingsContextShape => {
-  return useContext(Context);
+  return useContext(SettingsContext);
 };
 
-function setURLParam(param: SettingName, value: null | boolean) {
-  const url = new URL(window.location.href);
-  const params = new URLSearchParams(url.search);
-  if (value !== DEFAULT_SETTINGS[param]) {
-    params.set(param, String(value));
-  } else {
-    params.delete(param);
-  }
-  url.search = params.toString();
-  window.history.pushState(null, '', url.toString());
+export function ManageSettings(props: { id: string, children: any }) {
+  const [stored, setStored] = useLocalStorage(props.id, EDITOR_DEFAULT_SETTINGS)
+
+  const data = React.useMemo(() => {
+    return {
+      settings: stored,
+      setSettings(changes: Partial<typeof stored>) {
+        const settings = { ...EDITOR_DEFAULT_SETTINGS, ...stored, ...changes, } as typeof stored
+        setStored(settings)
+      },
+    }
+  }, [stored])
+
+  return <SettingsContext.Provider value={data}>
+    {props.children}
+  </SettingsContext.Provider>
 }

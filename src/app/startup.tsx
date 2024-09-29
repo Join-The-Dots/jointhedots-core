@@ -1,11 +1,18 @@
-import React, { useEffect, useState } from "react"
 import ReactDOM from 'react-dom/client'
-import { ToastContainer } from "react-toastify"
-import 'react-toastify/dist/ReactToastify.css'
-import "./style.scss"
+import { toast, ToastContainer } from "react-toastify"
 import { ASTNode } from "../core/AST"
 import { JSONSchema } from "../core/AST/JSONSchema"
-import { DocumentEditor } from "lexical-editor"
+import { DocumentViewer } from "lexical-editor/Viewer"
+import "components/icons-vscode"
+import "components/icons-fontawesome"
+import "components/icons-bootstrap"
+import 'react-toastify/dist/ReactToastify.css'
+import "./style.scss"
+
+import doc_ast from "./samples/Playground1.json"
+import { useState } from 'react'
+import { DocumentEditable } from 'lexical-editor'
+console.log(doc_ast)
 
 const ast = {
    "type": "flow",
@@ -89,15 +96,36 @@ handlers.push({
    }
 })
 
-function decompose_ast(ast: ASTNode) {
 
+function getDocumentState(id: string) {
+   try {
+      const result = JSON.parse(localStorage.getItem(id))
+      if (result.root instanceof Object) {
+         return result
+      }
+   }
+   catch (_) {
+   }
+   return doc_ast.editorState
+}
+
+function setDocumentState(id: string, content: any) {
+   localStorage.setItem(id, JSON.stringify(content))
+   toast.success(`Document '${id}' saved`)
 }
 
 function App() {
+   const id = "doc:my-test-doc"
+   const [content, setContent] = useState<any>(getDocumentState(id))
    return (<>
-      <ToastContainer />
-      <DocumentEditor />
-      hello
+      <ToastContainer position='bottom-right' />
+      <DocumentEditable
+         content={content}
+         onChange={(content) => {
+            setDocumentState(id, content)
+            setContent(content)
+         }}
+      />
    </>)
 }
 

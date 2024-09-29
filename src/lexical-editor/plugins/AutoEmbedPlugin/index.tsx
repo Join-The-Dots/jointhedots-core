@@ -23,9 +23,9 @@ import * as ReactDOM from 'react-dom';
 import useModal from '../../hooks/useModal';
 import Button from '../../ui/Button';
 import {DialogActions} from '../../ui/Dialog';
-import {INSERT_FIGMA_COMMAND} from '../FigmaPlugin';
-import {INSERT_TWEET_COMMAND} from '../TwitterPlugin';
-import {INSERT_YOUTUBE_COMMAND} from '../YouTubePlugin';
+import {INSERT_FIGMA_COMMAND} from '../../nodes/Figma/FigmaPlugin';
+import {INSERT_TWEET_COMMAND} from '../../nodes/Twitter/TweetPlugin';
+import {INSERT_YOUTUBE_COMMAND} from '../../nodes/YouTube/YouTubePlugin';
 
 interface PlaygroundEmbedConfig extends EmbedConfig {
   // Human readable name of the embeded content e.g. Tweet or Google Map.

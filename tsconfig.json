@@ -20,9 +20,6 @@
     "baseUrl": ".",
     "jsx": "react-jsx",
     "paths": {
-      "shared/*": [
-        "./src/lexical-editor/shared/*"
-      ],
       "*": [
         "src/*"
       ]

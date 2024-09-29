@@ -38,13 +38,13 @@ import * as ReactDOM from 'react-dom';
 import useModal from '../../hooks/useModal';
 import catTypingGif from '../../images/cat-typing.gif';
 import {EmbedConfigs} from '../AutoEmbedPlugin';
-import {INSERT_COLLAPSIBLE_COMMAND} from '../CollapsiblePlugin';
-import {InsertEquationDialog} from '../EquationsPlugin';
-import {INSERT_EXCALIDRAW_COMMAND} from '../ExcalidrawPlugin';
-import {INSERT_IMAGE_COMMAND, InsertImageDialog} from '../ImagesPlugin';
-import InsertLayoutDialog from '../LayoutPlugin/InsertLayoutDialog';
-import {INSERT_PAGE_BREAK} from '../PageBreakPlugin';
-import {InsertPollDialog} from '../PollPlugin';
+import {INSERT_COLLAPSIBLE_COMMAND} from '../../nodes/Collapsible/CollapsiblePlugin';
+import {InsertEquationDialog} from '../../nodes/Equations/EquationsPlugin';
+import {INSERT_EXCALIDRAW_COMMAND} from '../../nodes/Excalidraw/ExcalidrawPlugin';
+import {INSERT_IMAGE_COMMAND, InsertImageDialog} from '../../nodes/Images/ImagesPlugin';
+import InsertLayoutDialog from '../../nodes/Layout/InsertLayoutDialog';
+import {INSERT_PAGE_BREAK} from '../../nodes/PageBreak/PageBreakPlugin';
+import {InsertPollDialog} from '../../nodes/Poll/PollPlugin';
 import {InsertTableDialog} from '../TablePlugin';
 
 class ComponentPickerOption extends MenuOption {
