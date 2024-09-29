@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "es2020",
     "lib": [
+      "esnext",
       "dom",
       "dom.iterable"
     ],
@@ -17,37 +18,13 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "jsx": "react",
+    "jsx": "react-jsx",
     "paths": {
-      "services/*": [
-        "src/core/services/*"
+      "shared/*": [
+        "./src/lexical-editor/shared/*"
       ],
-      "components": [
-        "./src/components"
-      ],
-      "components/*": [
-        "./src/components/*"
-      ],
-      "editors": [
-        "./src/editors"
-      ],
-      "editors/*": [
-        "./src/editors/*"
-      ],
-      "core": [
-        "./src/core"
-      ],
-      "core/*": [
-        "./src/core/*"
-      ],
-      "react-application-frame": [
-        "src/components/ViewsFrame"
-      ],
-      "runtime": [
-        "./src/runtime"
-      ],
-      "runtime/*": [
-        "./src/runtime/*"
+      "*": [
+        "src/*"
       ]
     }
   },

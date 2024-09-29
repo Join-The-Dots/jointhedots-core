@@ -1,17 +1,13 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import ReactDOM from 'react-dom/client'
 import { ToastContainer } from "react-toastify"
-import { ThemeContext } from "components/Theme"
-import { AstMarkdown, deserialize_model_markdown, MarkdownModelDisplayer, serialize_model_markdown } from "./markdown-serial";
-import { MarkdownPreviewExample } from "./markdown-editor";
-import { ComponentsRegistry } from "core/components/registry";
-import { CoreInstance } from "core";
-import { LocalComponentStore } from "core/providers/component-local-provider";
-import { CommonModuleProvider } from "core/providers/module-provider";
 import 'react-toastify/dist/ReactToastify.css'
 import "./style.scss"
+import { ASTNode } from "../core/AST"
+import { JSONSchema } from "../core/AST/JSONSchema"
+import { DocumentEditor } from "lexical-editor"
 
-const markdownText2 = serialize_model_markdown({
+const ast = {
    "type": "flow",
    "flow": {
       "pp": {
@@ -42,35 +38,66 @@ console.log('Hello, world!');
 `
       ]
    }
+}
+
+type HandlerManifest = {
+   id: string,
+   expression: JSONSchema
+}
+
+const handlers: HandlerManifest[] = []
+
+handlers.push({
+   id: "flow",
+   expression: {
+      properties: {
+         "flow": {
+            type: "array",
+            items: {
+               type: "expression"
+            }
+         },
+         "layout": {
+            type: "expression"
+         }
+      }
+   }
 })
 
-const markdownModel = deserialize_model_markdown(markdownText2)
+handlers.push({
+   id: "property",
+   expression: {
+      properties: {
+         "schema": {
+            $ref: "http://json-schema.org/draft-07/schema"
+         }
+      }
+   }
+})
 
+handlers.push({
+   id: "state",
+   expression: {
+      properties: {
+         "value": {
+            type: "expression"
+         },
+         "schema": {
+            $ref: "http://json-schema.org/draft-07/schema"
+         }
+      }
+   }
+})
 
-const provider = new LocalComponentStore()
-CoreInstance.edition = true
-CoreInstance.simulation = true
-CoreInstance.storage = provider
-CoreInstance.component_provider = provider
-ComponentsRegistry.storage_provider = provider
-ComponentsRegistry.modules_provider = new CommonModuleProvider()
+function decompose_ast(ast: ASTNode) {
 
-async function run() {
-   const mermaid = await ComponentsRegistry.resolveResource("std:mermaid", "view").fetch()
-   console.log(mermaid)
 }
-run()
 
 function App() {
-   const theme = React.useContext(ThemeContext)
-
    return (<>
-      <MarkdownPreviewExample root={markdownModel.layout as AstMarkdown} />
-      <pre>{markdownText2}</pre>
-      <MarkdownModelDisplayer>
-         {markdownText2}
-      </MarkdownModelDisplayer>
-      <ToastContainer theme={theme.isDark ? "dark" : "light"} position="bottom-right" autoClose={2000} hideProgressBar />
+      <ToastContainer />
+      <DocumentEditor />
+      hello
    </>)
 }
 

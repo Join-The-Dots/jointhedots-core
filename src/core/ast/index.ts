@@ -1,8 +1,15 @@
 import { MapLike } from "core/common"
-import { JSONSchema } from "core/types/json-schema"
+import { JSONSchema } from "./JSONSchema"
+
+export type ASTLocation = {
+   moduleId: string
+   revision: number
+   path: string
+}
 
 export interface ASTNode {
    type: string
+   name?: string
    [prop: string]: any
 }
 
@@ -10,12 +17,12 @@ export interface ASTExpression extends ASTNode {
    schema?: JSONSchema
 }
 
-export interface ASTFlow extends ASTNode {
+export interface ASTRoutine extends ASTNode {
    type: "flow" | "dataflow" | "inline"
    flow?: MapLike<ASTExpression>
    layout?: ASTExpression
 }
 
-export interface ASTProgram extends ASTFlow {
+export interface ASTProgram extends ASTRoutine {
    revision?: number
 }

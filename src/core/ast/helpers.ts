@@ -1,4 +1,4 @@
-import { JSONSchemaRelation } from "core/ast/JSONDocument"
+import { JSONSchemaRelation } from "core/AST/JSONDocument"
 import { ASTExpression } from "."
 
 export type DataBreakupLevel = {
@@ -114,7 +114,7 @@ const forbiddenNames = [
    "this", "throw", "try", "typeof", "var", "void", "while", "with", "yield",
    "enum", "await", "implements", "interface", "package", "private", "protected",
    "public", "static", "let", "async", "of", "from", "null", "true", "false",
-   "NaN", "Infinity", "undefined","r"
+   "NaN", "Infinity", "undefined", "r"
 ]
 
 export function isValidTechnicalName(name: string): boolean {
@@ -204,6 +204,13 @@ export function checkDataEquals(data1: any, data2: any): boolean {
    return false
 }
 
+export function ASTExpressionFilter(data: any) {
+   if (data instanceof JSONSchemaRelation) {
+      return false
+   }
+   return true
+}
+
 export function findObjectPath(what: Object, content: Object): string {
    const infos = DataBreakupOnPath.find(what, content)
    if (infos) return infos.path
@@ -245,6 +252,10 @@ export function setDataAtPath(path: string, data: any, content: Object): any {
 export type DescriptorPlacement = {
    path: string
    content: ASTExpression
+}
+
+export function findDescriptorPath(searched: any, descriptor: ASTExpression) {
+   return DataBreakupOnPath.find(searched, descriptor)
 }
 
 export function insertDescriptorAtPath(path: string, descriptor: ASTExpression, source: ASTExpression): DescriptorPlacement {

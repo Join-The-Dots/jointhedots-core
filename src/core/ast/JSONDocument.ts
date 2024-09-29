@@ -1,5 +1,5 @@
 import { getDataAtKeys } from "./helpers"
-import { CommonTypes, JSONSchema } from "core/types/schema"
+import { CommonTypes, JSONSchema } from "core/AST/schema-helpers"
 
 export function getJSONSchemaName(schema: JSONSchema): string {
    if (schema instanceof JSONSchemaRelation) {

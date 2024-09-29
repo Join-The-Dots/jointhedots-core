@@ -54,7 +54,26 @@
       "unist": "^0.0.1",
       "vis-network": "~9.1.6",
       "vscode-uri": "^3.0.8",
-      "yargs": "^17.7.2"
+      "yargs": "^17.7.2",
+      "@excalidraw/excalidraw": "^0.17.0",
+      "@lexical/clipboard": "0.18.0",
+      "@lexical/code": "0.18.0",
+      "@lexical/file": "0.18.0",
+      "@lexical/hashtag": "0.18.0",
+      "@lexical/link": "0.18.0",
+      "@lexical/list": "0.18.0",
+      "@lexical/mark": "0.18.0",
+      "@lexical/overflow": "0.18.0",
+      "@lexical/plain-text": "0.18.0",
+      "@lexical/react": "0.18.0",
+      "@lexical/rich-text": "0.18.0",
+      "@lexical/selection": "0.18.0",
+      "@lexical/table": "0.18.0",
+      "@lexical/utils": "0.18.0",
+      "katex": "^0.16.10",
+      "prettier": "^2.3.2",
+      "y-websocket": "^1.5.4",
+      "lexical": "0.18.0"
    },
    "devDependencies": {
       "dts-generator": "~3.0.0",
@@ -66,7 +85,7 @@
       "typescript": "~5.3.3"
    },
    "scripts": {
-      "prepare": "tsc -w --project tsconfig.scripts.json",
+      "prepare": "tsc --project tsconfig.scripts.json",
       "watch": "tsc --watch --noEmit",
       "serve": "node scripts/esm/esbuild.js serve --mode development"
    }
