@@ -1,0 +1,11 @@
+{
+   "id": "pagebreak",
+   "description": "Pagination page break",
+   "icon": "bi:scissors",
+   "view": {
+   },
+   "attachments": {
+      "view.lexical": "./PageBreakNode#PageBreakNode",
+      "addon.lexical": "./PageBreakPlugin"
+   }
+}

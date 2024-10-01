@@ -1,0 +1,59 @@
+.InSlick-PropertiesTable {
+  overflow: hidden;
+
+  &>.Line {
+    display: flex;
+
+    &.Vertical {
+      flex-direction: column;
+      align-items: stretch;
+      margin-top: 10px;
+
+    }
+
+    &.Horizontal {
+      flex-direction: row;
+      align-items: center;
+
+      &>.PropertyName {
+        max-width: 30%;
+        min-width: 30%;
+        display: flex;
+        flex-direction: row;
+        gap: 5px;
+      }
+    }
+
+    &>.PropertyName {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &>.PropertyValue {
+      flex: 1 1 auto;
+      overflow: hidden;
+    }
+
+    &>.PropertyTitle {
+      margin-top: 15px;
+      margin-bottom: 5px;
+      padding-left: 5px;
+      padding-bottom: 5px;
+      flex: 1 1 auto;
+      overflow: hidden;
+      border-bottom: solid thin #fff1;
+    }
+  }
+
+  &>.ExpandLine {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 5px 0 10px 15px;
+    background-color: #fff1;
+  }
+
+  &>.ExpandLine>* {
+    flex: 1 1 auto;
+  }
+}

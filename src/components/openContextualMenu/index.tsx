@@ -3,12 +3,12 @@ import ReactDOMClient from 'react-dom/client'
 import ReactDOM from 'react-dom'
 import { computeEdgeBoxDOM, PositionType } from "../computeEdgeBox"
 import "./style.scss"
-import Icon from "components/Icon"
-import { getMousePos } from "components/event.utils"
+import Icon from "../Icon"
 
 type ItemPropsType = {
-   icon?: string
+   icon?: string | (() => React.ReactElement)
    title?: any
+   description?: string
    children?: any
    onClick?: (event: React.SyntheticEvent) => void
 }
@@ -24,7 +24,7 @@ let defaultStyle: StyleType = {}
 
 export const Menu = {
    Item(props: ItemPropsType) {
-      let { icon, title, children, onClick } = props
+      let { icon, title, description, children, onClick } = props
       let onMouseEnter, onMouseLeave
       if (children) {
          let closeCallback
@@ -43,9 +43,37 @@ export const Menu = {
             }
          }
       }
-      return <div className="cub8-menu-item" onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-         <div>{icon ? <Icon name={icon} /> : undefined}</div>
+      return <div className="cub8-menu-item" title={description} onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+         <div>{icon ? (icon instanceof Function ? icon() : <Icon name={icon} />) : undefined}</div>
          <div>{title}</div>
+      </div>
+   },
+   LargeItem(props: ItemPropsType) {
+      let { icon, title, description, children, onClick } = props
+      let onMouseEnter, onMouseLeave
+      if (children) {
+         let closeCallback
+         onMouseEnter = (e) => {
+            openContextualMenu(e.currentTarget, (f) => {
+               closeCallback = f
+               return children
+            })
+         }
+         onMouseLeave = () => {
+            closeCallback && closeCallback()
+         }
+         if (!onClick) {
+            onClick = (e) => {
+               openContextualMenu(e.currentTarget as HTMLElement, () => children)
+            }
+         }
+      }
+      return <div className="cub8-menu-item-large" title={description} onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+         <div>{icon ? (icon instanceof Function ? icon() : <Icon name={icon} />) : undefined}</div>
+         <div>
+            <div>{title}</div>
+            <div>{description}</div>
+         </div>
       </div>
    },
    Separator() {
@@ -68,14 +96,13 @@ export function setDefaultMenuStyle(className?: string, style?: StyleType) {
 
 export default function openContextualMenu<T>(
    target: Element | UIEvent | React.Component,
-   renderer: (close: (value?: T) => void) => React.ReactNode,
+   renderer: (close: (value?: T) => void) => React.ReactNode | Promise<React.ReactNode>,
    position?: PositionType,
    className?: string,
    style?: StyleType
 ): Promise<T> {
    console.assert(renderer instanceof Function)
    var resolve = null
-   var unpointed: number = 0
 
    // Determine tracked element
    var tracked: Element
@@ -110,7 +137,7 @@ export default function openContextualMenu<T>(
 
    // Create popup node
    var node = document.createElement("div")
-   node.className = className || defaultClassName
+   node.className = className ? `${className} ${defaultClassName}` : defaultClassName
    Object.assign(node.style, style || defaultStyle)
    node.style.visibility = "hidden"
    node.style.position = "fixed"
@@ -125,27 +152,8 @@ export default function openContextualMenu<T>(
       }
    }
 
-   function isMouseInside(): boolean {
-      const pos = getMousePos()
-      for (const item of document.elementsFromPoint(pos.clientX, pos.clientY)) {
-         if (item === node || item === tracked) {
-            return true
-         }
-      }
-      return false
-   }
-
    function updatePosition() {
       if (node) {
-         
-         if (!isMouseInside()) {
-            unpointed++
-            if (unpointed > 5) {
-               close()
-               return
-            }
-         }
-
          computeEdgeBoxDOM(position, node, tracked)
          node.style.visibility = "visible"
          setTimeout(updatePosition, 25)
@@ -180,8 +188,17 @@ export default function openContextualMenu<T>(
 
    // Render popup on node
    const root = ReactDOMClient.createRoot(node)
-   root.render(renderer(close))
-   updatePosition()
+   const rendered = renderer(close)
+   if (rendered instanceof Promise) {
+      rendered.then(rendered => {
+         root.render(rendered)
+         updatePosition()
+      })
+   }
+   else {
+      root.render(rendered)
+      updatePosition()
+   }
 
    // Make the promise
    const promise = new Promise<T>((_resolve) => {

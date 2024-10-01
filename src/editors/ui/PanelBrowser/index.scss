@@ -1,0 +1,40 @@
+.Livedoc-Component-Browser {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-bottom: var(--app-highlight-background) 1px dashed;
+
+  .ComponentPack {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 5px !important;
+    text-transform: capitalize;
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+    overflow: hidden;
+  }
+
+  .ComponentItem {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    white-space: nowrap;
+    cursor: pointer;
+    padding: 5px !important;
+    border-radius: 10px;
+    background-color: var(--app-background);
+    gap: 5px;
+
+    &:hover {
+      background-color:#eee;
+      outline: solid thin #aaa;
+    }
+
+    &>:nth-child(2) {
+      flex: 1;
+      padding-left: 5px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
+}

@@ -13,6 +13,7 @@ function FixedDock(props: React.HTMLAttributes<HTMLDivElement> & { width?: numbe
 
 export type StackProps = React.HTMLAttributes<HTMLDivElement> & {
    gap?: number
+   padding?: number
    vertical?: boolean
    children?: React.ReactNode
 }
@@ -21,9 +22,9 @@ export default class Stack extends React.Component<StackProps> {
    static FlexDock = FlexDock
    static FixedDock = FixedDock
    render(): React.ReactElement {
-      const { vertical, gap, style, ...otherProps } = this.props
+      const { vertical, gap, padding, style, ...otherProps } = this.props
       const cgap = (gap === undefined) ? 4 : gap
-      const cpadding = cgap / 2
+      const cpadding = padding || (cgap / 2)
       if (vertical === true) {
          return <div style={{ display: "flex", flexDirection: "column", alignItems: 'stretch', gap: cgap, padding: cpadding, ...style }} {...otherProps} />
       }

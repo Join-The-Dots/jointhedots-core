@@ -1,15 +1,16 @@
 import ReactDOM from 'react-dom/client'
 import { toast, ToastContainer } from "react-toastify"
 import { ASTNode } from "../core/AST"
-import { JSONSchema } from "../core/AST/JSONSchema"
+import { JSONSchema } from "../core/AST/schema"
 import { DocumentViewer } from "lexical-editor/Viewer"
 import "components/icons-vscode"
 import "components/icons-fontawesome"
 import "components/icons-bootstrap"
+import "core/theme"
 import 'react-toastify/dist/ReactToastify.css'
 import "./style.scss"
 
-import doc_ast from "./samples/Playground1.json"
+import doc_ast from "./samples/Livedoc1.json"
 import { useState } from 'react'
 import { DocumentEditable } from 'lexical-editor'
 console.log(doc_ast)

@@ -1,7 +1,7 @@
 import { MapLike } from "core/common"
-import { JSONSchema } from "./JSONSchema"
+import { JSONSchema } from "./schema"
 import { JSONSchema7TypeName } from "json-schema"
-export * from "./JSONSchema"
+export * from "./schema"
 
 export const CommonTypes: MapLike<JSONSchema> = {
    boolean: {
@@ -148,53 +148,6 @@ function typeAsString(type: JSONSchema["type"]): string {
    return Array.isArray(type) ? type.join(',') : type
 }
 
-function parseJson(text: string): any {
-   try {
-      return JSON.parse(text)
-   }
-   catch (e) {
-      return undefined
-   }
-}
-
-function convertTextToExpression(text: string, schema: JSONSchema, canBeExpression?: boolean): any {
-   const data = parseJson(text)
-   const canBeAny = isType(schema, "any") || !schema.type
-   if (canBeExpression && typeof data?.type === "string") {
-      return data
-   }
-   else if (isNaN(data)) {
-      if (isType(schema, "boolean") || canBeAny) {
-         if (text === "true") return true
-         if (text === "false") return false
-      }
-      if (isType(schema, "string") || canBeAny) {
-         return text
-      }
-      if (isType(schema, "number")) {
-         return 0
-      }
-   }
-   else {
-      if (isType(schema, "number") || canBeAny) {
-         return data
-      }
-      if (isType(schema, "string")) {
-         return text
-      }
-      if (isType(schema, "boolean")) {
-         return data !== 0
-      }
-   }
-   if (data !== undefined) {
-      return {
-         type: "const",
-         value: data,
-      }
-   }
-   return text
-}
-
 function generateTypescript(schema: JSONSchema): string {
    if (schema.type === "object") {
       const ln = []
@@ -215,14 +168,11 @@ function generateTypescript(schema: JSONSchema): string {
    return "any"
 }
 
-export const Types = {
+export const Schema = {
    getPropertyTyping,
    getItemTyping,
    getValueTyping,
    isType,
    typeAsString,
-   convertTextToExpression,
    generateTypescript,
 }
-
-export default Types

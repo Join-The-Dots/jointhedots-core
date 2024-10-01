@@ -16,10 +16,10 @@ import type {
   Spread,
 } from 'lexical';
 
-import {$setSelection, createEditor, DecoratorNode} from 'lexical';
+import { $setSelection, createEditor, DecoratorNode } from 'lexical';
 import * as React from 'react';
-import {Suspense} from 'react';
-import {createPortal} from 'react-dom';
+import { Suspense } from 'react';
+import { createPortal } from 'react-dom';
 
 const StickyComponent = React.lazy(() => import('./StickyComponent'));
 
@@ -61,10 +61,12 @@ export class StickyNode extends DecoratorNode<JSX.Element> {
       serializedNode.color,
     );
     const caption = serializedNode.caption;
-    const nestedEditor = stickyNode.__caption;
-    const editorState = nestedEditor.parseEditorState(caption.editorState);
-    if (!editorState.isEmpty()) {
-      nestedEditor.setEditorState(editorState);
+    if (caption) {
+      const nestedEditor = stickyNode.__caption;
+      const editorState = nestedEditor.parseEditorState(caption.editorState)
+      if (!editorState.isEmpty()) {
+        nestedEditor.setEditorState(editorState);
+      }
     }
     return stickyNode;
   }

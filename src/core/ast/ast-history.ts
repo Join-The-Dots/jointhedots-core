@@ -1,4 +1,4 @@
-import { DataBreakupOnPath, findObjectPath } from "./helpers"
+import { DataBreakupOnPath, findObjectPath } from "./ast-updater"
 
 type Versionned<T> = T & { revision?: number }
 

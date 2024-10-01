@@ -14,6 +14,8 @@ import { hideBin } from 'yargs/helpers'
 import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill'
 import { file, directory } from "@polycuber/script.cli"
 
+const outputDir = Path.resolve("./dist")
+
 function command_build() {
    return {
       command: 'build',
@@ -28,9 +30,9 @@ function command_build() {
             default: "",
          }),
       handler: async (argv) => {
-         const storage = new StorageFiles('./dist')
+         const storage = new StorageFiles(outputDir)
          console.time("build")
-         await build(argv, storage)
+         await execute(argv, storage)
          console.timeEnd("build")
       }
    }
@@ -54,11 +56,8 @@ function command_serve() {
             default: 3000,
          }),
       handler: async (argv) => {
-         const storage = new StorageFiles('./dist')
-         console.time("build")
-         const context = await build(argv, storage)
-         console.timeEnd("build")
-         await serve(argv.port, context, storage)
+         const storage = new StorageFiles(outputDir)
+         await execute(argv, storage)
       }
    }
 }
@@ -80,42 +79,54 @@ Yargs(hideBin(Process.argv)).scriptName("pcl")
    .help()
    .parse()
 
-async function build(env: {
-   mode: string
-   features: string
-}, storage: StorageFiles): Promise<esbuild.BuildContext> {
-   
+async function execute(env: {
+   mode?: string
+   features?: string
+   port?: number
+}, storage: StorageFiles): Promise<void> {
+
    // Parse options
    const use_dev = env.mode === "development"
    if (use_dev) console.log("Use devmode.")
    const use_features = env.features?.split(",")
    if (use_features) console.log("Use features: ", use_features)
+   const use_serve = env.port ? true : false
 
-   // Clean dist
-   directory.clean("./dist")
+   // Clean outputDir
+   if (use_dev === false || use_serve === false) {
+      directory.clean(outputDir)
+   }
 
    // Open workspace
    const ws = await open_workspace("./src", use_features)
-   await update_workspace_collections(ws)
+   await update_workspace_collections(ws, outputDir)
 
    // Register pages and entry from workspace
    const entry = {}
-   const importmap = { imports: {}, scopes: {} }
    for (const app of ws.applications) {
       entry[app.name] = app.entry
    }
    for (const name in ws.entries) {
       const extname = make_filename(name)
       entry[extname] = ws.entries[name]
-      importmap.imports[name] = `./${extname}.js`
    }
 
-   // Generate assets
-   file.copy.toDir("./src/favicon.webp", "./dist")
-   directory.copy("./node_modules/@salesforce-ux/design-system/assets", "./dist/assets")
-   for (const app of ws.applications) {
-      write_html_content(app.name, `./${app.name}.js`, importmap, true)
+   // Generate html assets
+   if (use_serve) {
+      Fs.writeFileSync(Path.resolve(outputDir, `esbuild-hotreload.js`),
+         `new EventSource('http://localhost:${env.port}/esbuild').addEventListener('change', e => { location.reload() })`
+      )
    }
+   for (const app of ws.applications) {
+      write_html_content(app.name, `./${app.name}.js`, use_serve)
+   }
+
+   // Generate static assets
+   const assetsDir = outputDir + "/assets"
+   if (!directory.exists(assetsDir)) {
+      directory.copy("node_modules/@salesforce-ux/design-system/assets", assetsDir)
+   }
+   file.copy.toDir("./src/favicon.webp", "./dist")
 
    // Define polyfill modules
    const polyfill_modules = {
@@ -138,7 +149,7 @@ async function build(env: {
       write: false,
       jsx: "automatic",
       jsxImportSource: "react",
-      mainFields: ['module', 'main'],
+      mainFields: ['browser', 'module', 'main', 'index'],
       define: {
          "process.browser": "true",
          ...Object.keys(ws.constants).reduce((prev, key) => {
@@ -208,7 +219,14 @@ async function build(env: {
       },
    }
 
-   return esbuild.context(options)
+   const context = await esbuild.context(options)
+   if (use_serve) {
+      await serve(env.port as number, context, storage)
+   }
+   else {
+      await context.rebuild()
+   }
+   await context.dispose()
 }
 
 async function serve(port: number, context: esbuild.BuildContext, storage: StorageFiles) {
@@ -225,10 +243,13 @@ async function serve(port: number, context: esbuild.BuildContext, storage: Stora
    app.listen(port, () => {
       console.log(`Server is running at http://localhost:${port}`)
    })
+   return new Promise((resolve) => {
+      process.on('SIGQUIT', () => resolve(null))
+   })
 }
 
-function write_html_content(name: string, entry: string, importmap: any, hotreload: boolean) {
-   Fs.writeFileSync(`./dist/${name}.html`, `<!DOCTYPE html>
+function write_html_content(name: string, entry: string, hotreload: boolean) {
+   Fs.writeFileSync(Path.resolve(outputDir, `${name}.html`), `<!DOCTYPE html>
 <html>
     <head>
         <title>${name}</title>
@@ -236,11 +257,7 @@ function write_html_content(name: string, entry: string, importmap: any, hotrelo
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="icon" type="image/webp" href="favicon.webp">
         <script type="module" src="${entry}"></script>
-        ${hotreload && `<script>
-            new EventSource('/esbuild').addEventListener('change', e => {
-                location.reload()
-            })
-        </script>`}
+        ${hotreload ? `<script type="module" src="./esbuild-hotreload.js"></script>` : ""}
     </head>
     <body>
     </body>

@@ -2,35 +2,38 @@ import Fsp from "node:fs/promises"
 import Process from "node:process"
 import Path from "node:path"
 import Crypto from "node:crypto"
+import { createRequire } from "node:module"
 
-type FeatureID = string // Identifier of feature
-type CatalogID = string // Identifier of catalog
-type ModuleID = string // Location of esm file: ./{module_path}
-type ExportID = ModuleID // Location of esm export: ./{module_path}#{export_name}
+const require = createRequire(import.meta.url);
 
-type CatalogEntry = {
+export type FeatureID = string // Identifier of feature
+export type CatalogID = string // Identifier of catalog
+export type ModuleID = string // Location of esm file: ./{module_path}
+export type ExportID = ModuleID // Location of esm export: ./{module_path}#{export_name}
+
+export type MapLike<T> = { [key: string]: T }
+
+export type CatalogEntry = {
    module: ExportID
    [meta: string]: any
 }
 
-type CatalogCollection = {
+export type CatalogCollection = {
    module: ExportID
    catalog: CatalogID
    typing?: ExportID
    lazy?: boolean
 }
 
-type ApplicationEntry = {
+export type ApplicationEntry = {
    title: string,
    name: string
    entry: ModuleID
 }
 
-type Publication = {
-   id?: string
-   name?: string
-   features?: FeatureID[]
+export type DeclarationDescriptor = {
    application?: ApplicationEntry
+   features?: FeatureID[]
    publish?: {
       [catalog: CatalogID]: CatalogEntry[]
    }
@@ -40,52 +43,84 @@ type Publication = {
    entries?: {
       [url: string]: string
    }
+}
+
+export type ComponentDescriptor = {
+   id: string
+   name?: string
+   features?: FeatureID[]
    attachments?: {
       [name: string]: string
    }
    [metadata: string]: any
 }
 
-class Workspace {
-   publications = new Map<string, Publication>()
+export interface ComponentPublication {
+   component_id: string
+   icon: string
+   title: string
+   description: string
+   keywords?: string[]
+   tags?: string[]
+}
+
+export class Workspace {
+   declarations = new Map<string, DeclarationDescriptor>()
+   components = new Map<string, ComponentDescriptor>()
    applications: ApplicationEntry[] = []
    entries: { [url: string]: string } = {}
    constants: { [key: string]: string | number } = {}
    manifests: { [url: string]: any } = {}
 }
 
-function is_enabled_publication(features?: FeatureID[], enables?: FeatureID[]) {
+function is_enabled_for(features?: FeatureID[], enables?: FeatureID[]) {
    if (enables && features) return features.reduce((val, ft) => enables.includes(ft) || val, false)
    return true
 }
 
-async function discover_publications(path: string, publications: Map<string, Publication>, enables?: FeatureID[]) {
-   const pub_dir_name = "publication.json"
-   const pub_file_ext = ".publication.json"
+async function discover_components(path: string, ws: Workspace, enables?: FeatureID[]) {
+   const comp_dir_name = "component.json"
+   const comp_file_ext = ".component.json"
 
    for (const fname of await Fsp.readdir(path)) {
       const fpath = `${path}/${fname}`
       const fstat = await Fsp.stat(fpath)
       if (fstat.isDirectory()) {
-         await discover_publications(fpath, publications, enables)
+         await discover_components(fpath, ws, enables)
       }
       else {
-         if (fname === pub_dir_name || fname.endsWith(pub_file_ext)) {
+         const is_component = fname === comp_dir_name || fname.endsWith(comp_file_ext)
+         if (fname === "declaration.json" || fname === "publication.json" || is_component) {
             try {
                const data = await Fsp.readFile(fpath)
-               const pub = JSON.parse(data.toString()) as Publication
-               if (is_enabled_publication(pub.features, enables)) {
-                  publications.set(fpath, pub)
-                  console.log("+ publication:", fpath)
+               const desc = JSON.parse(data.toString()) as (ComponentDescriptor & DeclarationDescriptor)
+               if (is_enabled_for(desc.features, enables)) {
+                  if (is_component) {
+                     if (typeof desc.id !== "string") throw new Error("Component descriptor shall have 'id'")
+                     ws.components.set(fpath, desc as ComponentDescriptor)
+                     console.log("+ component:", fpath)
+                  }
+                  else {
+                     ws.declarations.set(fpath, desc as DeclarationDescriptor)
+                     console.log("+ declaration:", fpath)
+                  }
                }
             }
             catch (e) {
-               console.log(`! invalid 'publication.json' at ${fpath}: ${e?.message}`)
+               console.log(`! invalid descriptor at ${fpath}: ${e?.message}`)
             }
          }
       }
    }
-   return publications
+}
+
+function resolve_entry_path(entryId: string, baseDir: string): string {
+   if (entryId.startsWith(".")) {
+      return make_relative_path(Process.cwd(), Path.resolve(baseDir, entryId))
+   }
+   else {
+      return make_relative_path(Process.cwd(), require.resolve(entryId))
+   }
 }
 
 function make_relative_path(baseDir: string, ...path: string[]) {
@@ -99,8 +134,8 @@ type CollectionGenerationEnv = {
    collect: CatalogCollection
    collect_name: string
    collect_dir: string
-   publication: Publication
-   publication_path: string
+   declaration: DeclarationDescriptor
+   declaration_path: string
 }
 
 function get_data_at(path: string, data: any): any {
@@ -153,7 +188,7 @@ class GenerationOutput {
          ``,
          `export default [`,
          `   ${this.chunks.join("\n   ")}`,
-         `] as ${this.exportType}[]`,
+         this.exportType ? `] as ${this.exportType}[]` : `]`,
          ``,
       ].join("\n")
    }
@@ -162,7 +197,7 @@ class GenerationOutput {
 function generate_reference(gen: GenerationOutput, ref: string, env: CollectionGenerationEnv): string {
    if (ref.startsWith(".")) {
       const mod_parts = ref.split("#")
-      const mod_path = make_relative_path(env.collect_dir, env.publication_path, mod_parts[0])
+      const mod_path = make_relative_path(env.collect_dir, Path.dirname(env.declaration_path), mod_parts[0])
       if (env.collect.lazy) {
          return `async () => (await import("${mod_path}")).${mod_parts[1] || "default"}`
       }
@@ -170,11 +205,11 @@ function generate_reference(gen: GenerationOutput, ref: string, env: CollectionG
          return gen.add_import(mod_path, mod_parts[1] || "default")
       }
    }
-   else if (ref.startsWith("pub:")) {
-      return JSON.stringify(get_data_at(ref.slice(4), env.publication))
+   else if (ref.startsWith("component:")) {
+      return JSON.stringify(get_data_at(ref.slice(4), env.declaration))
    }
    else {
-      throw `Invalid $ref '${ref}' at publication '${env.publication_path}'`
+      throw `Invalid $ref '${ref}' at component '${env.declaration_path}'`
    }
 }
 
@@ -184,22 +219,22 @@ async function generate_collection(name: string, baseDir: string, collect: Catal
       collect,
       collect_name: name,
       collect_dir: baseDir,
-      publication: null as any,
-      publication_path: null as any,
+      declaration: null as any,
+      declaration_path: null as any,
    }
    const gen = new GenerationOutput()
    if (collect.typing) {
       const typing = collect.typing.split("#")
       if (typing.length !== 2) {
-         throw `Invalid typing '${collect.typing}' at collection '${env.publication_path}#${name}'`
+         throw `Invalid typing '${collect.typing}' at collection '${env.declaration_path}#${name}'`
       }
       gen.set_export_type(typing[0], typing[1])
    }
-   for (const [path, pub] of ws.publications) {
-      const entries = pub.publish?.[collect.catalog]
+   for (const [path, desc] of ws.declarations) {
+      const entries = desc.publish?.[collect.catalog]
       if (entries) {
-         env.publication = pub
-         env.publication_path = path
+         env.declaration = desc
+         env.declaration_path = path
          for (const entry of entries) {
             if (typeof entry?.$ref === "string") {
                const code = generate_reference(gen, entry?.$ref, env)
@@ -226,22 +261,49 @@ async function generate_collection(name: string, baseDir: string, collect: Catal
    return gen.generate()
 }
 
-export async function update_workspace_collections(ws: Workspace) {
-   for (const [path, pub] of ws.publications) {
-      for (const name in pub.collections) {
+export async function update_workspace_collections(ws: Workspace, outputDir: string) {
+
+   for (const [path, desc] of ws.declarations) {
+      for (const name in desc.collections) {
          const file = `${Path.dirname(path)}/${name}.ts`
          console.log("+ update:", file)
-         const code = await generate_collection(name, path, pub.collections[name], ws)
+         const code = await generate_collection(name, Path.dirname(path), desc.collections[name], ws)
          await Fsp.writeFile(file, code)
       }
    }
 
-   const manifest_dir = "dist/manifest"
+   const manifest_dir = Path.resolve(outputDir, "manifest")
+   const catalogs_dir = Path.resolve(outputDir, "catalogs")
    await Fsp.mkdir(manifest_dir, { recursive: true })
+   await Fsp.mkdir(catalogs_dir, { recursive: true })
+
+   const catalogs: MapLike<ComponentPublication[]> = { "every": [] }
    for (const id in ws.manifests) {
+      const manif = ws.manifests[id]
       const file = manifest_dir + "/" + encodeURIComponent(id) + ".json"
-      await Fsp.writeFile(file, JSON.stringify(ws.manifests[id], null, 2))
+      const pub = {
+         component_id: id,
+         icon: manif.icon,
+         title: manif.title || id,
+         description: manif.description || "",
+         keywords: manif.keywords,
+         tags: manif.tags,
+      }
+      if (Array.isArray(manif.catalogs)) {
+         for (const name of manif.catalogs) {
+            let catalog = catalogs[name]
+            if (!catalog) catalog = catalogs[name] = []
+            catalog.push(pub)
+         }
+      }
+      catalogs.every.push(pub)
+      await Fsp.writeFile(file, JSON.stringify(manif, null, 2))
    }
+   for (const name in catalogs) {
+      const catalog = catalogs[name]
+      await Fsp.writeFile(Path.resolve(catalogs_dir, name + ".json"), JSON.stringify(catalog, null, 2))
+   }
+
 }
 
 export async function open_workspace(path: string, enables?: FeatureID[]): Promise<Workspace> {
@@ -250,20 +312,21 @@ export async function open_workspace(path: string, enables?: FeatureID[]): Promi
    const package_json = JSON.parse((await Fsp.readFile("package.json")).toString())
    ws.constants = package_json.constants || {}
 
-   await discover_publications(path, ws.publications, enables)
+   await discover_components(path, ws, enables)
 
-   for (const [path, pub] of ws.publications) {
-      if (pub.application) {
-         const { entry } = pub.application
+   for (const [path, desc] of ws.declarations) {
+      const baseDir = Path.dirname(path)
+      if (desc.application) {
+         const { entry } = desc.application
          const app = {
-            ...pub.application,
-            entry: make_relative_path(Process.cwd(), Path.dirname(path), entry),
+            ...desc.application,
+            entry: resolve_entry_path(entry, baseDir),
          }
          ws.applications.push(app)
          console.log(`+ application: ${app.name} : http://localhost:3000/${app.name}.html`)
       }
-      for (const ref in pub.entries) {
-         ws.entries[ref] = make_relative_path(Process.cwd(), path, pub.entries[ref])
+      for (const ref in desc.entries) {
+         ws.entries[ref] = resolve_entry_path(desc.entries[ref], baseDir)
          console.log(`+ entry: ${ref} -> ${ws.entries[ref]}`)
       }
    }
@@ -272,33 +335,32 @@ export async function open_workspace(path: string, enables?: FeatureID[]): Promi
    for (const url in ws.entries) {
       entryfiles[ws.entries[url]] = url
    }
-   for (const [path, pub] of ws.publications) {
-      const { id } = pub
-      if (id) {
+   for (const [path, desc] of ws.components) {
+      const { id } = desc
 
-         const manifest: Partial<Publication> = {
-            ...pub,
-            application: undefined,
-            publish: undefined,
-            collections: undefined,
-            entries: undefined,
-         }
-         ws.manifests[id] = manifest
-         console.log(`+ manifest: ${id}`)
+      const manifest: Partial<ComponentDescriptor> = {
+         ...desc,
+         application: undefined,
+         publish: undefined,
+         collections: undefined,
+         entries: undefined,
+      }
+      ws.manifests[id] = manifest
+      console.log(`+ manifest: ${id}`)
 
-         if (pub.attachments) {
-            manifest.attachments = {}
-            for (const name in pub.attachments) {
-               const parts = pub.attachments[name].split("#")
-               const file = make_relative_path(Process.cwd(), Path.dirname(path), parts[0])
-               let ref = entryfiles[name]
-               if (!ref) {
-                  ref = make_filename("addon_" + compute_hashID(file))
-                  ws.entries[ref] = file
-               }
-               manifest.attachments[name] = `/${ref}.js#${parts[1] || "default"}`
-               console.log(`+ attachment: ${id}#${name} -> ${manifest.attachments[name]}`)
+      if (desc.attachments) {
+         const baseDir = Path.dirname(path)
+         manifest.attachments = {}
+         for (const name in desc.attachments) {
+            const parts = desc.attachments[name].split("#")
+            const file = resolve_entry_path(parts[0], baseDir)
+            let ref = entryfiles[name]
+            if (!ref) {
+               ref = make_filename("addon_" + compute_hashID(file))
+               ws.entries[ref] = file
             }
+            manifest.attachments[name] = `./${ref}.js#${parts[1] || "default"}`
+            console.log(`+ attachment: ${id}#${name} -> ${manifest.attachments[name]}`)
          }
       }
    }

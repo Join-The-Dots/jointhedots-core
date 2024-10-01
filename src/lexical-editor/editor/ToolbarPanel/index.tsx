@@ -13,7 +13,7 @@ import {
   CODE_LANGUAGE_MAP,
   getLanguageFriendlyName,
 } from '@lexical/code';
-import {$isLinkNode, TOGGLE_LINK_COMMAND} from '@lexical/link';
+import { $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
 import {
   $isListNode,
   INSERT_CHECK_LIST_COMMAND,
@@ -21,10 +21,8 @@ import {
   INSERT_UNORDERED_LIST_COMMAND,
   ListNode,
 } from '@lexical/list';
-import {INSERT_EMBED_COMMAND} from '@lexical/react/LexicalAutoEmbedPlugin';
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
-import {$isDecoratorBlockNode} from '@lexical/react/LexicalDecoratorBlockNode';
-import {INSERT_HORIZONTAL_RULE_COMMAND} from '@lexical/react/LexicalHorizontalRuleNode';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $isDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode';
 import {
   $createHeadingNode,
   $createQuoteNode,
@@ -38,7 +36,7 @@ import {
   $patchStyleText,
   $setBlocksType,
 } from '@lexical/selection';
-import {$isTableNode, $isTableSelection} from '@lexical/table';
+import { $isTableNode, $isTableSelection } from '@lexical/table';
 import {
   $findMatchingParent,
   $getNearestBlockElementAncestorOrThrow,
@@ -49,7 +47,6 @@ import {
 import {
   $createParagraphNode,
   $getNodeByKey,
-  $getRoot,
   $getSelection,
   $isElementNode,
   $isRangeSelection,
@@ -71,35 +68,18 @@ import {
   SELECTION_CHANGE_COMMAND,
   UNDO_COMMAND,
 } from 'lexical';
-import {Dispatch, useCallback, useEffect, useState} from 'react';
-import * as React from 'react';
-import {IS_APPLE} from '../../shared/environment';
+import { Dispatch, useCallback, useEffect, useState } from 'react';
+import { IS_APPLE } from '../../shared/environment';
 
 import useModal from '../../hooks/useModal';
-import catTypingGif from '../../images/cat-typing.gif';
-import {$createStickyNode} from '../../nodes/Sticky/StickyNode';
-import DropDown, {DropDownItem} from '../../ui/DropDown';
+import DropDown, { DropDownItem } from '../../ui/DropDown';
 import DropdownColorPicker from '../../ui/DropdownColorPicker';
-import {getSelectedNode} from '../../utils/getSelectedNode';
-import {sanitizeUrl} from '../../utils/url';
-import {EmbedConfigs} from '../../plugins/AutoEmbedPlugin';
-import {INSERT_COLLAPSIBLE_COMMAND} from '../../nodes/Collapsible/CollapsiblePlugin';
-import {InsertEquationDialog} from '../../nodes/Equations/EquationsPlugin';
-import {INSERT_EXCALIDRAW_COMMAND} from '../../nodes/Excalidraw/ExcalidrawPlugin';
-import {
-  INSERT_IMAGE_COMMAND,
-  InsertImageDialog,
-  InsertImagePayload,
-} from '../../nodes/Images/ImagesPlugin';
-import {InsertInlineImageDialog} from '../../nodes/InlineImage/InlineImagePlugin';
-import InsertLayoutDialog from '../../nodes/Layout/InsertLayoutDialog';
-import {INSERT_PAGE_BREAK} from '../../nodes/PageBreak/PageBreakPlugin';
-import {InsertPollDialog} from '../../nodes/Poll/PollPlugin';
-import {InsertTableDialog} from '../../plugins/TablePlugin';
+import { getSelectedNode } from '../../utils/getSelectedNode';
+import { sanitizeUrl } from '../../utils/url';
 import FontSize from './fontSize';
-import { InsertExplorerViewDialog } from '../../nodes/View/ViewPlugin';
-import ActionsToolbar from './ActionsButtons';
+import ActionsToolbar from './Toolbox.Actions';
 import { SAVE_CONTENT_COMMAND } from 'lexical-editor/editor/commands';
+import { InsertToolbox } from './Toolbox.Insert';
 
 const blockTypeToBlockName = {
   bullet: 'Bulleted List',
@@ -400,9 +380,8 @@ function FontDropDown({
       {(style === 'font-family' ? FONT_FAMILY_OPTIONS : FONT_SIZE_OPTIONS).map(
         ([option, text]) => (
           <DropDownItem
-            className={`item ${dropDownActiveClass(value === option)} ${
-              style === 'font-size' ? 'fontsize-item' : ''
-            }`}
+            className={`item ${dropDownActiveClass(value === option)} ${style === 'font-size' ? 'fontsize-item' : ''
+              }`}
             onClick={() => handleClick(option)}
             key={option}>
             <span className="text">{text}</span>
@@ -430,9 +409,8 @@ function ElementFormatDropdown({
     <DropDown
       disabled={disabled}
       buttonLabel={formatOption.name}
-      buttonIconClassName={`icon ${
-        isRTL ? formatOption.iconRTL : formatOption.icon
-      }`}
+      buttonIconClassName={`icon ${isRTL ? formatOption.iconRTL : formatOption.icon
+        }`}
       buttonClassName="toolbar-item spaced alignment"
       buttonAriaLabel="Formatting options for text alignment">
       <DropDownItem
@@ -473,11 +451,10 @@ function ElementFormatDropdown({
         }}
         className="item">
         <i
-          className={`icon ${
-            isRTL
-              ? ELEMENT_FORMAT_OPTIONS.start.iconRTL
-              : ELEMENT_FORMAT_OPTIONS.start.icon
-          }`}
+          className={`icon ${isRTL
+            ? ELEMENT_FORMAT_OPTIONS.start.iconRTL
+            : ELEMENT_FORMAT_OPTIONS.start.icon
+            }`}
         />
         <span className="text">Start Align</span>
       </DropDownItem>
@@ -487,11 +464,10 @@ function ElementFormatDropdown({
         }}
         className="item">
         <i
-          className={`icon ${
-            isRTL
-              ? ELEMENT_FORMAT_OPTIONS.end.iconRTL
-              : ELEMENT_FORMAT_OPTIONS.end.icon
-          }`}
+          className={`icon ${isRTL
+            ? ELEMENT_FORMAT_OPTIONS.end.iconRTL
+            : ELEMENT_FORMAT_OPTIONS.end.icon
+            }`}
         />
         <span className="text">End Align</span>
       </DropDownItem>
@@ -570,9 +546,9 @@ export default function ToolbarPlugin({
         anchorNode.getKey() === 'root'
           ? anchorNode
           : $findMatchingParent(anchorNode, (e) => {
-              const parent = e.getParent();
-              return parent !== null && $isRootOrShadowRoot(parent);
-            });
+            const parent = e.getParent();
+            return parent !== null && $isRootOrShadowRoot(parent);
+          });
 
       if (element === null) {
         element = anchorNode.getTopLevelElementOrThrow();
@@ -663,8 +639,8 @@ export default function ToolbarPlugin({
         $isElementNode(matchingParent)
           ? matchingParent.getFormatType()
           : $isElementNode(node)
-          ? node.getFormatType()
-          : parent?.getFormatType() || 'left',
+            ? node.getFormatType()
+            : parent?.getFormatType() || 'left',
       );
     }
     if ($isRangeSelection(selection) || $isTableSelection(selection)) {
@@ -697,7 +673,7 @@ export default function ToolbarPlugin({
       editor.registerEditableListener((editable) => {
         setIsEditable(editable);
       }),
-      activeEditor.registerUpdateListener(({editorState}) => {
+      activeEditor.registerUpdateListener(({ editorState }) => {
         editorState.read(() => {
           $updateToolbar();
         });
@@ -726,7 +702,7 @@ export default function ToolbarPlugin({
       KEY_MODIFIER_COMMAND,
       (payload) => {
         const event: KeyboardEvent = payload;
-        const {code, ctrlKey, metaKey} = event;
+        const { code, ctrlKey, metaKey } = event;
 
         if (code === 'KeyK' && (ctrlKey || metaKey)) {
           event.preventDefault();
@@ -755,7 +731,7 @@ export default function ToolbarPlugin({
             $patchStyleText(selection, styles);
           }
         },
-        skipHistoryStack ? {tag: 'historic'} : {},
+        skipHistoryStack ? { tag: 'historic' } : {},
       );
     },
     [activeEditor],
@@ -819,14 +795,14 @@ export default function ToolbarPlugin({
 
   const onFontColorSelect = useCallback(
     (value: string, skipHistoryStack: boolean) => {
-      applyStyleText({color: value}, skipHistoryStack);
+      applyStyleText({ color: value }, skipHistoryStack);
     },
     [applyStyleText],
   );
 
   const onBgColorSelect = useCallback(
     (value: string, skipHistoryStack: boolean) => {
-      applyStyleText({'background-color': value}, skipHistoryStack);
+      applyStyleText({ 'background-color': value }, skipHistoryStack);
     },
     [applyStyleText],
   );
@@ -857,9 +833,6 @@ export default function ToolbarPlugin({
     },
     [activeEditor, selectedElementKey],
   );
-  const insertGifOnClick = (payload: InsertImagePayload) => {
-    activeEditor.dispatchCommand(INSERT_IMAGE_COMMAND, payload);
-  };
 
   const canViewerSeeInsertDropdown = !isImageCaption;
   const canViewerSeeInsertCodeButton = !isImageCaption;
@@ -902,6 +875,17 @@ export default function ToolbarPlugin({
         <i className="bi bi-floppy" />
       </button>
       <Divider />
+      {canViewerSeeInsertDropdown && (
+        <>
+          <Divider />
+          <InsertToolbox
+            activeEditor={activeEditor}
+            editor={editor}
+            isEditable={isEditable}
+            showModal={showModal}
+          />
+        </>
+      )}
       {blockType in blockTypeToBlockName && activeEditor === editor && (
         <>
           <BlockFormatDropDown
@@ -955,9 +939,8 @@ export default function ToolbarPlugin({
             className={'toolbar-item spaced ' + (isBold ? 'active' : '')}
             title={IS_APPLE ? 'Bold (⌘B)' : 'Bold (Ctrl+B)'}
             type="button"
-            aria-label={`Format text as bold. Shortcut: ${
-              IS_APPLE ? '⌘B' : 'Ctrl+B'
-            }`}>
+            aria-label={`Format text as bold. Shortcut: ${IS_APPLE ? '⌘B' : 'Ctrl+B'
+              }`}>
             <i className="format bold" />
           </button>
           <button
@@ -968,9 +951,8 @@ export default function ToolbarPlugin({
             className={'toolbar-item spaced ' + (isItalic ? 'active' : '')}
             title={IS_APPLE ? 'Italic (⌘I)' : 'Italic (Ctrl+I)'}
             type="button"
-            aria-label={`Format text as italics. Shortcut: ${
-              IS_APPLE ? '⌘I' : 'Ctrl+I'
-            }`}>
+            aria-label={`Format text as italics. Shortcut: ${IS_APPLE ? '⌘I' : 'Ctrl+I'
+              }`}>
             <i className="format italic" />
           </button>
           <button
@@ -981,9 +963,8 @@ export default function ToolbarPlugin({
             className={'toolbar-item spaced ' + (isUnderline ? 'active' : '')}
             title={IS_APPLE ? 'Underline (⌘U)' : 'Underline (Ctrl+U)'}
             type="button"
-            aria-label={`Format text to underlined. Shortcut: ${
-              IS_APPLE ? '⌘U' : 'Ctrl+U'
-            }`}>
+            aria-label={`Format text to underlined. Shortcut: ${IS_APPLE ? '⌘U' : 'Ctrl+U'
+              }`}>
             <i className="format underline" />
           </button>
           {canViewerSeeInsertCodeButton && (
@@ -1077,188 +1058,6 @@ export default function ToolbarPlugin({
               <span className="text">Clear Formatting</span>
             </DropDownItem>
           </DropDown>
-          {canViewerSeeInsertDropdown && (
-            <>
-              <Divider />
-              <DropDown
-                disabled={!isEditable}
-                buttonClassName="toolbar-item spaced"
-                buttonLabel="Insert"
-                buttonAriaLabel="Insert specialized editor node"
-                buttonIconClassName="icon plus">
-                <DropDownItem
-                  onClick={() => {
-                    showModal('View Library', (onClose) => (
-                      <InsertExplorerViewDialog
-                        activeEditor={activeEditor}
-                        onClose={onClose}
-                      />
-                    ));
-                  }}
-                  className="item">
-                  <i className="icon plus" />
-                  <span className="text">View...</span>
-                </DropDownItem>
-                <DropDownItem
-                  onClick={() => {
-                    activeEditor.dispatchCommand(
-                      INSERT_HORIZONTAL_RULE_COMMAND,
-                      undefined,
-                    );
-                  }}
-                  className="item">
-                  <i className="icon horizontal-rule" />
-                  <span className="text">Horizontal Rule</span>
-                </DropDownItem>
-                <DropDownItem
-                  onClick={() => {
-                    activeEditor.dispatchCommand(INSERT_PAGE_BREAK, undefined);
-                  }}
-                  className="item">
-                  <i className="icon page-break" />
-                  <span className="text">Page Break</span>
-                </DropDownItem>
-                <DropDownItem
-                  onClick={() => {
-                    showModal('Insert Image', (onClose) => (
-                      <InsertImageDialog
-                        activeEditor={activeEditor}
-                        onClose={onClose}
-                      />
-                    ));
-                  }}
-                  className="item">
-                  <i className="icon image" />
-                  <span className="text">Image</span>
-                </DropDownItem>
-                <DropDownItem
-                  onClick={() => {
-                    showModal('Insert Inline Image', (onClose) => (
-                      <InsertInlineImageDialog
-                        activeEditor={activeEditor}
-                        onClose={onClose}
-                      />
-                    ));
-                  }}
-                  className="item">
-                  <i className="icon image" />
-                  <span className="text">Inline Image</span>
-                </DropDownItem>
-                <DropDownItem
-                  onClick={() =>
-                    insertGifOnClick({
-                      altText: 'Cat typing on a laptop',
-                      src: catTypingGif,
-                    })
-                  }
-                  className="item">
-                  <i className="icon gif" />
-                  <span className="text">GIF</span>
-                </DropDownItem>
-                <DropDownItem
-                  onClick={() => {
-                    activeEditor.dispatchCommand(
-                      INSERT_EXCALIDRAW_COMMAND,
-                      undefined,
-                    );
-                  }}
-                  className="item">
-                  <i className="icon diagram-2" />
-                  <span className="text">Excalidraw</span>
-                </DropDownItem>
-                <DropDownItem
-                  onClick={() => {
-                    showModal('Insert Table', (onClose) => (
-                      <InsertTableDialog
-                        activeEditor={activeEditor}
-                        onClose={onClose}
-                      />
-                    ));
-                  }}
-                  className="item">
-                  <i className="icon table" />
-                  <span className="text">Table</span>
-                </DropDownItem>
-                <DropDownItem
-                  onClick={() => {
-                    showModal('Insert Poll', (onClose) => (
-                      <InsertPollDialog
-                        activeEditor={activeEditor}
-                        onClose={onClose}
-                      />
-                    ));
-                  }}
-                  className="item">
-                  <i className="icon poll" />
-                  <span className="text">Poll</span>
-                </DropDownItem>
-                <DropDownItem
-                  onClick={() => {
-                    showModal('Insert Columns Layout', (onClose) => (
-                      <InsertLayoutDialog
-                        activeEditor={activeEditor}
-                        onClose={onClose}
-                      />
-                    ));
-                  }}
-                  className="item">
-                  <i className="icon columns" />
-                  <span className="text">Columns Layout</span>
-                </DropDownItem>
-
-                <DropDownItem
-                  onClick={() => {
-                    showModal('Insert Equation', (onClose) => (
-                      <InsertEquationDialog
-                        activeEditor={activeEditor}
-                        onClose={onClose}
-                      />
-                    ));
-                  }}
-                  className="item">
-                  <i className="icon equation" />
-                  <span className="text">Equation</span>
-                </DropDownItem>
-                <DropDownItem
-                  onClick={() => {
-                    editor.update(() => {
-                      const root = $getRoot();
-                      const stickyNode = $createStickyNode(0, 0);
-                      root.append(stickyNode);
-                    });
-                  }}
-                  className="item">
-                  <i className="icon sticky" />
-                  <span className="text">Sticky Note</span>
-                </DropDownItem>
-                <DropDownItem
-                  onClick={() => {
-                    editor.dispatchCommand(
-                      INSERT_COLLAPSIBLE_COMMAND,
-                      undefined,
-                    );
-                  }}
-                  className="item">
-                  <i className="icon caret-right" />
-                  <span className="text">Collapsible container</span>
-                </DropDownItem>
-                {EmbedConfigs.map((embedConfig) => (
-                  <DropDownItem
-                    key={embedConfig.type}
-                    onClick={() => {
-                      activeEditor.dispatchCommand(
-                        INSERT_EMBED_COMMAND,
-                        embedConfig.type,
-                      );
-                    }}
-                    className="item">
-                    {embedConfig.icon}
-                    <span className="text">{embedConfig.contentName}</span>
-                  </DropDownItem>
-                ))}
-              </DropDown>
-            </>
-          )}
         </>
       )}
       <Divider />

@@ -1,5 +1,5 @@
-import { JSONSchemaRelation } from "core/AST/JSONDocument"
 import { ASTExpression } from "."
+import { JSONSchemaRelation } from "./schema-document"
 
 export type DataBreakupLevel = {
    key: string
@@ -297,15 +297,6 @@ export function deleteDescriptorAtPath(path: string, source: ASTExpression): AST
    const content = DataBreakupOnPath.breakup(path.split("/"), source)
    ejectDescriptorStackTop(content)
    return content.remake()
-}
-
-export function stringifyDescriptor(what: Object): string {
-   return JSON.stringify(what, (key, value) => {
-      if (value instanceof JSONSchemaRelation) {
-         return { $ref: value.$ref }
-      }
-      return value
-   }, 2)
 }
 
 function injectDescriptorStackTop(content: DataBreakupOnPath, injected: ASTExpression) {

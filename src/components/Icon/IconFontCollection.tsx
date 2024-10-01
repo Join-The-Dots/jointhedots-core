@@ -1,6 +1,6 @@
 import React from "react"
 import { IconCollection, IconProps } from "."
-import { ThemeLighting, ThemeProvider } from "components/Theme"
+import { ThemeLighting, ThemeProvider } from "core/theme"
 
 export class IconFontCollection implements IconCollection {
    constructor(
@@ -24,7 +24,7 @@ export class IconFontCollection implements IconCollection {
 export const styles: React.CSSProperties = {
    height: "1em",
    width: "1em",
-   display: "flex",
+   display: "inline-flex",
    flexDirection: "column",
    alignItems: "center",
 }

@@ -1,0 +1,15 @@
+.InSlick-ValueEditor {
+  // Position
+  overflow: hidden;
+
+  // Skin
+  background-color: var(--app-value-background);
+  color: var(--app-value-foreground);
+  font-size: var(--app-value-font-size);
+  font-style: var(--app-value-font-weight);
+  font-family: var(--app-value-font-family);
+
+  & > * {
+    padding: 10px;
+  }
+}

@@ -71,7 +71,7 @@ function $convertYoutubeElement(
 ): null | DOMConversionOutput {
   const videoID = domNode.getAttribute('data-lexical-youtube');
   if (videoID) {
-    const node = $createYouTubeNode(videoID);
+    const node = new YouTubeNode(videoID);
     return {node};
   }
   return null;
@@ -89,7 +89,7 @@ export class YouTubeNode extends DecoratorBlockNode {
   }
 
   static importJSON(serializedNode: SerializedYouTubeNode): YouTubeNode {
-    const node = $createYouTubeNode(serializedNode.videoID);
+    const node = new YouTubeNode(serializedNode.videoID);
     node.setFormat(serializedNode.format);
     return node;
   }
@@ -173,12 +173,4 @@ export class YouTubeNode extends DecoratorBlockNode {
   }
 }
 
-export function $createYouTubeNode(videoID: string): YouTubeNode {
-  return new YouTubeNode(videoID);
-}
 
-export function $isYouTubeNode(
-  node: YouTubeNode | LexicalNode | null | undefined,
-): node is YouTubeNode {
-  return node instanceof YouTubeNode;
-}

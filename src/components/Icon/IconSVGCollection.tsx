@@ -1,6 +1,6 @@
 import React from "react"
 import { IconCollection, IconProps } from "."
-import { ThemeLighting, ThemeProvider } from "components/Theme"
+import { ThemeLighting, ThemeProvider } from "core/theme"
 
 export class IconSVGCollection implements IconCollection {
    lights: { [name: string]: string } = {}

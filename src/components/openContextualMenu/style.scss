@@ -7,7 +7,7 @@
    min-height: 24px;
 
    &:hover {
-      background-color: var(--vscode-menu-selectionBackground);
+      background-color: #ccc;
    }
 
    &>:first-child {
@@ -28,8 +28,50 @@
 
 }
 
+.cub8-menu-item-large {
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+   cursor: pointer;
+   font-size: 14px;
+   min-height: 24px;
+
+   &:hover {
+      background-color: #ccc;
+   }
+
+   &>:first-child {
+      display: flex;
+      flex-direction: row;
+      flex: 0;
+      min-width: 40px;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 5px;
+   }
+
+   &>:last-child {
+      flex: 1;
+      padding: 0 20px 0 3px;
+      padding: 5px;
+
+      &>:first-child {
+         text-transform: capitalize;
+         font-weight: bold;
+         font-size: 12px;
+      }
+
+      &>:last-child {
+         color: #666;
+         font-size: 11px;
+         padding-top: 5px;
+      }
+   }
+}
+
 .cub8-menu-separator {
-   border-bottom: 1px solid var(--vscode-menu-separatorBackground);
+   border-bottom: 1px solid #999;
    margin: 5px;
    text-align: center;
    font-weight: bold;
@@ -37,14 +79,14 @@
 }
 
 .cub8-openContextualMenu {
-   border: 1px solid var(--vscode-panel-border);
-   background-color: var(--vscode-panel-background);
-   color: var(--vscode-menu-foreground);
+   border: 1px solid #999;
+   background-color: #eee;
+   color: #111;
    padding: 5px 0 5px 0;
    min-width: 150px;
    overflow: auto;
 
-   & > :first-child.cub8-menu-separator {
+   &> :first-child.cub8-menu-separator {
       border: none;
-  }
+   }
 }

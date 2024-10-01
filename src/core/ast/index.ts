@@ -1,5 +1,5 @@
 import { MapLike } from "core/common"
-import { JSONSchema } from "./JSONSchema"
+import { JSONSchema } from "./schema"
 
 export type ASTLocation = {
    moduleId: string
@@ -9,7 +9,6 @@ export type ASTLocation = {
 
 export interface ASTNode {
    type: string
-   name?: string
    [prop: string]: any
 }
 

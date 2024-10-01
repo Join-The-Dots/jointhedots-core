@@ -11,7 +11,7 @@ const CUSTOM_COMPONENT_TRANSFORMER: Transformer = {
       const data = node.exportJSON()
       if (type !== "paragraph") {
          console.log("Not handled", node)
-         return "```" + data.type + '\n' + yaml.dump({
+         return "```view " + data.type + '\n' + yaml.dump({
             ...data,
             type: undefined,
             version: undefined,

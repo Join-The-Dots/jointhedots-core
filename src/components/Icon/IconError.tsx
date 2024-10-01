@@ -1,6 +1,6 @@
 import React from "react"
 import { IconCollection, IconProps } from "."
-import { ThemeProvider } from "components/Theme"
+import { ThemeProvider } from "core/theme"
 
 export class IconError implements IconCollection {
    draw(props: IconProps, theme: ThemeProvider) {

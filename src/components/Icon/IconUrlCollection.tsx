@@ -1,6 +1,6 @@
 import React from "react"
 import { IconCollection, IconProps } from "."
-import { ThemeProvider } from "components/Theme"
+import { ThemeProvider } from "core/theme"
 
 export class IconUrlCollection implements IconCollection {
    constructor(readonly baseUrl: string) {

@@ -1,5 +1,8 @@
-import { useLocationQuery } from "components/hooks/useLocationQuery";
 import React from "react";
+import "./theme-dark.scss"
+import "./theme-light.scss"
+import "./theme.scss"
+
 
 export enum ThemeLighting {
    Dark = 0,
@@ -29,18 +32,22 @@ export function LocalTheme(props: { theme: ThemeProvider, children: any }) {
 
 
 export const LightTheme = new ThemeProvider(ThemeLighting.Light)
-export const DarkTheme = new ThemeProvider(ThemeLighting.Dark)
+export const DarkTheme = new ThemeProvider(ThemeLighting.Light) // No DarkTheme for now
 
 LightTheme.contrastTheme = DarkTheme
 DarkTheme.contrastTheme = LightTheme
-setGlobalTheme(getDefaultTheme())
+setGlobalTheme(loadDefaultTheme())
 
 export const ThemeContext = React.createContext<ThemeProvider>(ThemeProvider.globalTheme)
 
-function getDefaultTheme(): ThemeProvider {
-   const query = useLocationQuery()
-   if (query.theme) {
-      return query.theme === "dark" ? DarkTheme : LightTheme
+export function getGlobalTheme() {
+   return ThemeProvider.globalTheme
+}
+
+function loadDefaultTheme(): ThemeProvider {
+   const forcedMode = localStorage.getItem("application#theme")
+   if (forcedMode) {
+      return forcedMode === forcedMode ? DarkTheme : LightTheme
    }
    else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       return DarkTheme
@@ -59,12 +66,16 @@ function setGlobalTheme(theme: ThemeProvider) {
          if (!body.className.includes("dark")) {
             if (body.className.includes("light")) body.className = body.className.replace("dark", "light")
             else body.className = body.className += " theme-dark"
+            document.documentElement.setAttribute("data-theme", "dark");
+            document.documentElement.setAttribute("data-color-mode", "dark");
          }
       }
       else {
          if (!body.className.includes("light")) {
             if (body.className.includes("dark")) body.className = body.className.replace("light", "dark")
             else body.className = body.className += " theme-light"
+            document.documentElement.setAttribute("data-theme", "light");
+            document.documentElement.setAttribute("data-color-mode", "light");
          }
       }
       ThemeProvider.globalTheme = theme

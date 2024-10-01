@@ -1,4 +1,4 @@
-import { getDataAtKeys } from "./helpers"
+import { getDataAtKeys } from "./ast-updater"
 import { CommonTypes, JSONSchema } from "core/AST/schema-helpers"
 
 export function getJSONSchemaName(schema: JSONSchema): string {

@@ -9,7 +9,7 @@
                      "format": 0,
                      "mode": "normal",
                      "style": "",
-                     "text": "Welcome to the playground",
+                     "text": "Welcome to the livedoc",
                      "type": "text",
                      "version": 1
                   }
@@ -46,7 +46,7 @@
                      "format": 0,
                      "mode": "normal",
                      "style": "",
-                     "text": "The playground is a demo env",
+                     "text": "The livedoc is a demo env",
                      "type": "text",
                      "version": 1
                   },
@@ -1125,7 +1125,7 @@
                            "format": 0,
                            "mode": "normal",
                            "style": "",
-                           "text": "Playground code can be found ",
+                           "text": "Livedoc code can be found ",
                            "type": "text",
                            "version": 1
                         },
@@ -1149,7 +1149,7 @@
                            "rel": null,
                            "target": null,
                            "title": null,
-                           "url": "https://github.com/facebook/lexical/tree/main/packages/lexical-playground"
+                           "url": "https://github.com/facebook/lexical/tree/main/packages/lexical-livedoc"
                         },
                         {
                            "detail": 0,
@@ -1235,7 +1235,7 @@
                      "format": 0,
                      "mode": "normal",
                      "style": "",
-                     "text": "Lastly, we're constantly adding cool new features to this playground. So make sure you check back here when you next get a chance 🙂.",
+                     "text": "Lastly, we're constantly adding cool new features to this livedoc. So make sure you check back here when you next get a chance 🙂.",
                      "type": "text",
                      "version": 1
                   }
@@ -1297,6 +1297,6 @@
       }
    },
    "lastSaved": 1727529049380,
-   "source": "Playground",
+   "source": "Livedoc",
    "version": "0.18.0"
 }

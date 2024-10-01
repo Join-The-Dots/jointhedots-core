@@ -1,0 +1,17 @@
+{
+   "id": "youtube",
+   "description": "Embed youtube video",
+   "icon": "bi:youtube",
+   "view": {
+      "properties": {
+         "videoID": {
+            "type": "string",
+            "examples": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
+         }
+      }
+   },
+   "attachments": {
+      "view.lexical": "./YouTubeNode#YouTubeNode",
+      "addon.lexical": "./YouTubePlugin"
+   }
+}
