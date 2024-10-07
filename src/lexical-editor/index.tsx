@@ -7,8 +7,8 @@ import { DocumentViewer } from "./Viewer"
 import "./index.scss"
 
 export function DocumentEditable(props: {
-   content: SerializedEditorState
-   onChange: (content: SerializedEditorState) => void
+   content: SerializedEditorState | string
+   onChange: (content: string) => void
 }): JSX.Element {
    const { content, onChange } = props
    const [edition, setEdition] = React.useState(true)

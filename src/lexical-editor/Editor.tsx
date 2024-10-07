@@ -70,6 +70,7 @@ import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
 import { MarkdownViewPlugin } from './editor/MarkdownViewPanel';
 import { MARKDOWN_TRANSFORMERS } from './plugins/MarkdownTransformers';
 import "./index.css"
+import { $updateEditorStateFromMarkdown, transformEditorStateToMarkdown } from 'core/markdown/markdownizer';
 
 function Editor(): JSX.Element {
   const { historyState } = useSharedHistoryContext();
@@ -206,18 +207,24 @@ function Editor(): JSX.Element {
 }
 
 export function DocumentEditor(props: {
-  content: SerializedEditorState
-  onChange: (content: SerializedEditorState) => void
+  content: SerializedEditorState | string
+  onChange: (content: string) => void
 }): JSX.Element {
 
   const { content, onChange } = props
 
   const initialConfig: InitialConfigType = {
     editorState: (editor) => {
-      const state = editor.parseEditorState(content)
-      editor.setEditorState(state)
+      if (typeof content === "string") {
+        editor.update(() => $updateEditorStateFromMarkdown(content))
+      }
+      else {
+        const state = editor.parseEditorState(content)
+        editor.setEditorState(state)
+      }
       editor.registerCommand(SAVE_CONTENT_COMMAND, (_payload, editor) => {
-        onChange(editor.getEditorState().toJSON())
+        const value = transformEditorStateToMarkdown(editor.getEditorState())
+        onChange(value)
         return true
       }, 0)
     },

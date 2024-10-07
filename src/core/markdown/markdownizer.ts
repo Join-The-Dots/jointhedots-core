@@ -2,9 +2,9 @@ import { Transformer, $convertFromMarkdownString, $convertToMarkdownString } fro
 import { EditorState, $getRoot, ElementNode } from 'lexical';
 import { TRANSFORMERS } from '@lexical/markdown';
 import * as yaml from "js-yaml"
-import { MARKDOWN_TRANSFORMERS } from './plugins/MarkdownTransformers';
+import { MARKDOWN_TRANSFORMERS } from 'lexical-editor/plugins/MarkdownTransformers';
 
-const CUSTOM_COMPONENT_TRANSFORMER: Transformer = {
+const COMPONENT_TRANSFORMER: Transformer = {
    type: "element",
    export(node: ElementNode) {
       const type = node.getType()
@@ -26,13 +26,14 @@ const CUSTOM_COMPONENT_TRANSFORMER: Transformer = {
    dependencies: [],
 };
 
+const markdownTransformers: typeof TRANSFORMERS = [
+   COMPONENT_TRANSFORMER,
+   ...TRANSFORMERS,
+   ...MARKDOWN_TRANSFORMERS,
+]
+
 export function transformEditorStateToMarkdown(editorState: EditorState, shouldPreserveNewLinesInMarkdown = true): string {
    return editorState.read(() => {
-      const markdownTransformers: typeof TRANSFORMERS = [
-         ...TRANSFORMERS,     // Heading, List, Quote, etc.
-         ...MARKDOWN_TRANSFORMERS,
-         CUSTOM_COMPONENT_TRANSFORMER,
-      ]
       return $convertToMarkdownString(
          markdownTransformers,
          $getRoot(), //node
@@ -41,13 +42,11 @@ export function transformEditorStateToMarkdown(editorState: EditorState, shouldP
    })
 }
 
-export function updateEditorStateFromMarkdown(editorState: EditorState, markdown: string, shouldPreserveNewLinesInMarkdown = true) {
-   return editorState.read(() => {
-      $convertFromMarkdownString(
-         markdown,
-         MARKDOWN_TRANSFORMERS,
-         $getRoot(), //node
-         shouldPreserveNewLinesInMarkdown,
-      );
-   })
+export function $updateEditorStateFromMarkdown(markdown: string, shouldPreserveNewLinesInMarkdown = true) {
+   $convertFromMarkdownString(
+      markdown,
+      MARKDOWN_TRANSFORMERS,
+      $getRoot(), //node
+      shouldPreserveNewLinesInMarkdown,
+   );
 }

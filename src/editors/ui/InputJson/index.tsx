@@ -5,7 +5,7 @@ import Button from 'components/Button'
 import "./style.scss"
 import { toast } from 'react-toastify'
 import { EditionContext, IEditionOperation } from 'editors/ui'
-import { stringifyDescriptor } from 'core/AST/serialize/json'
+import { stringifyDescriptor } from 'core/serde/json'
 
 type PropsType = {
    typing: JSONSchema

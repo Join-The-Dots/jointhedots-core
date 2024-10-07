@@ -9,12 +9,10 @@
     "moduleResolution": "node",
     "noUnusedLocals": false,
     "sourceMap": true,
-    "outDir": "scripts/esm"
+    "outDir": "esm"
   },
-  "include": [
-    "scripts"
-  ],
   "exclude": [
-    "scripts/esm"
+    "esm",
+    "node_modules"
   ]
 }

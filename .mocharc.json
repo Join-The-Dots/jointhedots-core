@@ -1,0 +1,7 @@
+{
+  "spec": "dist/lib/**/*.test.js",
+  "watch-files": [
+    "dist/lib/**/*.js"
+  ],
+  "timeout": 5000
+}

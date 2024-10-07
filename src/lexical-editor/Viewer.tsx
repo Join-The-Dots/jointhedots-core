@@ -7,19 +7,27 @@ import PlaygroundNodes from './nodes/PlaygroundNodes'
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
 import { useMemo } from 'react'
 import "./index.css"
+import { $updateEditorStateFromMarkdown } from 'core/markdown/markdownizer'
 
 export function DocumentViewer(props: {
-   content: SerializedEditorState
+   content: SerializedEditorState | string
 }): JSX.Element {
 
    const { content } = props
 
    const initialConfig = useMemo<InitialConfigType>(() => ({
       editorState: (editor) => {
-         const state = editor.parseEditorState(content)
-         editor.setEditorState(state)
+         if (typeof content === "string") {
+            editor.update(() => {
+               $updateEditorStateFromMarkdown(content)
+            })
+         }
+         else {
+            const state = editor.parseEditorState(content)
+            editor.setEditorState(state)
+         }
       },
-      editable: false,
+      editable: true,
       namespace: 'Playground',
       nodes: [...PlaygroundNodes],
       onError: (error: Error) => {

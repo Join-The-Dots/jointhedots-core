@@ -18,12 +18,18 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "baseUrl": ".",
+    "outDir": "dist/lib",
     "jsx": "react-jsx",
     "paths": {
       "*": [
         "src/*"
       ]
-    }
+    },
+    "plugins": [
+      {
+        "transform": "typescript-transform-paths"
+      },
+    ]
   },
   "include": [
     "src"

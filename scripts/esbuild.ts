@@ -1,6 +1,5 @@
 import Fs from "node:fs"
 import Path from 'node:path'
-import Crypto from 'node:crypto'
 import Process from "node:process"
 import Yargs from "yargs"
 import * as esbuild from 'esbuild'
@@ -14,7 +13,7 @@ import { hideBin } from 'yargs/helpers'
 import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill'
 import { file, directory } from "@polycuber/script.cli"
 
-const outputDir = Path.resolve("./dist")
+const outputDir = Path.resolve("./dist/web")
 
 function command_build() {
    return {
@@ -126,7 +125,7 @@ async function execute(env: {
    if (!directory.exists(assetsDir)) {
       directory.copy("node_modules/@salesforce-ux/design-system/assets", assetsDir)
    }
-   file.copy.toDir("./src/favicon.webp", "./dist")
+   file.copy.toDir("./src/favicon.webp", outputDir)
 
    // Define polyfill modules
    const polyfill_modules = {
@@ -230,7 +229,7 @@ async function execute(env: {
 }
 
 async function serve(port: number, context: esbuild.BuildContext, storage: StorageFiles) {
-   const app = express()
+   const app = express() as any
    await context.watch()
    app.use((req, res, next) => {
       res.setHeader("Access-Control-Allow-Origin", "*")

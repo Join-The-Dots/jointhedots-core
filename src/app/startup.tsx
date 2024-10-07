@@ -10,43 +10,11 @@ import "core/theme"
 import 'react-toastify/dist/ReactToastify.css'
 import "./style.scss"
 
-import doc_ast from "./samples/Livedoc1.json"
+import doc_ast from "../samples/Livedoc1.json"
+import doc_mdx from "../samples/Livedoc3.txt"
 import { useState } from 'react'
 import { DocumentEditable } from 'lexical-editor'
-console.log(doc_ast)
-
-const ast = {
-   "type": "flow",
-   "flow": {
-      "pp": {
-         type: "property"
-      }
-   },
-   "layout": {
-      "type": "std:markdown",
-      "blocks": [
-         "# title\nbigblarebla",
-         {
-            "type": "std:mermaid",
-            "code": "graph TD;\n    A-->B;\n    A-->C;\n    B-->D;\n    C-->D;\n"
-         },
-         `
-# Heading 1
-
-Some **bold** text and some _italic_ text.
-
-- Item 1
-- Item 2
-
-> A blockquote
-
-\`\`\`typescript
-console.log('Hello, world!');
-\`\`\`
-`
-      ]
-   }
-}
+import { deserialize_model_markdown } from 'core/serde/markdown-reamark-serde'
 
 type HandlerManifest = {
    id: string,
@@ -115,9 +83,16 @@ function setDocumentState(id: string, content: any) {
    toast.success(`Document '${id}' saved`)
 }
 
+const doc_model = {
+   "root": {
+      "type": "root",
+      "children": deserialize_model_markdown(doc_mdx).layout["content"],
+   }
+}
+
 function App() {
    const id = "doc:my-test-doc"
-   const [content, setContent] = useState<any>(getDocumentState(id))
+   const [content, setContent] = useState<any>(doc_model)
    return (<>
       <ToastContainer position='bottom-right' />
       <DocumentEditable

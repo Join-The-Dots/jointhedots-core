@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { transformEditorStateToMarkdown } from "lexical-editor/markdownizer"
+import { transformEditorStateToMarkdown } from "core/markdown/markdownizer";
 import { useEffect, useState } from "react";
 
 export function MarkdownViewPlugin() {

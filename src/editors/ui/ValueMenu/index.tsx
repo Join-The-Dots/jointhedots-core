@@ -1,7 +1,7 @@
 import React from 'react'
 import { Menu } from 'components/openContextualMenu'
 import { EditionController, EditorMenu, EditorMenuItem, IEditionContext, ValueProps } from 'editors/ui'
-import { stringifyDescriptor } from 'core/AST/serialize/json'
+import { stringifyDescriptor } from 'core/serde/json'
 import { convertTextToExpression } from 'core/AST/ast-producer'
 
 export function ValueMenu(props: ValueProps & { menu?: EditorMenu, context: IEditionContext, ctl: EditionController, onClose: () => void }) {

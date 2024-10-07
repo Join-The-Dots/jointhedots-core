@@ -1,0 +1,6 @@
+{
+   "application": {
+      "name": "builder2",
+      "entry": "./startup.tsx"
+   }
+}

@@ -12,6 +12,7 @@ import {
   LexicalContextMenuPlugin,
   MenuOption,
 } from '@lexical/react/LexicalContextMenuPlugin';
+import { openDialog } from 'components/openDialog';
 import {
   $getNearestNodeFromDOMNode,
   $getSelection,
@@ -21,6 +22,7 @@ import {
   type LexicalNode,
   PASTE_COMMAND,
 } from 'lexical';
+import { ComponentViewDialog } from 'lexical-editor/nodes/View/ViewPlugin';
 import {useCallback, useMemo} from 'react';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -107,6 +109,29 @@ export default function ContextMenuPlugin(): JSX.Element {
 
   const defaultOptions = useMemo(() => {
     return [
+      new ContextMenuOption(`Insert Node`, {
+        onSelect: (_node) => {
+          openDialog<void>((onClose) => {
+            return <ComponentViewDialog
+              activeEditor={editor}
+              onClose={onClose}
+            />
+          });
+        },
+      }),
+      new ContextMenuOption(`Delete Node`, {
+        onSelect: (_node) => {
+          const selection = $getSelection();
+          if ($isRangeSelection(selection)) {
+            const currentNode = selection.anchor.getNode();
+            const ancestorNodeWithRootAsParent = currentNode
+              .getParents()
+              .at(-2);
+
+            ancestorNodeWithRootAsParent?.remove();
+          }
+        },
+      }),
       new ContextMenuOption(`Copy`, {
         onSelect: (_node) => {
           editor.dispatchCommand(COPY_COMMAND, null);
@@ -169,19 +194,6 @@ export default function ContextMenuPlugin(): JSX.Element {
             });
             editor.dispatchCommand(PASTE_COMMAND, event);
           });
-        },
-      }),
-      new ContextMenuOption(`Delete Node`, {
-        onSelect: (_node) => {
-          const selection = $getSelection();
-          if ($isRangeSelection(selection)) {
-            const currentNode = selection.anchor.getNode();
-            const ancestorNodeWithRootAsParent = currentNode
-              .getParents()
-              .at(-2);
-
-            ancestorNodeWithRootAsParent?.remove();
-          }
         },
       }),
     ];
