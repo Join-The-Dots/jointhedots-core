@@ -1,4 +1,158 @@
 import XHTMLEntities from './xhtml'
+import * as Acorn from 'acorn';
+
+/*
+JSXElement
+JSXFragment
+JSXText
+JSXIdentifier
+JSXNamespacedName
+JSXMemberExpression
+JSXEmptyExpression
+JSXExpressionContainer
+JSXSpreadAttribute
+JSXAttribute
+JSXOpeningElement
+JSXOpeningFragment
+JSXClosingElement
+JSXClosingFragment
+*/
+import { Node } from 'acorn';
+
+export interface JSXIdentifier extends Node {
+    type: 'JSXIdentifier';
+    name: string;
+}
+
+export interface JSXNamespacedName extends Node {
+    type: 'JSXNamespacedName';
+    namespace: JSXIdentifier;
+    name: JSXIdentifier;
+}
+
+export interface JSXMemberExpression extends Node {
+    type: 'JSXMemberExpression';
+    object: JSXIdentifier | JSXMemberExpression;
+    property: JSXIdentifier;
+}
+
+export interface JSXEmptyExpression extends Node {
+    type: 'JSXEmptyExpression';
+}
+
+export interface JSXExpressionContainer extends Node {
+    type: 'JSXExpressionContainer';
+    expression: Node; // could be any valid expression node
+}
+
+export interface JSXSpreadAttribute extends Node {
+    type: 'JSXSpreadAttribute';
+    argument: Node; // typically an object expression
+}
+
+export interface JSXAttribute extends Node {
+    type: 'JSXAttribute';
+    name: JSXIdentifier | JSXNamespacedName;
+    value: JSXExpressionContainer | JSXElement | JSXFragment | JSXText | null;
+}
+
+export interface JSXOpeningElement extends Node {
+    type: 'JSXOpeningElement';
+    name: JSXIdentifier | JSXNamespacedName | JSXMemberExpression;
+    attributes: (JSXAttribute | JSXSpreadAttribute)[];
+    selfClosing: boolean;
+}
+
+export interface JSXClosingElement extends Node {
+    type: 'JSXClosingElement';
+    name: JSXIdentifier | JSXNamespacedName | JSXMemberExpression;
+}
+
+export interface JSXOpeningFragment extends Node {
+    type: 'JSXOpeningFragment';
+}
+
+export interface JSXClosingFragment extends Node {
+    type: 'JSXClosingFragment';
+}
+
+export interface JSXElement extends Node {
+    type: 'JSXElement';
+    openingElement: JSXOpeningElement;
+    closingElement: JSXClosingElement | null;
+    children: (JSXText | JSXExpressionContainer | JSXElement | JSXFragment)[];
+}
+
+export interface JSXFragment extends Node {
+    type: 'JSXFragment';
+    openingFragment: JSXOpeningFragment;
+    closingFragment: JSXClosingFragment;
+    children: (JSXText | JSXExpressionContainer | JSXElement | JSXFragment)[];
+}
+
+export interface JSXText extends Node {
+    type: 'JSXText';
+    value: string;
+}
+
+
+export interface JsxTokTypes extends AcornTokTypes {
+  jsxName: Acorn.TokenType,
+  jsxText: Acorn.TokenType,
+  jsxTagEnd: Acorn.TokenType,
+  jsxTagStart: Acorn.TokenType
+}
+
+export type AcornTokTypes = typeof Acorn.tokTypes;
+
+export type TokTypes = JsxTokTypes
+
+export interface Options {
+  allowNamespacedObjects?: boolean;
+  allowNamespaces?: boolean;
+}
+
+export interface TokContexts {
+  // @ts-ignore
+  tc_oTag: Acorn.TokContext,
+  // @ts-ignore
+  tc_cTag: Acorn.TokContext,
+  // @ts-ignore
+  tc_expr: Acorn.TokContext
+}
+
+// We pick (statics) from acorn rather than plain extending to avoid complaint
+//   about base constructors needing the same return type (i.e., we return
+//   `AcornJsxParser` here)
+export interface AcornJsxParserCtor extends Pick<typeof Acorn.Parser, keyof typeof Acorn.Parser> {
+  readonly acornJsx: {
+    tokTypes: TokTypes;
+    tokContexts: TokContexts
+  };
+
+  new(options: Acorn.Options, input: string, startPos?: number): AcornJsxParser;
+}
+
+export interface AcornJsxParser extends Acorn.Parser {
+  jsx_readToken(): string;
+  jsx_readNewLine(normalizeCRLF: boolean): void;
+  jsx_readString(quote: number): void;
+  jsx_readEntity(): string;
+  jsx_readWord(): void;
+  jsx_parseIdentifier(): Acorn.Node;
+  jsx_parseNamespacedName(): Acorn.Node;
+  jsx_parseElementName(): Acorn.Node | string;
+  jsx_parseAttributeValue(): Acorn.Node;
+  jsx_parseEmptyExpression(): Acorn.Node;
+  jsx_parseExpressionContainer(): Acorn.Node;
+  jsx_parseAttribute(): Acorn.Node;
+  jsx_parseOpeningElementAt(startPos: number, startLoc?: Acorn.SourceLocation): Acorn.Node;
+  jsx_parseClosingElementAt(startPos: number, startLoc?: Acorn.SourceLocation): Acorn.Node;
+  jsx_parseElementAt(startPos: number, startLoc?: Acorn.SourceLocation): Acorn.Node;
+  jsx_parseText(): Acorn.Node;
+  jsx_parseElement(): Acorn.Node;
+}
+
 
 const hexNumber = /^[\da-fA-F]+$/;
 const decimalNumber = /^\d+$/;
@@ -52,7 +206,6 @@ function getJsxTokens(acorn) {
 }
 
 // Transforms JSX element name to string.
-
 function getQualifiedJSXName(object) {
   if (!object)
     return object;
@@ -68,16 +221,6 @@ function getQualifiedJSXName(object) {
       getQualifiedJSXName(object.property);
 }
 
-export default function (options) {
-  options = options || {};
-  return function (Parser) {
-    return plugin({
-      allowNamespaces: options.allowNamespaces !== false,
-      allowNamespacedObjects: !!options.allowNamespacedObjects
-    }, Parser);
-  };
-};
-
 // This is `tokTypes` of the peer dep.
 // This can be different instances from the actual `tokTypes` this plugin uses.
 export const tokTypes = {
@@ -88,8 +231,8 @@ export const tokTypes = {
   enumerable: true
 }
 
-function plugin(options, Parser) {
-  const acorn = Parser.acorn || require("acorn");
+function plugin(options: Options, Parser: any): AcornJsxParser {
+  const acorn = Acorn as any
   const acornJsx = getJsxTokens(acorn);
   const tt = acorn.tokTypes;
   const tok = acornJsx.tokTypes;
@@ -300,6 +443,7 @@ function plugin(options, Parser) {
 
         case tok.jsxTagStart:
         case tt.string:
+          // @ts-ignore
           return this.parseExprAtom();
 
         default:
@@ -390,6 +534,7 @@ function plugin(options, Parser) {
               break;
 
             case tok.jsxText:
+              // @ts-ignore
               children.push(this.parseExprAtom());
               break;
 
@@ -482,5 +627,11 @@ function plugin(options, Parser) {
         return super.updateContext(prevType);
       }
     }
-  };
+  } as any
 }
+
+export function acornJsx(options: Options) {
+  return function (BaseParser: typeof Acorn.Parser): typeof Acorn.Parser {
+    return plugin(options, BaseParser) as any as typeof Acorn.Parser;
+  };
+};

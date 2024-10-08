@@ -17,7 +17,7 @@ export interface ASTExpression extends ASTNode {
 }
 
 export interface ASTRoutine extends ASTNode {
-   type: "flow" | "dataflow" | "inline"
+   type: "flow" | "dataflow" | "inline" | "document"
    flow?: MapLike<ASTExpression>
    layout?: ASTExpression
 }

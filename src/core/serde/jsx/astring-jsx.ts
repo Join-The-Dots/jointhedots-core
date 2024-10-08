@@ -95,8 +95,9 @@ export const generator = Object.assign(
    astring.GENERATOR
 )
 
-export function astringJsx(ast, options) {
-   return astring.generate(ast, extend({
+export function Generator(options) {
+   return extend({
       generator: generator
-   }, options));
+   }, options)
 }
+
