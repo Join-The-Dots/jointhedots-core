@@ -3,7 +3,7 @@ import { EditorDescriptor, EditorValueMatch, ValueProps } from "editors/ui"
 import { Schema } from 'core/ast/schema/helpers'
 import { JSONSchema } from 'core/ast/schema'
 import { PropertyRows, PropertyTable } from 'editors/ui/PropertiesTable'
-import { DataEditors } from '..'
+import { ExpressionsEditors } from '..'
 import { ExpandableInputHOC } from 'editors/ui/ExpandableInput'
 
 function ObjectEditor(props: ValueProps) {
@@ -12,7 +12,7 @@ function ObjectEditor(props: ValueProps) {
       <PropertyRows
          values={value}
          typings={typing.properties}
-         provider={DataEditors}
+         provider={ExpressionsEditors}
          onChange={(value) => onChange(value)}
       />
    </PropertyTable>
@@ -27,8 +27,8 @@ const editor: EditorDescriptor = {
    }
 }
 
-DataEditors.registerController({
-   type: "object",
+ExpressionsEditors.registerController({
+   type: "ObjectExpression",
    icon: "code:symbol/object",
    editor,
    matchType(schema: JSONSchema): EditorValueMatch {

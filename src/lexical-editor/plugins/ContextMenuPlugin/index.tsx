@@ -22,7 +22,7 @@ import {
   type LexicalNode,
   PASTE_COMMAND,
 } from 'lexical';
-import { ComponentViewDialog } from 'lexical-editor/nodes/View/ViewPlugin';
+import { ComponentViewDialog } from 'lexical-editor/nodes/Component/ComponentPlugin'
 import {useCallback, useMemo} from 'react';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';

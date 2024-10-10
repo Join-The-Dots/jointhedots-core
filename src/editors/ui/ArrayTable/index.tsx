@@ -1,11 +1,11 @@
 import React from 'react'
 import Icon from 'components/Icon'
-import { JSONSchema } from 'core/AST/schema-helpers'
-import "./index.scss"
 import { DragZone, DropZone, getEventInElementPosition } from 'components/DragAndDrop'
 import { IEditorProvider } from 'editors/ui'
+import { JSONSchema } from 'core/ast/schema'
 import Button from 'components/Button'
 import ValueInput from '../InputValue'
+import "./index.scss"
 
 export function ArrayRow(props: {
   index: number

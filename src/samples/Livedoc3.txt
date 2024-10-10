@@ -71,3 +71,4 @@ you can navigate the cells with `enter`, `shift+enter`, `tab` and `shift+tab`.
   maxRow={<evaluate value={ x * 2 } />}
 />
 
+<my.comp1 />

@@ -122,9 +122,6 @@ async function execute(env: {
 
    // Generate static assets
    const assetsDir = outputDir + "/assets"
-   if (!directory.exists(assetsDir)) {
-      directory.copy("node_modules/@salesforce-ux/design-system/assets", assetsDir)
-   }
    file.copy.toDir("./src/favicon.webp", outputDir)
 
    // Define polyfill modules

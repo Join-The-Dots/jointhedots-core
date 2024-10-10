@@ -1,7 +1,7 @@
 import { EditionController, EditorValueMatch, IEditionContext, IEditionOperation, IEditorProvider } from "."
 import { MapLike } from "core/common"
-import { ASTExpression } from "core/AST"
-import { JSONSchema } from "core/AST/schema"
+import { JSONSchema } from "core/ast/schema"
+import * as AST from 'core/ast/nodes'
 
 export abstract class DescriptorEditionContext implements IEditionContext {
    operations = new Set<IEditionOperation>

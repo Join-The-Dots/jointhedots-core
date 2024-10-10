@@ -1,5 +1,5 @@
-import { ASTExpression } from "."
-import { JSONSchemaRelation } from "./schema-document"
+import * as AST from "core/ast/nodes"
+import { JSONSchemaRelation } from "./schema/document"
 
 export type DataBreakupLevel = {
    key: string
@@ -251,14 +251,14 @@ export function setDataAtPath(path: string, data: any, content: Object): any {
 
 export type DescriptorPlacement = {
    path: string
-   content: ASTExpression
+   content: AST.Node
 }
 
-export function findDescriptorPath(searched: any, descriptor: ASTExpression) {
+export function findDescriptorPath(searched: any, descriptor: AST.Node) {
    return DataBreakupOnPath.find(searched, descriptor)
 }
 
-export function insertDescriptorAtPath(path: string, descriptor: ASTExpression, source: ASTExpression): DescriptorPlacement {
+export function insertDescriptorAtPath(path: string, descriptor: AST.Node, source: AST.Node): DescriptorPlacement {
    const content = DataBreakupOnPath.breakup(path.split("/"), source)
    injectDescriptorStackTop(content, descriptor)
    return {
@@ -267,7 +267,7 @@ export function insertDescriptorAtPath(path: string, descriptor: ASTExpression, 
    }
 }
 
-export function displaceDescriptorAtPath(from_path: string, to_path: string, source: ASTExpression): DescriptorPlacement {
+export function displaceDescriptorAtPath(from_path: string, to_path: string, source: AST.Node): DescriptorPlacement {
 
    // Remove content at 'from' path
    const keys_ejected = from_path.split("/")
@@ -293,13 +293,13 @@ export function displaceDescriptorAtPath(from_path: string, to_path: string, sou
    }
 }
 
-export function deleteDescriptorAtPath(path: string, source: ASTExpression): ASTExpression {
+export function deleteDescriptorAtPath(path: string, source: AST.Node): AST.Node {
    const content = DataBreakupOnPath.breakup(path.split("/"), source)
    ejectDescriptorStackTop(content)
    return content.remake()
 }
 
-function injectDescriptorStackTop(content: DataBreakupOnPath, injected: ASTExpression) {
+function injectDescriptorStackTop(content: DataBreakupOnPath, injected: AST.Node) {
    if (content.data instanceof Object) {
       const owner = content.back(0)
       if (Array.isArray(owner.data)) {
@@ -319,8 +319,8 @@ function injectDescriptorStackTop(content: DataBreakupOnPath, injected: ASTExpre
    content.data = injected
 }
 
-function ejectDescriptorStackTop(content: DataBreakupOnPath): ASTExpression {
-   let ejected: ASTExpression = content.data
+function ejectDescriptorStackTop(content: DataBreakupOnPath): AST.Node {
+   let ejected: AST.Node = content.data
    if (content.data instanceof Object) {
       const owner = content.back(0)
       if (Array.isArray(owner.data)) {

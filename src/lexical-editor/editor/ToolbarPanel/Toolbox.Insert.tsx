@@ -22,7 +22,7 @@ import { INSERT_PAGE_BREAK } from '../../nodes/PageBreak/PageBreakPlugin';
 import { InsertPollDialog } from '../../nodes/Poll/PollPlugin';
 import { InsertTableDialog } from '../../plugins/TablePlugin';
 import { openDialog } from 'components/openDialog';
-import { ComponentViewDialog } from 'lexical-editor/nodes/View/ViewPlugin';
+import { ComponentViewDialog } from 'lexical-editor/nodes/Component/ComponentPlugin'
 
 export function InsertToolbox(props: { activeEditor: LexicalEditor, editor: LexicalEditor, isEditable: boolean, showModal: any }) {
   const { activeEditor, editor, isEditable, showModal } = props

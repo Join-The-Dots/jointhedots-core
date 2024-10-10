@@ -1,4 +1,4 @@
-import { JSONSchemaRelation } from "../AST/schema-document"
+import { JSONSchemaRelation } from "./document"
 
 export function stringifyDescriptor(what: Object): string {
    return JSON.stringify(what, (key, value) => {

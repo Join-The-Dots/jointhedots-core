@@ -1,12 +1,13 @@
 import React from 'react'
 import TextInput from "editors/ui/InputText"
 import { ValueProps, EditorDescriptor } from "editors/ui"
-import { Schema, JSONSchema } from 'core/AST/schema-helpers'
+import { Schema } from 'core/ast/schema/helpers'
+import { JSONSchema } from 'core/ast/schema'
 import { EditorValueMatch } from 'editors/ui'
 import { DataEditors } from '..'
-import { convertTextToExpression } from 'core/AST/ast-producer'
+import { convertTextToExpression } from 'core/ast/producer'
 
-function StringInput(props: ValueProps) {
+function LiteralInput(props: ValueProps) {
    const { value, typing, onChange } = props
    const onValidate = onChange && React.useCallback((text) => {
       onChange(convertTextToExpression(text, typing))
@@ -19,7 +20,7 @@ function StringInput(props: ValueProps) {
 }
 
 const editor: EditorDescriptor = {
-   input: StringInput,
+   input: LiteralInput,
 }
 
 DataEditors.registerController({

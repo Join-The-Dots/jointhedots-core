@@ -1,6 +1,6 @@
 import { JSONSchema } from "core/ast/schema"
-import { MapLike } from "core/common"
 import { EditionController, EditorValueMatch, IEditorProvider } from "editors/ui"
+import * as AST from "core/ast/nodes"
 
 export class DataEditorProvider implements IEditorProvider {
    controllers: EditionController[] = []
@@ -48,4 +48,4 @@ export class DataEditorProvider implements IEditorProvider {
    }
 }
 
-export const DataEditors = new DataEditorProvider()
+export const ExpressionsEditors = new DataEditorProvider()

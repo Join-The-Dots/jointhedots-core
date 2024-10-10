@@ -1,7 +1,8 @@
 import React from 'react'
-import { CommonTypes, JSONSchema, DocumentationSchema, Schema } from 'core/AST/schema-helpers'
+import { CommonTypes, Schema } from 'core/ast/schema/helpers'
 import { MapLike } from 'core/common'
 import { EditorMenu, IEditorProvider } from 'editors/ui'
+import { DocumentationSchema, JSONSchema } from 'core/ast/schema'
 import ValueInput from 'editors/ui/InputValue'
 import "./index.scss"
 

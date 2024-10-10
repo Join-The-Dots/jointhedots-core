@@ -1,8 +1,8 @@
 import React from 'react'
 import { Menu } from 'components/openContextualMenu'
 import { EditionController, EditorMenu, EditorMenuItem, IEditionContext, ValueProps } from 'editors/ui'
-import { stringifyDescriptor } from 'core/serde/json'
-import { convertTextToExpression } from 'core/AST/ast-producer'
+import { stringifyDescriptor } from 'core/ast/schema/json'
+import { convertTextToExpression } from 'core/ast/producer'
 
 export function ValueMenu(props: ValueProps & { menu?: EditorMenu, context: IEditionContext, ctl: EditionController, onClose: () => void }) {
    const { ctl, context, menu, value, typing, onChange, onClose } = props

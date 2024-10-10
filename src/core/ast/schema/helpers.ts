@@ -1,7 +1,6 @@
 import { MapLike } from "core/common"
-import { JSONSchema } from "./schema"
 import { JSONSchema7TypeName } from "json-schema"
-export * from "./schema"
+import { JSONSchema } from "."
 
 export const CommonTypes: MapLike<JSONSchema> = {
    boolean: {

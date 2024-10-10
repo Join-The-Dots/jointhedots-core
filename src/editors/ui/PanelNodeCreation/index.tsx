@@ -1,15 +1,15 @@
-import { JSONSchema } from "core/AST/schema"
+import { JSONSchema } from "core/ast/schema"
 import { PropertyRows, PropertyTable } from "../PropertiesTable"
 import { DataEditors } from "editors/datas"
 import { useCallback, useState } from "react"
 import { ComponentPublication } from "core/components/interfaces"
 import { ComponentEntry, ComponentManifest, ComponentsRegistry } from "core/components"
-import { ASTNode } from "core/AST"
 import { ComponentBrowser } from "../PanelBrowser"
-import { createValueFromTyping } from "core/AST/ast-producer"
+import { createValueFromTyping } from "core/ast/producer"
 import Stack from "components/Stack"
 import Icon from "components/Icon"
 import Button from "lexical-editor/ui/Button"
+import * as AST from "core/ast/nodes"
 
 export function DataEditor(props: {
    data: any
@@ -67,7 +67,7 @@ type Selected = {
 
 export function PanelNodeCreation(props: {
    service: string
-   onComplete: (component?: ComponentEntry, node?: ASTNode) => void;
+   onComplete: (component?: ComponentEntry, node?: AST.Any) => void;
    onCancel: () => void
 }): JSX.Element {
    const { service, onComplete, onCancel } = props
@@ -85,7 +85,7 @@ export function PanelNodeCreation(props: {
       })
    }, null)
 
-   const complete = useCallback(async (data?: ASTNode) => {
+   const complete = useCallback(async (data?: AST.Any) => {
       onComplete(selected.component, data)
    }, [selected])
 

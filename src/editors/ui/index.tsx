@@ -1,9 +1,8 @@
 import React from 'react'
-import { JSONSchema } from 'core/AST/schema-helpers'
 import { MapLike } from 'core/common'
-import { ASTExpression } from 'core/AST'
 import { ComponentResource } from 'core/components'
-
+import { JSONSchema } from 'core/ast/schema'
+import * as AST from 'core/ast/nodes'
 
 export type ValueProps<T = any> = {
    name?: string
@@ -74,8 +73,8 @@ export interface IEditionContext {
 }
 
 export interface IEditorProvider {
-   findControllerOf(value: ASTExpression, typing: JSONSchema): Promise<EditionController>
-   listControllerOf(value: ASTExpression, typing: JSONSchema): Promise<Map<EditionController, EditorValueMatch>>
+   findControllerOf(value: AST.Node, typing: JSONSchema): Promise<EditionController>
+   listControllerOf(value: AST.Node, typing: JSONSchema): Promise<Map<EditionController, EditorValueMatch>>
 }
 
 export const EditionContext = React.createContext<IEditionContext>(null)

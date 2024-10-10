@@ -25,8 +25,6 @@
       "@lexical/table": "0.18.0",
       "@lexical/utils": "0.18.0",
       "@polycuber/script.cli": "~1.0.5",
-      "@salesforce-ux/design-system": "^2.21.5-wcag",
-      "@salesforce/design-system-react": "^0.10.59",
       "acorn": "^8.11.3",
       "acorn-loose": "^8.4.0",
       "astring": "^1.9.0",

@@ -7,7 +7,7 @@ import { DocumentViewer } from "./Viewer"
 import "./index.scss"
 
 export function DocumentEditable(props: {
-   content: SerializedEditorState | string
+   content: string
    onChange: (content: string) => void
 }): JSX.Element {
    const { content, onChange } = props

@@ -1,54 +1,96 @@
 import { MapLike } from "core/common"
 import { JSONSchema } from "./schema"
-import { Schema } from "./schema-helpers"
+import { Schema } from "./schema/helpers"
+import * as AST from './nodes'
 
 function parseJson(text: string): any {
    try { return JSON.parse(text) }
    catch (e) { return undefined }
 }
 
-export function createExpressionProps(properties: MapLike<JSONSchema>): any {
+export function emitASTFromValue(value: any): AST.Expression {
+   if (value instanceof Object) {
+      if (Array.isArray(value)) {
+         return {
+            type: "ArrayExpression",
+            elements: value.map(x => emitASTFromValue(x)),
+         } as AST.ArrayExpression
+      }
+      else {
+         return {
+            type: "ObjectExpression",
+            properties: Object.keys(value).map((key, i) => {
+               return {
+                  type: "Property",
+                  key: {
+                     type: "Identifier",
+                     name: key,
+                  },
+                  value: emitASTFromValue(value[key]),
+               } as AST.Property
+            })
+         } as AST.ObjectExpression
+      }
+   }
+   else {
+      return {
+         type: "Literal",
+         value,
+      } as AST.Literal
+   }
+}
+
+export function emitASTProps(properties: MapLike<JSONSchema>): any {
    const result = {}
    for (const name in properties) {
-      result[name] = createExpressionFromTyping(properties[name])
+      result[name] = emitASTFromTyping(properties[name])
    }
    return result
 }
 
-export function createExpressionTuple(items: JSONSchema[]): any {
+export function emitASTTuple(items: JSONSchema[]): any {
    const result = []
    for (const item of items) {
-      result.push(createExpressionFromTyping(item))
+      result.push(emitASTFromTyping(item))
    }
    return result
 }
 
-export function createExpressionFromTyping(typing: JSONSchema): any {
+export function emitASTFromTyping(typing: JSONSchema): AST.Any {
 
    if (typing.default) {
-      return typing.default
+      return emitASTFromValue(typing.default)
    }
 
    const { properties } = typing
    if (properties) {
       return {
-         type: "record",
-         fields: createExpressionProps(properties)
-      }
+         type: "ObjectExpression",
+         properties: Object.keys(properties).map(key => {
+            return {
+               type: "Property",
+               key: {
+                  type: "Identifier",
+                  name: key,
+               },
+               value: emitASTFromTyping(properties[key])
+            }
+         })
+      } as AST.ObjectExpression
    }
 
    const { items } = typing
    if (Array.isArray(items)) {
       return {
-         type: "list",
-         items: createExpressionTuple(items),
-      }
+         type: "ArrayExpression",
+         elements: emitASTTuple(items),
+      } as AST.ArrayExpression
    }
    else if (items) {
       return {
-         type: "list",
-         items: [],
-      }
+         type: "ArrayExpression",
+         elements: [],
+      } as AST.ArrayExpression
    }
 }
 

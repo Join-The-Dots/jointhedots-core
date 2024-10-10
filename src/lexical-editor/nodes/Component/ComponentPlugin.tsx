@@ -1,11 +1,13 @@
-import { COMMAND_PRIORITY_EDITOR, createCommand, Klass, LexicalCommand, LexicalEditor, LexicalNode } from 'lexical';
-import { useCallback, useEffect } from 'react';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { ComponentEntry } from 'core/components';
-import { $insertNodeToNearestRoot } from '@lexical/utils';
-import { ViewNode } from './ViewNode';
-import { PanelNodeCreation } from 'editors/ui/PanelNodeCreation';
+import { COMMAND_PRIORITY_EDITOR, createCommand, Klass, LexicalCommand, LexicalEditor, LexicalNode } from 'lexical'
+import { useCallback, useContext, useEffect } from 'react'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { ComponentEntry } from 'core/components'
+import { $insertNodeToNearestRoot } from '@lexical/utils'
+import { ComponentNode } from './ComponentNode'
+import { PanelNodeCreation } from 'editors/ui/PanelNodeCreation'
 import "editors/datas/register"
+import { emitASTFromValue } from 'core/ast/producer'
+import { stringify_node_jsx } from 'core/ast/serde/markdown'
 
 export const INSERT_VIEW_COMMAND: LexicalCommand<string> = createCommand(
   'INSERT_VIEW_COMMAND',
@@ -15,8 +17,8 @@ export function ComponentViewDialog({
   activeEditor,
   onClose,
 }: {
-  activeEditor: LexicalEditor;
-  onClose: () => void;
+  activeEditor: LexicalEditor
+  onClose: () => void
 }): JSX.Element {
 
   const complete = useCallback(async (component: ComponentEntry, data: any) => {
@@ -26,21 +28,20 @@ export function ComponentViewDialog({
         const node = view_lexical.importJSON({
           type: component.id,
           ...data,
-        });
-        $insertNodeToNearestRoot(node);
+          ...data.props,
+        })
+        $insertNodeToNearestRoot(node)
       })
     }
     else {
       const view_react = await component.fetchResource<Klass<LexicalNode>>("view.react")
       if (view_react) {
-        activeEditor.update(() => {
-          const node = new ViewNode({
-            type: "element",
-            version: 0,
-            view: component.id,
-            props: data
+        activeEditor.update(async () => {
+          const node = new ComponentNode({
+            tag: component.id,
+            props: data as any,
           })
-          $insertNodeToNearestRoot(node);
+          $insertNodeToNearestRoot(node)
         })
       }
     }
@@ -55,24 +56,24 @@ export function ComponentViewDialog({
   />
 }
 
-export default function ExplorerViewPlugin({
+export default function ComponentPlugin({
   captionsEnabled,
 }: {
-  captionsEnabled?: boolean;
+  captionsEnabled?: boolean
 }): JSX.Element | null {
 
-  const [editor] = useLexicalComposerContext();
+  const [editor] = useLexicalComposerContext()
 
   useEffect(() => {
     return editor.registerCommand<string>(
       INSERT_VIEW_COMMAND,
       (payload) => {
 
-        return true;
+        return true
       },
       COMMAND_PRIORITY_EDITOR,
-    );
-  }, [editor]);
+    )
+  }, [editor])
 
-  return null;
+  return null
 }

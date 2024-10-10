@@ -1,11 +1,11 @@
 import React from 'react'
 import * as monaco from "monaco-editor"
-import { JSONSchema } from 'core/AST/schema-helpers'
 import Button from 'components/Button'
 import "./style.scss"
 import { toast } from 'react-toastify'
 import { EditionContext, IEditionOperation } from 'editors/ui'
-import { stringifyDescriptor } from 'core/serde/json'
+import { stringifyDescriptor } from 'core/ast/schema/json'
+import { JSONSchema } from 'core/ast/schema'
 
 type PropsType = {
    typing: JSONSchema

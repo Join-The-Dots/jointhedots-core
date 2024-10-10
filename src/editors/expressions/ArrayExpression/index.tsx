@@ -2,7 +2,7 @@ import React from 'react'
 import { ValueProps, EditorDescriptor, EditorValueMatch } from "editors/ui"
 import { Schema, CommonTypes } from 'core/ast/schema/helpers'
 import { ArrayTable } from 'editors/ui/ArrayTable'
-import { DataEditors } from '..'
+import { ExpressionsEditors } from '..'
 import { ExpandableInputHOC } from 'editors/ui/ExpandableInput'
 import { createValueFromTyping } from 'core/ast/producer'
 import { JSONSchema } from 'core/ast/schema'
@@ -13,7 +13,7 @@ function ArrayEditor(props: ValueProps) {
    return (<ArrayTable
       items={value}
       itemTyping={typing?.items as JSONSchema || CommonTypes.any}
-      provider={DataEditors}
+      provider={ExpressionsEditors}
       onChange={(value) => onChange(value)}
       onCreate={() => createValueFromTyping(itemTyping)}
    />)
@@ -28,8 +28,8 @@ const editor: EditorDescriptor = {
    }
 }
 
-DataEditors.registerController({
-   type: "array",
+ExpressionsEditors.registerController({
+   type: "ArrayExpression",
    icon: "code:symbol/list",
    editor,
    matchType(schema: JSONSchema): EditorValueMatch {

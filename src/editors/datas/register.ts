@@ -1,3 +1,3 @@
-import "./String"
+import "./Literal"
 import "./Array"
 import "./Object"

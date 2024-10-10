@@ -1,8 +1,6 @@
 import ReactDOM from 'react-dom/client'
 import { toast, ToastContainer } from "react-toastify"
-import { ASTNode } from "../core/AST"
-import { JSONSchema } from "../core/AST/schema"
-import { DocumentViewer } from "lexical-editor/Viewer"
+import { JSONSchema } from "../core/ast/schema"
 import "components/icons-vscode"
 import "components/icons-fontawesome"
 import "components/icons-bootstrap"
@@ -10,11 +8,9 @@ import "core/theme"
 import 'react-toastify/dist/ReactToastify.css'
 import "./style.scss"
 
-import doc_ast from "../samples/Livedoc1.json"
-import doc_mdx from "../samples/Livedoc3.txt"
+import doc_mdx from "../samples/Livedoc4.txt"
 import { useState } from 'react'
 import { DocumentEditable } from 'lexical-editor'
-import { deserialize_model_markdown } from 'core/serde/markdown-reamark-serde'
 
 type HandlerManifest = {
    id: string,
@@ -68,14 +64,10 @@ handlers.push({
 
 function getDocumentState(id: string) {
    try {
-      const result = JSON.parse(localStorage.getItem(id))
-      if (result.root instanceof Object) {
-         return result
-      }
+      return localStorage.getItem(id).toString()
    }
    catch (_) {
    }
-   return doc_ast.editorState
 }
 
 function setDocumentState(id: string, content: any) {
@@ -83,16 +75,9 @@ function setDocumentState(id: string, content: any) {
    toast.success(`Document '${id}' saved`)
 }
 
-const doc_model = {
-   "root": {
-      "type": "root",
-      "children": deserialize_model_markdown(doc_mdx).layout["content"],
-   }
-}
-
 function App() {
    const id = "doc:my-test-doc"
-   const [content, setContent] = useState<any>(doc_model)
+   const [content, setContent] = useState<any>(doc_mdx)
    return (<>
       <ToastContainer position='bottom-right' />
       <DocumentEditable

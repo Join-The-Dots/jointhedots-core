@@ -4,13 +4,13 @@ import ContentEditable from './ui/ContentEditable'
 import { SerializedEditorState } from 'lexical'
 import { InitialConfigType, LexicalComposer } from '@lexical/react/LexicalComposer'
 import PlaygroundNodes from './nodes/PlaygroundNodes'
-import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
+import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme'
 import { useMemo } from 'react'
 import "./index.css"
-import { $updateEditorStateFromMarkdown } from 'core/markdown/markdownizer'
+import { $updateEditorStateFromMarkdown } from 'lexical-editor/markdown-to-lexical'
 
 export function DocumentViewer(props: {
-   content: SerializedEditorState | string
+   content: string
 }): JSX.Element {
 
    const { content } = props
@@ -27,14 +27,14 @@ export function DocumentViewer(props: {
             editor.setEditorState(state)
          }
       },
-      editable: true,
+      editable: false,
       namespace: 'Playground',
       nodes: [...PlaygroundNodes],
       onError: (error: Error) => {
-         throw error;
+         throw error
       },
       theme: PlaygroundEditorTheme,
-   }), [content]);
+   }), [content])
 
    return <LexicalComposer initialConfig={initialConfig}>
       <div className={`editor-container plain-text`}>
