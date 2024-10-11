@@ -1,9 +1,9 @@
 import React from 'react'
 import { ValueProps, EditorDescriptor, EditorValueMatch } from "editors/ui"
 import { Schema, CommonTypes } from 'core/ast/schema/helpers'
-import { ArrayTable } from 'editors/ui/ArrayTable'
+import { ArrayTable } from 'editors/ui/TableArray'
 import { DataEditors } from '..'
-import { ExpandableInputHOC } from 'editors/ui/ExpandableInput'
+import { ExpandableInputHOC } from 'editors/ui/InputExpandable'
 import { createValueFromTyping } from 'core/ast/producer'
 import { JSONSchema } from 'core/ast/schema'
 

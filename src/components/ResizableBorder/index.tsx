@@ -1,5 +1,5 @@
 import React from "react"
-import { HtmlGrabReaction } from "../event.utils"
+import { HtmlGrabReaction } from "../../editors/ui/event.utils"
 import "./index.scss"
 
 type PropsType = {

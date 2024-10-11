@@ -1,4 +1,4 @@
-import { ComponentsRegistry } from "core/components"
+import { ComponentsRegistry } from "core/library"
 import * as AST from "core/ast/nodes"
 import { MapLike } from "core/common"
 import { emitASTFromValue } from "./producer"

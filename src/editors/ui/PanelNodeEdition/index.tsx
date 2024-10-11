@@ -1,15 +1,15 @@
 import React from 'react'
 import { toast } from 'react-toastify'
-import Icon from 'components/Icon'
+import Icon from 'core/ui/Icon'
 import { JsonInput } from '../InputJson'
-import { Tabs } from 'components/Tabs'
+import { Tabs } from 'editors/ui/Tabs'
 import { EditionController, EditionContext, IEditorProvider, ValueProps } from '..'
-import Stack from 'components/Stack'
+import Stack from 'editors/ui/Stack'
 import "./index.scss"
-import Button from 'components/Button'
-import openContextualMenu from 'components/openContextualMenu'
+import Button from 'editors/ui/ButtonIcon'
+import openContextualMenu from 'editors/ui/openContextualMenu'
 import { ValueMenu } from '../ValueMenu'
-import { useAsyncState } from 'components/hooks/useAsyncState'
+import { useAsyncState } from 'editors/hooks/useAsyncState'
 
 function ValueHeading(props: ValueProps & { ctl: EditionController }) {
    const { ctl, name, value } = props

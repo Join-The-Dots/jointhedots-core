@@ -1,6 +1,6 @@
 import React from 'react'
 import * as monaco from "monaco-editor"
-import Button from 'components/Button'
+import Button from 'editors/ui/ButtonIcon'
 import "./style.scss"
 import { toast } from 'react-toastify'
 import { EditionContext, IEditionOperation } from 'editors/ui'

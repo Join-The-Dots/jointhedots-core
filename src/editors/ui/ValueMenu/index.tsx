@@ -1,5 +1,5 @@
 import React from 'react'
-import { Menu } from 'components/openContextualMenu'
+import { Menu } from 'editors/ui/openContextualMenu'
 import { EditionController, EditorMenu, EditorMenuItem, IEditionContext, ValueProps } from 'editors/ui'
 import { stringifyDescriptor } from 'core/ast/schema/json'
 import { convertTextToExpression } from 'core/ast/producer'

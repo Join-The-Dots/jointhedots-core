@@ -22,6 +22,7 @@ export function emitASTFromValue(value: any): AST.Expression {
             properties: Object.keys(value).map((key, i) => {
                return {
                   type: "Property",
+                  kind: "init",
                   key: {
                      type: "Identifier",
                      name: key,

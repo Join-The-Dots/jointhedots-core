@@ -1,5 +1,5 @@
-import { IconSVGCollection } from "components/Icon/IconSVGCollection"
-import { registerIconCollection } from "components/Icon"
+import { IconSVGCollection } from "core/ui/Icon/IconSVGCollection"
+import { registerIconCollection } from "core/ui/Icon"
 import getDarkIcons from "./icons-dark"
 import getLightIcons from "./icons-light"
 

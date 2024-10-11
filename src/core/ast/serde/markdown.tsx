@@ -36,8 +36,8 @@ export function stringify_node_json(n: AST.Any) {
    }, 2)
 }
 
-export function serialize_jsx_document(model: AST.LiveProgram): string {
-   const layout = model.layout as AST.LiveDocument
+export function serialize_jsx_document(model: AST.LDXProgram): string {
+   const layout = model.layout as AST.LDXDocument
    if (layout.type === "LiveDocument") {
       const code = Astring.generate({
          type: "JSXDocument",
@@ -47,14 +47,14 @@ export function serialize_jsx_document(model: AST.LiveProgram): string {
    }
 }
 
-export function deserialize_jsx_document(code: string): AST.LiveProgram {
+export function deserialize_jsx_document(code: string): AST.LDXProgram {
    try {
       const program = DocParser.parse(`export default <>\n${code}\n</>`, {
          ecmaVersion: 2024,
          sourceType: 'module',
       })
 
-      let layout: AST.LiveDocument = null
+      let layout: AST.LDXDocument = null
       for (const c of program.body) {
          if (c.type === "ExportDefaultDeclaration") {
             const exported = c.declaration as any as AST.JSXFragment
@@ -65,7 +65,7 @@ export function deserialize_jsx_document(code: string): AST.LiveProgram {
                      if (x.type === "JSXText") return x.value
                      else return x
                   })
-               } as AST.LiveDocument
+               } as AST.LDXDocument
                if (layout) break
             }
          }
@@ -74,7 +74,7 @@ export function deserialize_jsx_document(code: string): AST.LiveProgram {
       return {
          type: "LiveRoutine",
          layout,
-      } as AST.LiveProgram
+      } as AST.LDXProgram
    }
    catch (error) {
       if (error.loc) {

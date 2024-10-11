@@ -1,0 +1,17 @@
+{
+   "id": "layout.columns",
+   "title": "Columns Layout",
+   "description": "Display content as columns layout",
+   "icon": "bi:layout-three-columns",
+   "view": {
+      "properties": {
+         "templateColumns": {
+            "type": "string"
+         }
+      }
+   },
+   "attachments": {
+      "view.lexical": "./LayoutContainerNode#LayoutContainerNode",
+      "addon.lexical": "./LayoutPlugin"
+   }
+}

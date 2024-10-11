@@ -1,6 +1,6 @@
 import React from 'react'
 import { MapLike } from 'core/common'
-import { ComponentResource } from 'core/components'
+import { ComponentResource } from 'core/library'
 import { JSONSchema } from 'core/ast/schema'
 import * as AST from 'core/ast/nodes'
 

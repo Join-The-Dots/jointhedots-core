@@ -1,6 +1,6 @@
 import React from "react"
-import Stack from "components/Stack"
-import Icon from "components/Icon"
+import Stack from "editors/ui/Stack"
+import Icon from "core/ui/Icon"
 
 export function Card(props: {
    icon?: string

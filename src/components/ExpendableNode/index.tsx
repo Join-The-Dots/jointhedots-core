@@ -1,5 +1,5 @@
 import React from 'react'
-import Icon from 'components/Icon'
+import Icon from 'core/ui/Icon'
 import "./index.scss"
 
 export function ExpendableNode(props: {

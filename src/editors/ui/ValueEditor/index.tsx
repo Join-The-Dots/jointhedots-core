@@ -1,7 +1,7 @@
 import React from 'react'
 import { IEditorProvider, ValueProps } from '..'
 import "./index.scss"
-import { useAsyncState } from 'components/hooks/useAsyncState'
+import { useAsyncState } from 'editors/hooks/useAsyncState'
 
 function NoPanel(): JSX.Element {
    return <>unsupported</>

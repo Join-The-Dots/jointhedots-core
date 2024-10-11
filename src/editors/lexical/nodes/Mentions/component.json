@@ -1,0 +1,16 @@
+{
+   "id": "mensions",
+   "description": "Mensions to someone",
+   "icon": "bi:at",
+   "view": {
+      "properties": {
+         "mentionName": {
+            "type": "string"
+         }
+      }
+   },
+   "attachments": {
+      "view.lexical": "./MentionNode#MentionNode",
+      "addon.lexical": "./MentionsPlugin"
+   }
+}

@@ -1,0 +1,23 @@
+{
+   "id": "layout.table",
+   "title": "Table Layout",
+   "description": "Display grid as table layout",
+   "icon": "bi:table",
+   "view": {
+      "properties": {
+         "colWidths": {
+            "type": "array",
+            "items": {
+               "type": "number"
+            }
+         },
+         "rowStriping": {
+            "type": "boolean"
+         }
+      }
+   },
+   "attachments": {
+      "view.lexical": "./TableNode#TableNode",
+      "addon.lexical": "./TablePlugin"
+   }
+}

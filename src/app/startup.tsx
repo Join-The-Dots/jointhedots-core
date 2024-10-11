@@ -1,6 +1,5 @@
 import ReactDOM from 'react-dom/client'
 import { toast, ToastContainer } from "react-toastify"
-import { JSONSchema } from "../core/ast/schema"
 import "components/icons-vscode"
 import "components/icons-fontawesome"
 import "components/icons-bootstrap"
@@ -10,57 +9,7 @@ import "./style.scss"
 
 import doc_mdx from "../samples/Livedoc4.txt"
 import { useState } from 'react'
-import { DocumentEditable } from 'lexical-editor'
-
-type HandlerManifest = {
-   id: string,
-   expression: JSONSchema
-}
-
-const handlers: HandlerManifest[] = []
-
-handlers.push({
-   id: "flow",
-   expression: {
-      properties: {
-         "flow": {
-            type: "array",
-            items: {
-               type: "expression"
-            }
-         },
-         "layout": {
-            type: "expression"
-         }
-      }
-   }
-})
-
-handlers.push({
-   id: "property",
-   expression: {
-      properties: {
-         "schema": {
-            $ref: "http://json-schema.org/draft-07/schema"
-         }
-      }
-   }
-})
-
-handlers.push({
-   id: "state",
-   expression: {
-      properties: {
-         "value": {
-            type: "expression"
-         },
-         "schema": {
-            $ref: "http://json-schema.org/draft-07/schema"
-         }
-      }
-   }
-})
-
+import { DocumentEditable } from 'editors/lexical'
 
 function getDocumentState(id: string) {
    try {

@@ -1,11 +1,11 @@
 import React from 'react'
 import { EditionContext, EditionController, EditorMenu, IEditorProvider, ValueProps, sortMatchedControllers } from '..'
-import openContextualMenu, { Menu } from 'components/openContextualMenu'
-import Icon from 'components/Icon'
+import openContextualMenu, { Menu } from 'editors/ui/openContextualMenu'
+import Icon from 'core/ui/Icon'
 import "./index.scss"
-import { DropZone } from 'components/DragAndDrop'
+import { DropZone } from '../DragAndDrop'
 import { ValueMenu } from '../ValueMenu'
-import { useAsyncState } from 'components/hooks/useAsyncState'
+import { useAsyncState } from 'editors/hooks/useAsyncState'
 
 function NoInput(): JSX.Element {
    return <>unsupported</>

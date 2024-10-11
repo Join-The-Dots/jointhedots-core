@@ -1,14 +1,14 @@
 import { JSONSchema } from "core/ast/schema"
-import { PropertyRows, PropertyTable } from "../PropertiesTable"
+import { PropertyRows, PropertyTable } from "../TableProperties"
 import { DataEditors } from "editors/datas"
-import { useCallback, useState } from "react"
-import { ComponentPublication } from "core/components/interfaces"
-import { ComponentEntry, ComponentManifest, ComponentsRegistry } from "core/components"
+import { useCallback, useEffect, useState } from "react"
+import { ComponentPublication } from "core/library/interfaces"
+import { ComponentEntry, ComponentManifest, ComponentsRegistry } from "core/library"
 import { ComponentBrowser } from "../PanelBrowser"
 import { createValueFromTyping } from "core/ast/producer"
-import Stack from "components/Stack"
-import Icon from "components/Icon"
-import Button from "lexical-editor/ui/Button"
+import Stack from "editors/ui/Stack"
+import Icon from "core/ui/Icon"
+import Button from "editors/ui/Button"
 import * as AST from "core/ast/nodes"
 
 export function DataEditor(props: {
@@ -66,24 +66,30 @@ type Selected = {
 }
 
 export function PanelNodeCreation(props: {
+   component?: ComponentEntry,
    service: string
    onComplete: (component?: ComponentEntry, node?: AST.Any) => void;
-   onCancel: () => void
+   onCancel?: () => void
 }): JSX.Element {
    const { service, onComplete, onCancel } = props
+   const [component, setComponent] = useState<ComponentEntry>(props.component)
    const [selected, setSelected] = useState<Selected>(null)
 
-   const select = useCallback(async (pub: ComponentPublication) => {
-      const component = ComponentsRegistry.acquireComponent(pub.component_id)
-      const manifest = await component.fetch()
-      const schema = manifest[service] as JSONSchema
-      setSelected({
-         component,
-         manifest,
-         schema,
-         data: createValueFromTyping(schema)
+   useEffect(() => {
+      component && component.fetch().then(manifest => {
+         const schema = manifest[service] as JSONSchema
+         setSelected({
+            component,
+            manifest,
+            schema,
+            data: createValueFromTyping(schema)
+         })
       })
-   }, null)
+   }, [component])
+
+   const select = useCallback(async (pub?: ComponentPublication) => {
+      setComponent(ComponentsRegistry.acquireComponent(pub.component_id))
+   }, [])
 
    const complete = useCallback(async (data?: AST.Any) => {
       onComplete(selected.component, data)
@@ -101,7 +107,7 @@ export function PanelNodeCreation(props: {
          schema={selected.schema}
          data={selected.data}
          onValidate={complete}
-         onCancel={() => setSelected(null)}
+         onCancel={onCancel ? onCancel : () => setSelected(null)}
       />
    }
 }
