@@ -1,11 +1,11 @@
 import React from 'react'
-import TextInput from "editors/ui/InputText"
-import { ValueProps, EditorDescriptor } from "editors/ui"
-import { Schema } from 'core/ast/schema/helpers'
-import { JSONSchema } from 'core/ast/schema'
-import { EditorValueMatch } from 'editors/ui'
+import TextInput from "@livedoc/editors/ui/InputText"
+import { ValueProps, EditorDescriptor } from "@livedoc/editors/ui"
+import { Schema } from '@livedoc/core/ast/schema/helpers'
+import { JSONSchema } from '@livedoc/core/ast/schema'
+import { EditorValueMatch } from '@livedoc/editors/ui'
 import { ExpressionsEditors } from '..'
-import { convertTextToExpression } from 'core/ast/producer'
+import { convertTextToExpression } from '@livedoc/core/ast/producer'
 
 function LiteralInput(props: ValueProps) {
    const { value, typing, onChange } = props

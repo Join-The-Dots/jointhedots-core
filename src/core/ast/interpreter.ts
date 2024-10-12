@@ -1,5 +1,5 @@
 import * as AST from './nodes'
-import { MapLike } from 'core/common'
+import { MapLike } from '@livedoc/core/common'
 
 export interface InterpreterScope<C> {
    getThis(): any

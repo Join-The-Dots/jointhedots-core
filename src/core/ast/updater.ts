@@ -1,4 +1,4 @@
-import * as AST from "core/ast/nodes"
+import * as AST from "@livedoc/core/ast/nodes"
 import { JSONSchemaRelation } from "./schema/document"
 
 export type DataBreakupLevel = {

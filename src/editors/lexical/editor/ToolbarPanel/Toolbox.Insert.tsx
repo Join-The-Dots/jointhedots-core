@@ -21,8 +21,8 @@ import InsertLayoutDialog from '../../nodes/ColumnsLayout/InsertLayoutDialog';
 import { INSERT_PAGE_BREAK } from '../../nodes/PageBreak/PageBreakPlugin';
 import { InsertPollDialog } from '../../nodes/Poll/PollPlugin';
 import { InsertTableDialog } from '../../nodes/Table/TablePlugin';
-import { openDialog } from 'editors/ui/openDialog';
-import { ComponentViewDialog } from 'editors/lexical/nodes/Component/ComponentViewDialog'
+import { openDialog } from '@livedoc/editors/ui/openDialog';
+import { ComponentViewDialog } from '@livedoc/editors/lexical/nodes/Component/ComponentViewDialog'
 
 export function InsertToolbox(props: { activeEditor: LexicalEditor, editor: LexicalEditor, isEditable: boolean, showModal: any }) {
   const { activeEditor, editor, isEditable, showModal } = props

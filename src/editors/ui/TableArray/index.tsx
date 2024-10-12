@@ -1,9 +1,9 @@
 import React from 'react'
-import Icon from 'core/ui/Icon'
+import Icon from '@livedoc/core/ui/Icon'
 import { DragZone, DropZone, getEventInElementPosition } from '../DragAndDrop'
-import { IEditorProvider } from 'editors/ui'
-import { JSONSchema } from 'core/ast/schema'
-import Button from 'editors/ui/ButtonIcon'
+import { IEditorProvider } from '@livedoc/editors/ui'
+import { JSONSchema } from '@livedoc/core/ast/schema'
+import Button from '@livedoc/editors/ui/ButtonIcon'
 import ValueInput from '../InputValue'
 import "./index.scss"
 
@@ -98,7 +98,7 @@ export function ArrayTable(props: {
     onChange(new_items)
   }
 
-  return (<div className="InSlick-ArrayTable">
+  return (<div className="LDX-ArrayTable">
     {Array.isArray(items) && items.map((value, i) => {
       return <ArrayRow
         key={i}

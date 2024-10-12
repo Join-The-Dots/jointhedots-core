@@ -1,5 +1,5 @@
-import { IconSVGCollection } from "core/ui/Icon/IconSVGCollection"
-import { registerIconCollection } from "core/ui/Icon"
+import { IconSVGCollection } from "@livedoc/core/ui/Icon/IconSVGCollection"
+import { registerIconCollection } from "@livedoc/core/ui/Icon"
 import getDarkIcons from "./icons-dark"
 import getLightIcons from "./icons-light"
 

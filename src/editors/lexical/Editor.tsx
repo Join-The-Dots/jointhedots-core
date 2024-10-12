@@ -69,8 +69,9 @@ import { SharedAutocompleteContext } from './context/SharedAutocompleteContext'
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme'
 import { MarkdownViewPlugin } from './editor/MarkdownViewPanel'
 import { MARKDOWN_TRANSFORMERS } from './markdown/markdown-transformers'
-import { $updateEditorStateFromMarkdown, transformEditorStateToMarkdown } from 'editors/lexical/markdown/markdown-to-lexical'
+import { $updateEditorStateFromMarkdown, transformEditorStateToMarkdown } from '@livedoc/editors/lexical/markdown/markdown-to-lexical'
 import "./index.css"
+import { InstrumentationSupport } from '@livedoc/core/ui/Instrumentation/InstrumentationSupport'
 
 function Editor(): JSX.Element {
   const { historyState } = useSharedHistoryContext()
@@ -245,7 +246,9 @@ export function DocumentEditor(props: {
           <TableContext>
             <SharedAutocompleteContext>
               <div className="editor-shell">
-                <Editor />
+                <InstrumentationSupport>
+                  <Editor />
+                </InstrumentationSupport>
               </div>
             </SharedAutocompleteContext>
           </TableContext>

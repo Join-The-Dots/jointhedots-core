@@ -1,6 +1,6 @@
-import { JSONSchema } from "core/ast/schema"
-import { MapLike } from "core/common"
-import { EditionController, EditorValueMatch, IEditorProvider } from "editors/ui"
+import { JSONSchema } from "@livedoc/core/ast/schema"
+import { MapLike } from "@livedoc/core/common"
+import { EditionController, EditorValueMatch, IEditorProvider } from "@livedoc/editors/ui"
 
 export class DataEditorProvider implements IEditorProvider {
    controllers: EditionController[] = []

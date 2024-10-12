@@ -1,6 +1,6 @@
 import React from "react"
 import { IconCollection, IconProps } from "."
-import { ThemeProvider } from "core/theme"
+import { ThemeProvider } from "@livedoc/core/theme"
 
 export class IconUrlCollection implements IconCollection {
    constructor(readonly baseUrl: string) {

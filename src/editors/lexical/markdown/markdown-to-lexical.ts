@@ -1,11 +1,11 @@
 import { Transformer, $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown'
 import { EditorState, $getRoot, ElementNode, $applyNodeReplacement } from 'lexical'
 import { TRANSFORMERS } from '@lexical/markdown'
-import { MARKDOWN_TRANSFORMERS } from 'editors/lexical/markdown/markdown-transformers'
-import { deserialize_jsx_document } from 'core/ast/serde/markdown'
+import { MARKDOWN_TRANSFORMERS } from '@livedoc/editors/lexical/markdown/markdown-transformers'
+import { deserialize_jsx_document } from '@livedoc/core/ast/serde/markdown'
 import { ComponentNode } from '../nodes/Component/ComponentNode'
-import * as AST from "core/ast/nodes"
-import { evaluateJSXElementData } from 'core/ast/evaluate'
+import * as AST from "@livedoc/core/ast/nodes"
+import { evaluateJSXElementData } from '@livedoc/core/ast/evaluate'
 
 export function transformEditorStateToMarkdown(editorState: EditorState, shouldPreserveNewLinesInMarkdown = true): string {
 
@@ -49,10 +49,7 @@ export function $updateEditorStateFromMarkdown(content: string, shouldPreserveNe
       replace: (parentNode, chilren, match, isImport) => {
          const index = parseInt(match[1])
          const descriptor = evaluateJSXElementData(layout.items[index] as any)
-         console.log("component", descriptor)
-
-         const node = (new ComponentNode(descriptor))
-         //const node = $createCodeNode(descriptor.tag)
+         const node = new ComponentNode(descriptor)
          parentNode.replace(node)
       },
       regExp: /\x00([0-9]+)\x01/,

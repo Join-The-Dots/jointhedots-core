@@ -10,13 +10,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as ReactDOM from 'react-dom';
 import useModal from '../../hooks/useModal';
 import { getLexicalComponentsProvider, TextualComponentSelect } from './TextualComponentList';
-import { openDialog } from 'editors/ui/openDialog';
+import { openDialog } from '@livedoc/editors/ui/openDialog';
 import { insertComponentDialog } from './ComponentViewDialog';
-import { PanelNodeCreation } from 'editors/ui/PanelNodeCreation';
-import { ComponentsRegistry } from 'core/library';
-import { ComponentPublication } from 'core/library/interfaces';
-import { Menu } from 'editors/ui/openContextualMenu';
-import { getComponentGroupName } from 'editors/common/pub-helpers';
+import { PanelNodeCreation } from '@livedoc/editors/ui/PanelNodeCreation';
+import { ComponentsRegistry } from '@livedoc/core/library';
+import { ComponentPublication } from '@livedoc/core/library/interfaces';
+import { Menu } from '@livedoc/editors/ui/openContextualMenu';
+import { getComponentGroupName } from '@livedoc/editors/common/pub-helpers';
 
 class ComponentPickerOption extends MenuOption {
   constructor(

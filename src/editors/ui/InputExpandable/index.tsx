@@ -1,5 +1,5 @@
 import React from 'react'
-import { ValueProps } from "editors/ui"
+import { ValueProps } from "@livedoc/editors/ui"
 import ExpandedZone from './ExpandedZone'
 
 export function StaticInputHOC(title: string) {

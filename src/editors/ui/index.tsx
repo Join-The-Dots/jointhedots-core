@@ -1,8 +1,8 @@
 import React from 'react'
-import { MapLike } from 'core/common'
-import { ComponentResource } from 'core/library'
-import { JSONSchema } from 'core/ast/schema'
-import * as AST from 'core/ast/nodes'
+import { MapLike } from '@livedoc/core/common'
+import { ComponentResource } from '@livedoc/core/library'
+import { JSONSchema } from '@livedoc/core/ast/schema'
+import * as AST from '@livedoc/core/ast/nodes'
 
 export type ValueProps<T = any> = {
    name?: string

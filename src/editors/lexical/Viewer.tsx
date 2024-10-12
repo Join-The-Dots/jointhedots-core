@@ -7,7 +7,7 @@ import PlaygroundNodes from './nodes/PlaygroundNodes'
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme'
 import { useMemo } from 'react'
 import "./index.css"
-import { $updateEditorStateFromMarkdown } from 'editors/lexical/markdown/markdown-to-lexical'
+import { $updateEditorStateFromMarkdown } from '@livedoc/editors/lexical/markdown/markdown-to-lexical'
 
 export function DocumentViewer(props: {
    content: string

@@ -1,10 +1,10 @@
 import { Klass, LexicalEditor, LexicalNode } from 'lexical'
 import { useCallback } from 'react'
-import { ComponentEntry, ComponentsRegistry } from 'core/library'
+import { ComponentEntry, ComponentsRegistry } from '@livedoc/core/library'
 import { $insertNodeToNearestRoot } from '@lexical/utils'
 import { ComponentNode } from './ComponentNode'
-import { PanelNodeCreation } from 'editors/ui/PanelNodeCreation'
-import "editors/datas/register"
+import { PanelNodeCreation } from '@livedoc/editors/ui/PanelNodeCreation'
+import "@livedoc/editors/datas/register"
 
 export async function insertComponentDialog(activeEditor: LexicalEditor, component_id: string, data: any) {
   const component = await ComponentsRegistry.acquireComponent(component_id)

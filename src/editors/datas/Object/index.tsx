@@ -1,10 +1,10 @@
 import React from 'react'
-import { EditorDescriptor, EditorValueMatch, ValueProps } from "editors/ui"
-import { Schema } from 'core/ast/schema/helpers'
-import { JSONSchema } from 'core/ast/schema'
-import { PropertyRows, PropertyTable } from 'editors/ui/TableProperties'
+import { EditorDescriptor, EditorValueMatch, ValueProps } from "@livedoc/editors/ui"
+import { Schema } from '@livedoc/core/ast/schema/helpers'
+import { JSONSchema } from '@livedoc/core/ast/schema'
+import { PropertyRows, PropertyTable } from '@livedoc/editors/ui/TableProperties'
 import { DataEditors } from '..'
-import { ExpandableInputHOC } from 'editors/ui/InputExpandable'
+import { ExpandableInputHOC } from '@livedoc/editors/ui/InputExpandable'
 
 function ObjectEditor(props: ValueProps) {
    const { value, typing, onChange } = props

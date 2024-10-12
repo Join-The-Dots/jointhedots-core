@@ -1,8 +1,8 @@
 import React from 'react'
-import Stack from 'editors/ui/Stack'
-import Icon from 'core/ui/Icon'
+import Stack from '@livedoc/editors/ui/Stack'
+import Icon from '@livedoc/core/ui/Icon'
 import "./style.scss"
-import { useAsyncState } from 'editors/hooks/useAsyncState'
+import { useAsyncState } from '@livedoc/editors/hooks/useAsyncState'
 
 const ListTableContext = React.createContext<number>(0)
 

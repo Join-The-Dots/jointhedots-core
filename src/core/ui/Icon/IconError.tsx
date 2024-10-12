@@ -1,6 +1,6 @@
 import React from "react"
 import { IconCollection, IconProps } from "."
-import { ThemeProvider } from "core/theme"
+import { ThemeProvider } from "@livedoc/core/theme"
 
 export class IconError implements IconCollection {
    draw(props: IconProps, theme: ThemeProvider) {

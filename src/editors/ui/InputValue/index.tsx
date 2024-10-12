@@ -1,11 +1,11 @@
 import React from 'react'
 import { EditionContext, EditionController, EditorMenu, IEditorProvider, ValueProps, sortMatchedControllers } from '..'
-import openContextualMenu, { Menu } from 'editors/ui/openContextualMenu'
-import Icon from 'core/ui/Icon'
+import openContextualMenu, { Menu } from '@livedoc/editors/ui/openContextualMenu'
+import Icon from '@livedoc/core/ui/Icon'
 import "./index.scss"
 import { DropZone } from '../DragAndDrop'
 import { ValueMenu } from '../ValueMenu'
-import { useAsyncState } from 'editors/hooks/useAsyncState'
+import { useAsyncState } from '@livedoc/editors/hooks/useAsyncState'
 
 function NoInput(): JSX.Element {
    return <>unsupported</>
@@ -69,9 +69,9 @@ export default function ValueInput(props: ValueProps & {
 
       return (<>
          <DropZone
-            className='InSlick-ValueInput'
-            highlightClassName='InSlick-ValueInput DropHightlight'
-            selectedClassName='InSlick-ValueInput DropHover'
+            className='LDX-ValueInput'
+            highlightClassName='LDX-ValueInput DropHightlight'
+            selectedClassName='LDX-ValueInput DropHover'
             onDrop={handleDropWindow}
          >
             <Icon name={ctl.icon} className="Icon" onClick={onSelectMenu} />

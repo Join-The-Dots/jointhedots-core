@@ -32,8 +32,8 @@ import useModal from '../../hooks/useModal';
 import Button from '../../../ui/Button';
 import { docFromHash, docToHash } from '../../utils/docSerialization';
 import { SPEECH_TO_TEXT_COMMAND, SUPPORT_SPEECH_RECOGNITION } from '../../plugins/SpeechToTextPlugin';
-import DropDown, { DropDownItem } from 'editors/lexical/ui/DropDown';
-import { useSettings } from 'editors/lexical/context/SettingsContext';
+import DropDown, { DropDownItem } from '@livedoc/editors/lexical/ui/DropDown';
+import { useSettings } from '@livedoc/editors/lexical/context/SettingsContext';
 
 async function sendEditorState(editor: LexicalEditor): Promise<void> {
   const stringifiedEditorState = JSON.stringify(editor.getEditorState());

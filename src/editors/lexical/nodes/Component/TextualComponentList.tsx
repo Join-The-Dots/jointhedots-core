@@ -4,10 +4,10 @@ import { INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/react/LexicalHorizontal
 import { $createHeadingNode, $createQuoteNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { $createParagraphNode, $getSelection, $isRangeSelection, FORMAT_ELEMENT_COMMAND } from 'lexical';
-import { ComponentPublication, IComponentProvider } from 'core/library/interfaces';
-import { MapLike } from 'core/common';
-import { ComponentsRegistry } from 'core/library';
-import { CombinedComponentProvider, MemoryComponentProvider } from 'core/library/handlers/component-provider';
+import { ComponentPublication, IComponentProvider } from '@livedoc/core/library/interfaces';
+import { MapLike } from '@livedoc/core/common';
+import { ComponentsRegistry } from '@livedoc/core/library';
+import { CombinedComponentProvider, MemoryComponentProvider } from '@livedoc/core/library/handlers/component-provider';
 
 type TextualComponentEntry = Partial<ComponentPublication> & {
    onSelect: (editor) => void

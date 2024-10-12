@@ -1,11 +1,11 @@
 import React from 'react'
 import * as monaco from "monaco-editor"
-import Button from 'editors/ui/ButtonIcon'
+import Button from '@livedoc/editors/ui/ButtonIcon'
 import "./style.scss"
 import { toast } from 'react-toastify'
-import { EditionContext, IEditionOperation } from 'editors/ui'
-import { stringifyDescriptor } from 'core/ast/schema/json'
-import { JSONSchema } from 'core/ast/schema'
+import { EditionContext, IEditionOperation } from '@livedoc/editors/ui'
+import { stringifyDescriptor } from '@livedoc/core/ast/schema/json'
+import { JSONSchema } from '@livedoc/core/ast/schema'
 
 type PropsType = {
    typing: JSONSchema

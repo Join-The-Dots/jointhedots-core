@@ -1,6 +1,6 @@
 import React from "react"
 import { Button } from "react-bootstrap"
-import Icon from "core/ui/Icon"
+import Icon from "@livedoc/core/ui/Icon"
 import { SerializedEditorState } from "lexical"
 import { DocumentEditor } from "./Editor"
 import { DocumentViewer } from "./Viewer"

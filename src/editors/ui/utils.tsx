@@ -1,7 +1,7 @@
 import { EditionController, EditorValueMatch, IEditionContext, IEditionOperation, IEditorProvider } from "."
-import { MapLike } from "core/common"
-import { JSONSchema } from "core/ast/schema"
-import * as AST from 'core/ast/nodes'
+import { MapLike } from "@livedoc/core/common"
+import { JSONSchema } from "@livedoc/core/ast/schema"
+import * as AST from '@livedoc/core/ast/nodes'
 
 export abstract class DescriptorEditionContext implements IEditionContext {
    operations = new Set<IEditionOperation>

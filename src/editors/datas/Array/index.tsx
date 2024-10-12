@@ -1,11 +1,11 @@
 import React from 'react'
-import { ValueProps, EditorDescriptor, EditorValueMatch } from "editors/ui"
-import { Schema, CommonTypes } from 'core/ast/schema/helpers'
-import { ArrayTable } from 'editors/ui/TableArray'
+import { ValueProps, EditorDescriptor, EditorValueMatch } from "@livedoc/editors/ui"
+import { Schema, CommonTypes } from '@livedoc/core/ast/schema/helpers'
+import { ArrayTable } from '@livedoc/editors/ui/TableArray'
 import { DataEditors } from '..'
-import { ExpandableInputHOC } from 'editors/ui/InputExpandable'
-import { createValueFromTyping } from 'core/ast/producer'
-import { JSONSchema } from 'core/ast/schema'
+import { ExpandableInputHOC } from '@livedoc/editors/ui/InputExpandable'
+import { createValueFromTyping } from '@livedoc/core/ast/producer'
+import { JSONSchema } from '@livedoc/core/ast/schema'
 
 function ArrayEditor(props: ValueProps) {
    const { value, typing, onChange } = props

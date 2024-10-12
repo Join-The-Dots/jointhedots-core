@@ -1,5 +1,5 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { transformEditorStateToMarkdown } from "editors/lexical/markdown/markdown-to-lexical";
+import { transformEditorStateToMarkdown } from "@livedoc/editors/lexical/markdown/markdown-to-lexical";
 import { useEffect, useState } from "react";
 
 export function MarkdownViewPlugin() {

@@ -5,7 +5,7 @@ export class ErrorDisplayer extends React.Component {
    render() {
       const { error, onRetry } = this.props
       const message = `${error.name}: ${error.message}`
-      return <div className="InSlick-Instrumentation-Error" title={message}>
+      return <div className="LDX-Instrumentation-Error" title={message}>
          <pre className="msg">
             {message}
          </pre>

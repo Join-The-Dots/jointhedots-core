@@ -1,6 +1,6 @@
-import { ComponentsRegistry } from "core/library"
-import * as AST from "core/ast/nodes"
-import { MapLike } from "core/common"
+import { ComponentsRegistry } from "@livedoc/core/library"
+import * as AST from "@livedoc/core/ast/nodes"
+import { MapLike } from "@livedoc/core/common"
 import { emitASTFromValue } from "./producer"
 import { EmptyScope, evaluateExpression } from "./interpreter"
 

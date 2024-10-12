@@ -1,5 +1,5 @@
 import React from "react"
-import Listenable from "components/Events/listenable"
+import Listenable from "../Events/listenable"
 
 export type PropsType = {
    object: Listenable,

@@ -21,8 +21,11 @@
     "outDir": "dist/lib",
     "jsx": "react-jsx",
     "paths": {
-      "*": [
-        "src/*"
+      "@livedoc/core/*": [
+        "src/core/*"
+      ],
+      "@livedoc/editors/*": [
+        "src/editors/*"
       ]
     },
     "plugins": [

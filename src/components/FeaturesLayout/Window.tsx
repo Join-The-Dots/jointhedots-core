@@ -1,10 +1,10 @@
 /* eslint-disable no-use-before-define */
 import React, { Component } from "react"
 import ReactDOMClient from "react-dom/client"
-import Listenable from "components/Events/listenable"
-import Icon from "core/ui/Icon"
+import Listenable from "../Events/listenable"
+import Icon from "@livedoc/core/ui/Icon"
 import { FeatureClass, FeatureInstance } from "./Feature"
-import { ErrorBoundary } from "core/ui/ErrorBoundary"
+import { ErrorBoundary } from "@livedoc/core/ui/ErrorBoundary"
 import { FeaturesContext, ReactFeaturesContext } from "./Context"
 
 export type WindowDescriptor = {

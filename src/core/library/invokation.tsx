@@ -1,10 +1,10 @@
 
-import { ComponentManifest, ComponentsRegistry } from "core/library"
+import { ComponentManifest, ComponentsRegistry } from "@livedoc/core/library"
 import React, { ReactElement, useEffect, useState } from "react"
 import { MapLike } from "typescript"
 import { JSONSchema } from "./JSONSchema"
 import { useLocation } from "react-router-dom"
-import { ErrorDisplayer } from "core/ui/ErrorBoundary"
+import { ErrorDisplayer } from "@livedoc/core/ui/ErrorBoundary"
 import qs from 'query-string';
 
 export type ViewDescriptor = {

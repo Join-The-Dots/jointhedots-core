@@ -1,7 +1,7 @@
 import React from 'react'
 import { IEditorProvider, ValueProps } from '..'
 import "./index.scss"
-import { useAsyncState } from 'editors/hooks/useAsyncState'
+import { useAsyncState } from '@livedoc/editors/hooks/useAsyncState'
 
 function NoPanel(): JSX.Element {
    return <>unsupported</>
@@ -24,7 +24,7 @@ export default function ValueEditor(props: ValueProps & {
       let View = ctl.editor?.panels?.main?.view
       if (!View) View = ctl.editor?.input
       if (!View) View = NoPanel
-      return (<div className="InSlick-ValueEditor">
+      return (<div className="LDX-ValueEditor">
          <View {...props} typing={typing} value={value} />
       </div>)
    }

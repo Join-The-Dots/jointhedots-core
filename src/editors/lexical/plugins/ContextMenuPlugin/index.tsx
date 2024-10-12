@@ -12,7 +12,7 @@ import {
   LexicalContextMenuPlugin,
   MenuOption,
 } from '@lexical/react/LexicalContextMenuPlugin';
-import { openDialog } from 'editors/ui/openDialog';
+import { openDialog } from '@livedoc/editors/ui/openDialog';
 import {
   $getNearestNodeFromDOMNode,
   $getSelection,
@@ -22,7 +22,7 @@ import {
   type LexicalNode,
   PASTE_COMMAND,
 } from 'lexical';
-import { ComponentViewDialog } from 'editors/lexical/nodes/Component/ComponentViewDialog'
+import { ComponentViewDialog } from '@livedoc/editors/lexical/nodes/Component/ComponentViewDialog'
 import {useCallback, useMemo} from 'react';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';

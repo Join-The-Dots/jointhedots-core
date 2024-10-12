@@ -1,5 +1,5 @@
 import React from 'react'
-import Icon from 'core/ui/Icon'
+import Icon from '@livedoc/core/ui/Icon'
 import "./index.scss"
 
 export function ExpendableNode(props: {
@@ -18,7 +18,7 @@ export function ExpendableNode(props: {
    else if (open) iconName = "code:tree/closable"
    else iconName = "code:tree/openable"
 
-   return (<div className="InSlick-ExpendableNode">
+   return (<div className="LDX-ExpendableNode">
       <span className="Label" title={title} onClick={entire && swapOpen}>
          <Icon name={iconName} onClick={swapOpen} />
          {label}

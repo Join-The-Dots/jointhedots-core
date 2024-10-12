@@ -1,6 +1,6 @@
 import React from "react"
 import { IconError } from "./IconError"
-import { ThemeContext, ThemeProvider } from "core/theme"
+import { ThemeContext, ThemeProvider } from "@livedoc/core/theme"
 import { IconUrlCollection } from "./IconUrlCollection"
 
 export interface IconCollection {

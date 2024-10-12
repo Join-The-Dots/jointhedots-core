@@ -1,4 +1,4 @@
-import { MapLike } from "core/common"
+import { MapLike } from "@livedoc/core/common"
 import { JSONSchema } from "./schema"
 import * as Acorn from "acorn"
 import * as AcornJsx from "./jsx/nodes"

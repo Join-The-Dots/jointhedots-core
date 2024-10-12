@@ -67,7 +67,7 @@ import useModal from '../../hooks/useModal';
 import CommentEditorTheme from '../../themes/CommentEditorTheme';
 import Button from '../../../ui/Button';
 import ContentEditable from '../../ui/ContentEditable';
-import { useSettings } from 'editors/lexical/context/SettingsContext';
+import { useSettings } from '@livedoc/editors/lexical/context/SettingsContext';
 
 export const INSERT_INLINE_COMMAND: LexicalCommand<void> = createCommand(
   'INSERT_INLINE_COMMAND',

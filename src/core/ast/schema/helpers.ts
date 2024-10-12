@@ -1,4 +1,4 @@
-import { MapLike } from "core/common"
+import { MapLike } from "@livedoc/core/common"
 import { JSONSchema7TypeName } from "json-schema"
 import { JSONSchema } from "."
 

@@ -78,7 +78,7 @@ import { getSelectedNode } from '../../utils/getSelectedNode';
 import { sanitizeUrl } from '../../utils/url';
 import FontSize from './fontSize';
 import ActionsToolbar from './Toolbox.Actions';
-import { SAVE_CONTENT_COMMAND } from 'editors/lexical/editor/commands';
+import { SAVE_CONTENT_COMMAND } from '@livedoc/editors/lexical/editor/commands';
 import { InsertToolbox } from './Toolbox.Insert';
 
 const blockTypeToBlockName = {

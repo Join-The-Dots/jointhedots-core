@@ -1,4 +1,4 @@
-import { MapLike } from "core/common"
+import { MapLike } from "@livedoc/core/common"
 
 export function useLocationQuery(): MapLike<string> {
    const { search } = window.location

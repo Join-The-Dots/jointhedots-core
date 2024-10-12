@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-import Listenable from "components/Events/listenable"
+import Listenable from "../Events/listenable"
 import { WindowClass, WindowDescriptor } from "./Window"
 import { FeaturesContext } from "./Context"
 

@@ -1,4 +1,4 @@
-.InSlick-ValuePanel {
+.LDX-ValuePanel {
   display: flex;
   flex-direction: column;
 
@@ -9,7 +9,7 @@
     color: var(--app-shadow-foreground);
   }
 
-  &>.InSlick-Tabs {
+  &>.LDX-Tabs {
     flex: 1;
     overflow: hidden;
   }

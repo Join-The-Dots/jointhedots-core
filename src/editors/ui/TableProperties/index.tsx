@@ -1,9 +1,9 @@
 import React from 'react'
-import { CommonTypes, Schema } from 'core/ast/schema/helpers'
-import { MapLike } from 'core/common'
-import { EditorMenu, IEditorProvider } from 'editors/ui'
-import { DocumentationSchema, JSONSchema } from 'core/ast/schema'
-import ValueInput from 'editors/ui/InputValue'
+import { CommonTypes, Schema } from '@livedoc/core/ast/schema/helpers'
+import { MapLike } from '@livedoc/core/common'
+import { EditorMenu, IEditorProvider } from '@livedoc/editors/ui'
+import { DocumentationSchema, JSONSchema } from '@livedoc/core/ast/schema'
+import ValueInput from '@livedoc/editors/ui/InputValue'
 import "./index.scss"
 
 type SectionsMap = {
@@ -126,7 +126,7 @@ export function PropertyRows(props: {
 export function PropertyTable(props: {
    children?: any
 }) {
-   return (<div className="InSlick-PropertiesTable">
+   return (<div className="LDX-PropertiesTable">
       {props.children}
    </div>)
 }

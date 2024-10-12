@@ -1,6 +1,6 @@
 import React from "react"
 import ReactDOMClient from 'react-dom/client'
-import Stack from "editors/ui/Stack"
+import Stack from "@livedoc/editors/ui/Stack"
 import "./style.scss"
 
 const modalStack = []

@@ -1,5 +1,5 @@
 import React from 'react'
-import Icon from 'core/ui/Icon'
+import Icon from '@livedoc/core/ui/Icon'
 import "./index.scss"
 
 export default function Button(props: {
@@ -7,7 +7,7 @@ export default function Button(props: {
    secondary?: boolean
    onClick: any
 }) {
-   return (<div className={props.secondary ? "InSlick-Button secondary" : "InSlick-Button primary"} onClick={props.onClick}>
+   return (<div className={props.secondary ? "LDX-Button secondary" : "LDX-Button primary"} onClick={props.onClick}>
       <Icon name={props.name} />
    </div>)
 }

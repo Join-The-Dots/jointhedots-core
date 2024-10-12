@@ -1,5 +1,5 @@
-import { MapLike } from "core/common"
-import { ComponentPublication } from "core/library/interfaces"
+import { MapLike } from "@livedoc/core/common"
+import { ComponentPublication } from "@livedoc/core/library/interfaces"
 
 export function getComponentGroupName(id: string) {
    const pos = id.lastIndexOf(":")

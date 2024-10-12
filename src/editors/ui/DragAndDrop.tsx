@@ -1,5 +1,5 @@
 import React from "react"
-import { MapLike } from "core/common"
+import { MapLike } from "@livedoc/core/common"
 import { stopPropagation } from "./event.utils"
 
 export type DragPropsType = {

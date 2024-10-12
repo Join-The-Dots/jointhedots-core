@@ -23,7 +23,7 @@ export function TabsBar(props: {
          {items[key].tab}
       </div>)
    }
-   return (<div className={atBottom ? "InSlick-TabsBar atBottom" : "InSlick-TabsBar atTop"}>
+   return (<div className={atBottom ? "LDX-TabsBar atBottom" : "LDX-TabsBar atTop"}>
       {list}
    </div>)
 }
@@ -42,7 +42,7 @@ export function Tabs(props: {
       selection={selection}
       onSelection={onSelect}
    />
-   return (<div className="InSlick-Tabs">
+   return (<div className="LDX-Tabs">
       {!atBottom && bar}
       <div className="content">
          {item?.content}

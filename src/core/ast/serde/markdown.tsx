@@ -1,5 +1,5 @@
 import { JSXElement, JSXExpressionContainer, JSXFragment, JSXIdentifier, JSXMemberExpression, JSXNamespacedName, JSXText } from "../jsx/nodes"
-import { MapLike } from "core/common"
+import { MapLike } from "@livedoc/core/common"
 import * as Astring from 'astring'
 import * as AstringJsx from "../jsx/generator"
 import { acornJsx } from "../jsx/parser"

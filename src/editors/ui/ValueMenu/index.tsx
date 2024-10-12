@@ -1,8 +1,8 @@
 import React from 'react'
-import { Menu } from 'editors/ui/openContextualMenu'
-import { EditionController, EditorMenu, EditorMenuItem, IEditionContext, ValueProps } from 'editors/ui'
-import { stringifyDescriptor } from 'core/ast/schema/json'
-import { convertTextToExpression } from 'core/ast/producer'
+import { Menu } from '@livedoc/editors/ui/openContextualMenu'
+import { EditionController, EditorMenu, EditorMenuItem, IEditionContext, ValueProps } from '@livedoc/editors/ui'
+import { stringifyDescriptor } from '@livedoc/core/ast/schema/json'
+import { convertTextToExpression } from '@livedoc/core/ast/producer'
 
 export function ValueMenu(props: ValueProps & { menu?: EditorMenu, context: IEditionContext, ctl: EditionController, onClose: () => void }) {
    const { ctl, context, menu, value, typing, onChange, onClose } = props

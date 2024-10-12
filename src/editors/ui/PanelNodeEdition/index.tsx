@@ -1,15 +1,15 @@
 import React from 'react'
 import { toast } from 'react-toastify'
-import Icon from 'core/ui/Icon'
+import Icon from '@livedoc/core/ui/Icon'
 import { JsonInput } from '../InputJson'
-import { Tabs } from 'editors/ui/Tabs'
+import { Tabs } from '@livedoc/editors/ui/Tabs'
 import { EditionController, EditionContext, IEditorProvider, ValueProps } from '..'
-import Stack from 'editors/ui/Stack'
+import Stack from '@livedoc/editors/ui/Stack'
 import "./index.scss"
-import Button from 'editors/ui/ButtonIcon'
-import openContextualMenu from 'editors/ui/openContextualMenu'
+import Button from '@livedoc/editors/ui/ButtonIcon'
+import openContextualMenu from '@livedoc/editors/ui/openContextualMenu'
 import { ValueMenu } from '../ValueMenu'
-import { useAsyncState } from 'editors/hooks/useAsyncState'
+import { useAsyncState } from '@livedoc/editors/hooks/useAsyncState'
 
 function ValueHeading(props: ValueProps & { ctl: EditionController }) {
    const { ctl, name, value } = props
@@ -66,7 +66,7 @@ export default function ValuePanel(props: ValueProps & {
          const panel = panels[name]
          tabs[name] = {
             tab: <Icon name={panel.icon || "code:/editor"} />,
-            content: <div className="InSlick-ValueEditor">
+            content: <div className="LDX-ValueEditor">
                <panel.view
                   value={value}
                   typing={typing}
@@ -79,7 +79,7 @@ export default function ValuePanel(props: ValueProps & {
    else if (ctl.editor.input) {
       tabs["main"] = {
          tab: <Icon name={"code:/editor"} />,
-         content: <div className="InSlick-ValueEditor">
+         content: <div className="LDX-ValueEditor">
             <ctl.editor.input
                value={value}
                typing={typing}
@@ -97,7 +97,7 @@ export default function ValuePanel(props: ValueProps & {
       />,
    }
 
-   return (<div className={"InSlick-ValuePanel " + (className || "")}>
+   return (<div className={"LDX-ValuePanel " + (className || "")}>
       <ValueHeading {...props} ctl={ctl} />
       <Tabs
          // atBottom

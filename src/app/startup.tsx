@@ -1,15 +1,15 @@
 import ReactDOM from 'react-dom/client'
 import { toast, ToastContainer } from "react-toastify"
-import "components/icons-vscode"
-import "components/icons-fontawesome"
-import "components/icons-bootstrap"
-import "core/theme"
+import "../components/icons-vscode"
+import "../components/icons-fontawesome"
+import "../components/icons-bootstrap"
+import "@livedoc/core/theme"
 import 'react-toastify/dist/ReactToastify.css'
 import "./style.scss"
 
 import doc_mdx from "../samples/Livedoc4.txt"
 import { useState } from 'react'
-import { DocumentEditable } from 'editors/lexical'
+import { DocumentEditable } from '@livedoc/editors/lexical'
 
 function getDocumentState(id: string) {
    try {

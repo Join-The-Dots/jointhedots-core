@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { createContext, useContext } from 'react';
-import { useLocalStorage } from 'editors/hooks/useLocalStorage';
+import { useLocalStorage } from '@livedoc/editors/hooks/useLocalStorage';
 
 export type SettingsType = {
   isAutocomplete: boolean
