@@ -86,7 +86,11 @@ let timer: any = 0
 const InstrumentationEvents = new EventEmitter()
 
 function zoneUpdate() {
-   if (selectedZone) selectedZone.renderOverlay(zoneSelectedRenderer, zoneSelectedParentRenderer)
+   if (selectedZone) {
+      requestAnimationFrame(() => {
+         selectedZone?.renderOverlay(zoneSelectedRenderer, zoneSelectedParentRenderer)
+      })
+   }
 }
 function zoneSelectedRenderer(sel: DOMSelection) {
    sel.element.className = "LDX-Overlay-Selected"
@@ -107,7 +111,9 @@ function zoneHoverRenderer(sel: DOMSelection) {
 }
 
 export function registerZone(target: ElementInstrumentation) {
-   if (zones.size === 0) timer = setInterval(zoneUpdate, 100)
+   if (zones.size === 0) {
+      timer = setInterval(zoneUpdate, 25)
+   }
    zones.add(target)
    InstrumentationEvents.emit("RegisterZone", target)
 }
@@ -115,7 +121,10 @@ export function registerZone(target: ElementInstrumentation) {
 export function unregisterZone(target: ElementInstrumentation) {
    zones.delete(target)
    InstrumentationEvents.emit("UnregisterZone", target)
-   if (zones.size === 0) clearInterval(timer)
+   if (zones.size === 0) {
+      clearInterval(timer)
+      timer = 0
+   }
 }
 
 export function executeZoneCommand(target: ElementInstrumentation, cmd: ElementCommand) {
@@ -244,8 +253,7 @@ export const EventHandlers = {
                expression: ctl.getDescriptor(),
                origin: ctl.getLocation(),
             }
-            if (data) objectToDataTransfert(data, e.dataTransfer)
-            //e.preventDefault()
+            objectToDataTransfert(data, e.dataTransfer)
             e.stopPropagation()
          }
       }
@@ -253,9 +261,14 @@ export const EventHandlers = {
    },
    onZoneDragOver(e: DragEvent) {
       const hovered = DOMSelection.computeElementSelection(e.target as HTMLElement, overlay)
-      highligthZone(hovered, zoneDragOverRenderer)
-      e.preventDefault()
-      e.stopPropagation()
+      if (hovered) {
+         highligthZone(hovered, zoneDragOverRenderer)
+         e.preventDefault()
+         e.stopPropagation()
+      }
+      else {
+         unhighligthZone()
+      }
    },
    onZoneDragLeave(e: DragEvent) {
       const relatedTarget = e.relatedTarget

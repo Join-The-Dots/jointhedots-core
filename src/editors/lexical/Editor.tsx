@@ -27,7 +27,7 @@ import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin'
 import CodeHighlightPlugin from './plugins/CodeHighlightPlugin'
 import CollapsiblePlugin from './nodes/Collapsible/CollapsiblePlugin'
 import CommentPlugin from './plugins/CommentPlugin'
-import { ComponentPickerMenuPlugin } from './nodes/Component/ComponentPickerMenuPlugin'
+import { ComponentPluginPickerMenu } from './nodes/Component/ComponentPluginPickerMenu'
 import ContextMenuPlugin from './plugins/ContextMenuPlugin'
 import DragDropPaste from './plugins/DragDropPastePlugin'
 import DraggableBlockPlugin from './plugins/DraggableBlockPlugin'
@@ -59,7 +59,7 @@ import TreeViewPlugin from './editor/TreeViewPanel'
 import TwitterPlugin from './nodes/Twitter/TweetPlugin'
 import YouTubePlugin from './nodes/YouTube/YouTubePlugin'
 import ContentEditable from './ui/ContentEditable'
-import { LexicalEditor } from 'lexical'
+import { $getSelection, $isNodeSelection, CLICK_COMMAND, COMMAND_PRIORITY_LOW, DRAGEND_COMMAND, DRAGOVER_COMMAND, DRAGSTART_COMMAND, DROP_COMMAND, KEY_DELETE_COMMAND, LexicalEditor } from 'lexical'
 import { InitialConfigType, LexicalComposer } from '@lexical/react/LexicalComposer'
 import { SAVE_CONTENT_COMMAND } from './editor/commands'
 import PlaygroundNodes from './nodes/PlaygroundNodes'
@@ -68,10 +68,14 @@ import { TableContext } from './nodes/Table/TablePlugin'
 import { SharedAutocompleteContext } from './context/SharedAutocompleteContext'
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme'
 import { MarkdownViewPlugin } from './editor/MarkdownViewPanel'
-import { MARKDOWN_TRANSFORMERS } from './markdown/markdown-transformers'
-import { $updateEditorStateFromMarkdown, transformEditorStateToMarkdown } from '@livedoc/editors/lexical/markdown/markdown-to-lexical'
+import { $updateEditorStateFromMarkdown, MARKDOWN_TRANSFORMERS, transformEditorStateToMarkdown } from '@livedoc/editors/lexical/markdown/markdown-to-lexical'
 import "./index.css"
 import { InstrumentationSupport } from '@livedoc/core/ui/Instrumentation/InstrumentationSupport'
+import { EventHandlers } from '@livedoc/core/ui/Instrumentation'
+import { mergeRegister } from '@lexical/utils'
+import { ComponentNode } from './nodes/Component/ComponentNode'
+import { RIGHT_CLICK_IMAGE_COMMAND } from './nodes/Images/ImageComponent'
+import ComponentPluginDragDrop from './nodes/Component/ComponentPluginDragDrop'
 
 function Editor(): JSX.Element {
   const { historyState } = useSharedHistoryContext()
@@ -115,7 +119,8 @@ function Editor(): JSX.Element {
         <DragDropPaste />
         <AutoFocusPlugin />
         <ClearEditorPlugin />
-        <ComponentPickerMenuPlugin />
+        <ComponentPluginPickerMenu />
+        <ComponentPluginDragDrop />
         <EmojiPickerPlugin />
         <AutoEmbedPlugin />
 
@@ -238,6 +243,53 @@ export function DocumentEditor(props: {
       $updateEditorStateFromMarkdown(content)
     })
   }, [content, editor])
+
+
+  useEffect(() => {
+    if (editor) {
+      return mergeRegister(
+        editor.registerCommand(
+          DRAGSTART_COMMAND,
+          EventHandlers.onZoneDragStart as any,
+          COMMAND_PRIORITY_LOW,
+        ),
+        editor.registerCommand(
+          DRAGOVER_COMMAND,
+          EventHandlers.onZoneDragOver as any,
+          COMMAND_PRIORITY_LOW,
+        ),
+        editor.registerCommand(
+          DRAGEND_COMMAND,
+          EventHandlers.onZoneDragLeave as any,
+          COMMAND_PRIORITY_LOW,
+        ),
+        editor.registerCommand(
+          DROP_COMMAND,
+          EventHandlers.onZoneDrop as any,
+          COMMAND_PRIORITY_LOW,
+        ),
+        editor.registerCommand(
+          KEY_DELETE_COMMAND,
+          (payload: KeyboardEvent) => {
+            const deleteSelection = $getSelection();
+            if ($isNodeSelection(deleteSelection)) {
+              const event: KeyboardEvent = payload;
+              event.preventDefault();
+              editor.update(() => {
+                deleteSelection.getNodes().forEach((node) => {
+                  if (node instanceof ComponentNode) {
+                    node.remove();
+                  }
+                });
+              });
+            }
+            return false;
+          },
+          COMMAND_PRIORITY_LOW,
+        ),
+      )
+    }
+  }, [editor])
 
   return <ManageSettings id="settings:lexical-editor">
     <FlashMessageContext>

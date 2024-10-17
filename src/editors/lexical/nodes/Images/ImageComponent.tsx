@@ -53,7 +53,7 @@ import {Suspense, useCallback, useEffect, useRef, useState} from 'react';
 
 import {createWebsocketProvider} from '../../editor/collaboration';
 import {useSharedHistoryContext} from '../../context/SharedHistoryContext';
-import brokenImage from '../../images/image-broken.svg';
+import brokenImage from './images/image-broken.svg';
 import EmojisPlugin from '../Emojis/EmojisPlugin';
 import KeywordsPlugin from '../Keywords/KeywordsPlugin';
 import LinkPlugin from '../../plugins/LinkPlugin';

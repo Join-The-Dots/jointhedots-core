@@ -14,7 +14,6 @@ import { openDialog } from '@livedoc/editors/ui/openDialog';
 import { insertComponentDialog } from './ComponentViewDialog';
 import { PanelNodeCreation } from '@livedoc/editors/ui/PanelNodeCreation';
 import { ComponentsRegistry } from '@livedoc/core/library';
-import { ComponentPublication } from '@livedoc/core/library/interfaces';
 import { Menu } from '@livedoc/editors/ui/openContextualMenu';
 import { getComponentGroupName } from '@livedoc/editors/common/pub-helpers';
 
@@ -61,7 +60,7 @@ function getDynamicOptions(editor: LexicalEditor, queryString: string) {
   return options;
 }
 
-export function ComponentPickerMenuPlugin(): JSX.Element {
+export function ComponentPluginPickerMenu(): JSX.Element {
   const [editor] = useLexicalComposerContext();
   const [modal, showModal] = useModal();
   const [options, setOptions] = useState(null);
@@ -101,25 +100,6 @@ export function ComponentPickerMenuPlugin(): JSX.Element {
       setOptions(options)
     })
   }, [editor, queryString, showModal]);
-
-  const onSelect = (entry: ComponentPublication) => {
-    const apply = TextualComponentSelect[entry.component_id]
-    if (!apply) {
-      const component = ComponentsRegistry.acquireComponent(entry.component_id)
-      openDialog<void>((onClose) => {
-        return <PanelNodeCreation
-          service='view'
-          component={component}
-          onComplete={async (data) => {
-            await insertComponentDialog(editor, entry.component_id, data)
-            onClose()
-          }}
-          onCancel={onClose}
-        />
-      });
-    }
-    else apply(editor)
-  }
 
   const onSelectOption = useCallback(
     (

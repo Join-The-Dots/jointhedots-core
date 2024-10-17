@@ -1,29 +1,41 @@
-import { Transformer, $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown'
-import { EditorState, $getRoot, ElementNode, $applyNodeReplacement } from 'lexical'
-import { TRANSFORMERS } from '@lexical/markdown'
-import { MARKDOWN_TRANSFORMERS } from '@livedoc/editors/lexical/markdown/markdown-transformers'
-import { deserialize_jsx_document } from '@livedoc/core/ast/serde/markdown'
+import { Transformer, $convertFromMarkdownString, $convertToMarkdownString, ElementTransformer, TextMatchTransformer, CHECK_LIST, ELEMENT_TRANSFORMERS, MULTILINE_ELEMENT_TRANSFORMERS, TEXT_FORMAT_TRANSFORMERS, TEXT_MATCH_TRANSFORMERS } from '@lexical/markdown'
+import { EditorState, $getRoot, ElementNode, $applyNodeReplacement, LexicalNode } from 'lexical'
+import { deserialize_jsx_document, stringify_node_jsx } from '@livedoc/core/ast/serde/markdown'
 import { ComponentNode } from '../nodes/Component/ComponentNode'
 import * as AST from "@livedoc/core/ast/nodes"
 import { evaluateJSXElementData } from '@livedoc/core/ast/evaluate'
+
+export const MARKDOWN_TRANSFORMERS: Transformer[] = [
+   CHECK_LIST,
+   ...ELEMENT_TRANSFORMERS,
+   ...MULTILINE_ELEMENT_TRANSFORMERS,
+   ...TEXT_FORMAT_TRANSFORMERS,
+   ...TEXT_MATCH_TRANSFORMERS,
+]
+
+export function registerMarkdownTransformer(transformer: TextMatchTransformer | ElementTransformer) {
+   MARKDOWN_TRANSFORMERS.unshift(transformer)
+}
+
+export function exportAstToMarkdown(node: LexicalNode) {
+   if (node["exportAST"] instanceof Function) {
+      const ast = node["exportAST"]()
+      return stringify_node_jsx(ast)
+   }
+}
 
 export function transformEditorStateToMarkdown(editorState: EditorState, shouldPreserveNewLinesInMarkdown = true): string {
 
    const COMPONENT_TRANSFORMER: Transformer = {
       type: "element",
-      export(node: ElementNode) {
-         if (node instanceof ComponentNode) {
-            return node.generateJSX()
-         }
-      },
+      export: exportAstToMarkdown,
       replace: null,
       regExp: null,
-      dependencies: [ComponentNode],
+      dependencies: [ElementNode],
    }
 
-   const markdownTransformers: typeof TRANSFORMERS = [
+   const markdownTransformers: typeof MARKDOWN_TRANSFORMERS = [
       COMPONENT_TRANSFORMER,
-      ...TRANSFORMERS,
       ...MARKDOWN_TRANSFORMERS,
    ]
 
@@ -56,9 +68,8 @@ export function $updateEditorStateFromMarkdown(content: string, shouldPreserveNe
       dependencies: [],
    }
 
-   const markdownTransformers: typeof TRANSFORMERS = [
+   const markdownTransformers: typeof MARKDOWN_TRANSFORMERS = [
       COMPONENT_TRANSFORMER,
-      ...TRANSFORMERS,
       ...MARKDOWN_TRANSFORMERS,
    ]
 

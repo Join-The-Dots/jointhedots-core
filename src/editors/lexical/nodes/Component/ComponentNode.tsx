@@ -3,47 +3,68 @@ import { stringify_node_jsx } from '@livedoc/core/ast/serde/markdown'
 import { InvokeView } from '@livedoc/core/library/invokation'
 import { DisplayInfos, ElementBoundingBox, ElementController, InstrumentationLayout } from '@livedoc/core/ui/Instrumentation'
 import { InstrumentationZone } from '@livedoc/core/ui/Instrumentation/InstrumentationZone'
-import type { EditorConfig, LexicalEditor, NodeKey } from 'lexical'
-import { DecoratorNode } from 'lexical'
+import type { EditorConfig, LexicalEditor, NodeKey, SerializedEditor, SerializedLexicalNode, Spread } from 'lexical'
+import { $getEditor, DecoratorNode } from 'lexical'
+
+export type SerializedComponentNode = Spread<
+    {
+        descriptor: JSXElementData
+    },
+    SerializedLexicalNode
+>
 
 export class ComponentNode extends DecoratorNode<JSX.Element> implements ElementController {
-    descriptor: JSXElementData
+    __descriptor: JSXElementData
 
     static getType(): string {
         return 'component'
     }
 
     static clone(node: ComponentNode): ComponentNode {
-        return new ComponentNode(node.descriptor, node.__key)
+        return new ComponentNode(node.__descriptor, node.__key)
     }
 
     constructor(descriptor: JSXElementData, key?: NodeKey) {
         super(key)
-        this.descriptor = descriptor
+        this.__descriptor = descriptor
     }
 
     createDOM(_config: EditorConfig): HTMLElement {
         const element = document.createElement(this.isInline() ? 'span' : 'div')
+        element.draggable = $getEditor().isEditable()
         return element
     }
 
     updateDOM(prevNode: ComponentNode): boolean {
-        return this.descriptor !== prevNode.descriptor
+        return this.__descriptor !== prevNode.__descriptor
+    }
+
+    exportJSON(): SerializedComponentNode {
+        return {
+            type: 'component',
+            version: 1,
+            descriptor: this.__descriptor,
+        }
+    }
+
+    static importJSON(serializedNode: SerializedComponentNode): ComponentNode {
+        const { descriptor } = serializedNode
+        const node = new ComponentNode(descriptor)
+        return node
     }
 
     decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
         console.log(editor, config)
         return <InstrumentationZone controller={this}>
             <InvokeView descriptor={{
-                name: this.descriptor.tag,
-                params: this.descriptor.props,
+                name: this.__descriptor.tag,
+                params: this.__descriptor.props,
             }} />
         </InstrumentationZone>
     }
 
-    generateJSX(): string {
-        const ast = emitJSXElementFromData(this.descriptor)
-        return stringify_node_jsx(ast)
+    exportAST() {
+        return emitJSXElementFromData(this.__descriptor)
     }
 
     get layout() {
@@ -54,7 +75,7 @@ export class ComponentNode extends DecoratorNode<JSX.Element> implements Element
     }
     getDisplayInfos(): DisplayInfos {
         return {
-            title: this.descriptor.tag,
+            title: this.__descriptor.tag,
             icon: "bi:puzzle",
         }
     }

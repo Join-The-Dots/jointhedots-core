@@ -8,6 +8,8 @@ This is a **live demo** of MDXEditor with all default features on.
 
 [— Daring Fireball](https://daringfireball.net/projects/markdown/).
 
+![Yellow flower in tilt shift lens](./yellow-flower-R72KOP74.jpg)
+
 ## A code sample
 
 MDXEditor embeds CodeMirror for code editing.

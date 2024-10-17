@@ -14,9 +14,8 @@ import { AutoLinkNode, LinkNode } from '@lexical/link'
 import { ListItemNode, ListNode } from '@lexical/list'
 import { MarkNode } from '@lexical/mark'
 import { OverflowNode } from '@lexical/overflow'
-import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode'
 import { HeadingNode, QuoteNode } from '@lexical/rich-text'
-import { TableCellNode, TableNode, TableRowNode } from '@lexical/table'
+import { TableCellNode, TableNode, TableRowNode } from './Table/TableNode'
 
 import { CollapsibleContainerNode } from './Collapsible/CollapsibleContainerNode'
 import { CollapsibleContentNode } from './Collapsible/CollapsibleContentNode'
@@ -38,6 +37,7 @@ import { StickyNode } from './Sticky/StickyNode'
 import { TweetNode } from './Twitter/TweetNode'
 import { YouTubeNode } from './YouTube/YouTubeNode'
 import { ComponentNode } from './Component/ComponentNode'
+import { HorizontalRuleNode } from './HorizontalRule/HorizontalRuleNode'
 
 const PlaygroundNodes: Array<Klass<LexicalNode>> = [
   HeadingNode,

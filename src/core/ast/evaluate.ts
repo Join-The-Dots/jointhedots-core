@@ -25,6 +25,13 @@ export type JSXElementData = {
    [ns: string]: any
 }
 
+export function emitJSXMarkdownText(text: string): AST.JSXText {
+   return {
+      type: "JSXText",
+      value: text,
+   } as AST.JSXText
+}
+
 export function emitJSXElementFromData(data: JSXElementData): AST.JSXElement {
    const attributes: AST.JSXAttribute[] = []
    for (const ns in data) {
