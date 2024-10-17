@@ -16,6 +16,7 @@ import { PanelNodeCreation } from '@livedoc/editors/ui/PanelNodeCreation';
 import { ComponentsRegistry } from '@livedoc/core/library';
 import { Menu } from '@livedoc/editors/ui/openContextualMenu';
 import { getComponentGroupName } from '@livedoc/editors/common/pub-helpers';
+import { useDocumentContext } from '../../context/DocumentContext';
 
 class ComponentPickerOption extends MenuOption {
   constructor(
@@ -66,6 +67,7 @@ export function ComponentPluginPickerMenu(): JSX.Element {
   const [options, setOptions] = useState(null);
   const [queryString, setQueryString] = useState<string | null>(null);
   const provider = useMemo(getLexicalComponentsProvider, []);
+  const layout = useDocumentContext()
 
   const checkForTriggerMatch = useBasicTypeaheadTriggerMatch('/', {
     minLength: 0,
@@ -84,7 +86,7 @@ export function ComponentPluginPickerMenu(): JSX.Element {
                 service='view'
                 component={component}
                 onComplete={async (data) => {
-                  await insertComponentDialog(editor, entry.component_id, data)
+                  await insertComponentDialog(editor, layout, entry.component_id, data)
                   onClose()
                 }}
                 onCancel={onClose}
@@ -99,7 +101,7 @@ export function ComponentPluginPickerMenu(): JSX.Element {
       })
       setOptions(options)
     })
-  }, [editor, queryString, showModal]);
+  }, [editor, layout, queryString, showModal]);
 
   const onSelectOption = useCallback(
     (

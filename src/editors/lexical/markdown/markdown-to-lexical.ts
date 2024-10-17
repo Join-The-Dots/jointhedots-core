@@ -1,9 +1,8 @@
 import { Transformer, $convertFromMarkdownString, $convertToMarkdownString, ElementTransformer, TextMatchTransformer, CHECK_LIST, ELEMENT_TRANSFORMERS, MULTILINE_ELEMENT_TRANSFORMERS, TEXT_FORMAT_TRANSFORMERS, TEXT_MATCH_TRANSFORMERS } from '@lexical/markdown'
-import { EditorState, $getRoot, ElementNode, $applyNodeReplacement, LexicalNode } from 'lexical'
-import { deserialize_jsx_document, stringify_node_jsx } from '@livedoc/core/ast/serde/markdown'
+import { EditorState, $getRoot, ElementNode, LexicalNode } from 'lexical'
+import { stringify_node_jsx } from '@livedoc/core/ast/serde/markdown'
 import { ComponentNode } from '../nodes/Component/ComponentNode'
-import * as AST from "@livedoc/core/ast/nodes"
-import { evaluateJSXElementData } from '@livedoc/core/ast/evaluate'
+import { LDXDocumentExpr, LDXElementExpr } from '@livedoc/core/interpreter/exprs'
 
 export const MARKDOWN_TRANSFORMERS: Transformer[] = [
    CHECK_LIST,
@@ -50,19 +49,21 @@ export function transformEditorStateToMarkdown(editorState: EditorState, shouldP
    return content
 }
 
-export function $updateEditorStateFromMarkdown(content: string, shouldPreserveNewLinesInMarkdown = true) {
-   const ast = deserialize_jsx_document(content)
-
-   const layout = ast.layout as AST.LDXDocument
+export function $updateEditorStateFromModel(xpr: LDXDocumentExpr) {
 
    const COMPONENT_TRANSFORMER: Transformer = {
       type: "element",
       export: () => null,
       replace: (parentNode, chilren, match, isImport) => {
-         const index = parseInt(match[1])
-         const descriptor = evaluateJSXElementData(layout.items[index] as any)
-         const node = new ComponentNode(descriptor)
-         parentNode.replace(node)
+         const key = match[1]
+         const value = xpr.embeds.get(key)
+         if (value instanceof LDXElementExpr) {
+            const node = new ComponentNode(value)
+            parentNode.replace(node)
+         }
+         else {
+            // TODO: expression embeds
+         }
       },
       regExp: /\x00([0-9]+)\x01/,
       dependencies: [],
@@ -73,19 +74,12 @@ export function $updateEditorStateFromMarkdown(content: string, shouldPreserveNe
       ...MARKDOWN_TRANSFORMERS,
    ]
 
-   const markdown = layout.items.map((chunk, i) => {
-      if (chunk instanceof Object) {
-         return `\x00${i}\x01`
-      }
-      else {
-         return chunk
-      }
-   }).join("\n")
-
    $convertFromMarkdownString(
-      markdown,
+      xpr.markdown,
       markdownTransformers,
       $getRoot(), //node
-      shouldPreserveNewLinesInMarkdown,
+      true,
    )
+
+   return xpr
 }

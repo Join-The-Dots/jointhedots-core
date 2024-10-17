@@ -1,22 +1,15 @@
-import {
-  LexicalEditor,
-} from 'lexical';
+import { LexicalEditor } from 'lexical';
 import DropDown, { DropDownItem } from '../../ui/DropDown';
-import {
-  INSERT_IMAGE_COMMAND,
-  InsertImageDialog,
-  InsertImagePayload,
-} from '../../nodes/Images/ImagesPlugin';
+import { InsertImageDialog } from '../../nodes/Images/ImagesPlugin';
 import { InsertInlineImageDialog } from '../../nodes/InlineImage/InlineImagePlugin';
 import { InsertTableDialog } from '../../nodes/Table/TablePlugin';
 import { openDialog } from '@livedoc/editors/ui/openDialog';
 import { ComponentViewDialog } from '@livedoc/editors/lexical/nodes/Component/ComponentViewDialog'
+import { useDocumentContext } from '../../context/DocumentContext';
 
 export function InsertToolbox(props: { activeEditor: LexicalEditor, editor: LexicalEditor, isEditable: boolean, showModal: any }) {
-  const { activeEditor, editor, isEditable, showModal } = props
-  const insertGifOnClick = (payload: InsertImagePayload) => {
-    activeEditor.dispatchCommand(INSERT_IMAGE_COMMAND, payload);
-  };
+  const { activeEditor, isEditable, showModal } = props
+  const layout = useDocumentContext()
   return <DropDown
     disabled={!isEditable}
     buttonClassName="toolbar-item spaced"
@@ -28,6 +21,7 @@ export function InsertToolbox(props: { activeEditor: LexicalEditor, editor: Lexi
         openDialog<void>((onClose) => {
           return <ComponentViewDialog
             activeEditor={activeEditor}
+            layout={layout}
             onClose={onClose}
           />
         });

@@ -36,9 +36,9 @@ export function stringify_node_json(n: AST.Any) {
    }, 2)
 }
 
-export function serialize_jsx_document(model: AST.LDXProgram): string {
+export function serialize_jsx_document(model: AST.LDXLayer): string {
    const layout = model.layout as AST.LDXDocument
-   if (layout.type === "LiveDocument") {
+   if (layout.type === "LDXDocument") {
       const code = Astring.generate({
          type: "JSXDocument",
          children: layout.items,
@@ -47,7 +47,7 @@ export function serialize_jsx_document(model: AST.LDXProgram): string {
    }
 }
 
-export function deserialize_jsx_document(code: string): AST.LDXProgram {
+export function deserialize_jsx_document(code: string): AST.LDXLayer {
    try {
       const program = DocParser.parse(`export default <>\n${code}\n</>`, {
          ecmaVersion: 2024,
@@ -60,7 +60,7 @@ export function deserialize_jsx_document(code: string): AST.LDXProgram {
             const exported = c.declaration as any as AST.JSXFragment
             if (exported.type === "JSXFragment") {
                layout = {
-                  type: "LiveDocument",
+                  type: "LDXDocument",
                   items: exported.children.map(x => {
                      if (x.type === "JSXText") return x.value
                      else return x
@@ -72,9 +72,9 @@ export function deserialize_jsx_document(code: string): AST.LDXProgram {
       }
 
       return {
-         type: "LiveRoutine",
+         type: "LDXLayer",
          layout,
-      } as AST.LDXProgram
+      } as AST.LDXLayer
    }
    catch (error) {
       if (error.loc) {

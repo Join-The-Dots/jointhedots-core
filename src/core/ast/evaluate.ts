@@ -124,7 +124,7 @@ export function evaluateJSXElementData(n: AST.JSXElement): JSXElementData {
    return result
 }
 
-function getSymbolFromNode(n: AST.JSXIdentifier | AST.JSXNamespacedName | AST.JSXMemberExpression): string {
+export function getSymbolFromNode(n: AST.JSXIdentifier | AST.JSXNamespacedName | AST.JSXMemberExpression): string {
    switch (n.type) {
       case "JSXIdentifier":
          return n.name

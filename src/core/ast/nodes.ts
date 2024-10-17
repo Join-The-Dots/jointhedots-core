@@ -1,25 +1,20 @@
 import { MapLike } from "@livedoc/core/common"
-import { JSONSchema } from "./schema"
 import * as Acorn from "acorn"
 import * as AcornJsx from "./jsx/nodes"
 export * from "acorn"
 export * from "./jsx/nodes"
 
-export interface LDXRoutine extends Acorn.Node {
-   type: "LiveRoutine"
-   flow?: MapLike<Any>
-   layout?: Any
-}
-
-export interface LDXProgram extends LDXRoutine {
-   revision?: number
-}
-
 export interface LDXDocument extends Acorn.Node {
-   type: "LiveDocument"
+   type: "LDXDocument"
    items: (string | Any)[]
 }
 
-export type LDXNode = LDXProgram | LDXRoutine | LDXDocument
+export interface LDXLayer extends Acorn.Node {
+   type: "LDXLayer"
+   flow?: MapLike<Any>
+   layout?: LDXDocument
+}
+
+export type LDXNode = LDXLayer | LDXDocument
 
 export type Any = LDXNode | Acorn.AnyNode | AcornJsx.AnyJSX 

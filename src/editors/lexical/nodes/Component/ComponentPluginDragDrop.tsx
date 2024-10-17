@@ -21,13 +21,15 @@ import {
 } from 'lexical';
 import { useEffect } from "react";
 import { ComponentNode } from "./ComponentNode";
-import { JSXElementData } from "@livedoc/core/ast/evaluate";
+import * as AST from "@livedoc/core/ast/nodes"
+import { useDocumentContext } from '../../context/DocumentContext';
+import { LDXElementExpr } from '@livedoc/core/interpreter/exprs';
 
 const TRANSPARENT_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 const img = document.createElement('img');
 img.src = TRANSPARENT_IMAGE;
 
-export const INSERT_COMPONENT_COMMAND: LexicalCommand<JSXElementData> =
+export const INSERT_COMPONENT_COMMAND: LexicalCommand<AST.Any> =
    createCommand('INSERT_COMPONENT_COMMAND');
 
 
@@ -37,6 +39,7 @@ export function getDOMSelection(targetWindow: Window | null): Selection | null {
 
 export default function ComponentPluginDragDrop(): JSX.Element | null {
    const [editor] = useLexicalComposerContext();
+   const layout = useDocumentContext();
 
    useEffect(() => {
       if (!editor.hasNodes([ComponentNode])) {
@@ -44,16 +47,19 @@ export default function ComponentPluginDragDrop(): JSX.Element | null {
       }
 
       return mergeRegister(
-         editor.registerCommand<JSXElementData>(
+         editor.registerCommand<AST.Any>(
             INSERT_COMPONENT_COMMAND,
             (payload) => {
-               const imageNode = new ComponentNode(payload);
-               $insertNodes([imageNode]);
-               if ($isRootOrShadowRoot(imageNode.getParentOrThrow())) {
-                  $wrapNodeInElement(imageNode, $createParagraphNode).selectEnd();
+               const expr = layout.NewFrom(payload)
+               if (expr instanceof LDXElementExpr) {
+                   const node = new ComponentNode(expr);
+                  $insertNodes([node]);
+                  if ($isRootOrShadowRoot(node.getParentOrThrow())) {
+                     $wrapNodeInElement(node, $createParagraphNode).selectEnd();
+                  }
+                  return true;
                }
-
-               return true;
+               return false;
             },
             COMMAND_PRIORITY_EDITOR,
          ),

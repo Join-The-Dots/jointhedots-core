@@ -26,6 +26,7 @@ import { ComponentViewDialog } from '@livedoc/editors/lexical/nodes/Component/Co
 import {useCallback, useMemo} from 'react';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { useDocumentContext } from '../../context/DocumentContext';
 
 function ContextMenuItem({
   index,
@@ -106,6 +107,7 @@ export class ContextMenuOption extends MenuOption {
 
 export default function ContextMenuPlugin(): JSX.Element {
   const [editor] = useLexicalComposerContext();
+  const layout = useDocumentContext()
 
   const defaultOptions = useMemo(() => {
     return [
@@ -114,6 +116,7 @@ export default function ContextMenuPlugin(): JSX.Element {
           openDialog<void>((onClose) => {
             return <ComponentViewDialog
               activeEditor={editor}
+              layout={layout}
               onClose={onClose}
             />
           });

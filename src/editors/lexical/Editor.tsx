@@ -59,7 +59,7 @@ import TreeViewPlugin from './editor/TreeViewPanel'
 import TwitterPlugin from './nodes/Twitter/TweetPlugin'
 import YouTubePlugin from './nodes/YouTube/YouTubePlugin'
 import ContentEditable from './ui/ContentEditable'
-import { $getSelection, $isNodeSelection, CLICK_COMMAND, COMMAND_PRIORITY_LOW, DRAGEND_COMMAND, DRAGOVER_COMMAND, DRAGSTART_COMMAND, DROP_COMMAND, KEY_DELETE_COMMAND, LexicalEditor } from 'lexical'
+import { LexicalEditor } from 'lexical'
 import { InitialConfigType, LexicalComposer } from '@lexical/react/LexicalComposer'
 import { SAVE_CONTENT_COMMAND } from './editor/commands'
 import PlaygroundNodes from './nodes/PlaygroundNodes'
@@ -68,14 +68,12 @@ import { TableContext } from './nodes/Table/TablePlugin'
 import { SharedAutocompleteContext } from './context/SharedAutocompleteContext'
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme'
 import { MarkdownViewPlugin } from './editor/MarkdownViewPanel'
-import { $updateEditorStateFromMarkdown, MARKDOWN_TRANSFORMERS, transformEditorStateToMarkdown } from '@livedoc/editors/lexical/markdown/markdown-to-lexical'
+import { $updateEditorStateFromModel, MARKDOWN_TRANSFORMERS, transformEditorStateToMarkdown } from '@livedoc/editors/lexical/markdown/markdown-to-lexical'
 import "./index.css"
 import { InstrumentationSupport } from '@livedoc/core/ui/Instrumentation/InstrumentationSupport'
-import { EventHandlers } from '@livedoc/core/ui/Instrumentation'
-import { mergeRegister } from '@lexical/utils'
-import { ComponentNode } from './nodes/Component/ComponentNode'
-import { RIGHT_CLICK_IMAGE_COMMAND } from './nodes/Images/ImageComponent'
 import ComponentPluginDragDrop from './nodes/Component/ComponentPluginDragDrop'
+import { createDocumentID, createDocumentModel, DocumentModel, LDXDocumentExpr } from '@livedoc/core/interpreter/exprs'
+import { DocumentContext } from './context/DocumentContext'
 
 function Editor(): JSX.Element {
   const { historyState } = useSharedHistoryContext()
@@ -219,6 +217,7 @@ export function DocumentEditor(props: {
 
   const { content, onChange } = props
   const [editor, setEditor] = useState<LexicalEditor>(null)
+  const [model, setModel] = useState<DocumentModel>(null)
 
   const initialConfig: InitialConfigType = useMemo(() => ({
     editorState: (editor) => {
@@ -231,6 +230,7 @@ export function DocumentEditor(props: {
     },
     editable: true,
     namespace: 'Playground',
+    toto: true,
     nodes: [...PlaygroundNodes],
     onError: (error: Error) => {
       throw error
@@ -239,70 +239,84 @@ export function DocumentEditor(props: {
   }), [])
 
   useEffect(() => {
-    editor?.update(() => {
-      $updateEditorStateFromMarkdown(content)
-    })
+    if (content && editor) {
+      createDocumentModel(createDocumentID(), content).then((model) => {
+        editor?.update(() => {
+          const { layout } = model.base
+          if (layout instanceof LDXDocumentExpr) {
+            $updateEditorStateFromModel(layout)
+            setModel(model)
+          }
+          else {
+            throw new Error()
+          }
+        })
+      })
+    }
   }, [content, editor])
 
-
-  useEffect(() => {
-    if (editor) {
-      return mergeRegister(
-        editor.registerCommand(
-          DRAGSTART_COMMAND,
-          EventHandlers.onZoneDragStart as any,
-          COMMAND_PRIORITY_LOW,
-        ),
-        editor.registerCommand(
-          DRAGOVER_COMMAND,
-          EventHandlers.onZoneDragOver as any,
-          COMMAND_PRIORITY_LOW,
-        ),
-        editor.registerCommand(
-          DRAGEND_COMMAND,
-          EventHandlers.onZoneDragLeave as any,
-          COMMAND_PRIORITY_LOW,
-        ),
-        editor.registerCommand(
-          DROP_COMMAND,
-          EventHandlers.onZoneDrop as any,
-          COMMAND_PRIORITY_LOW,
-        ),
-        editor.registerCommand(
-          KEY_DELETE_COMMAND,
-          (payload: KeyboardEvent) => {
-            const deleteSelection = $getSelection();
-            if ($isNodeSelection(deleteSelection)) {
-              const event: KeyboardEvent = payload;
-              event.preventDefault();
-              editor.update(() => {
-                deleteSelection.getNodes().forEach((node) => {
-                  if (node instanceof ComponentNode) {
-                    node.remove();
-                  }
+  /*
+    useEffect(() => {
+      if (editor) {
+        return mergeRegister(
+          editor.registerCommand(
+            DRAGSTART_COMMAND,
+            EventHandlers.onZoneDragStart as any,
+            COMMAND_PRIORITY_LOW,
+          ),
+          editor.registerCommand(
+            DRAGOVER_COMMAND,
+            EventHandlers.onZoneDragOver as any,
+            COMMAND_PRIORITY_LOW,
+          ),
+          editor.registerCommand(
+            DRAGEND_COMMAND,
+            EventHandlers.onZoneDragLeave as any,
+            COMMAND_PRIORITY_LOW,
+          ),
+          editor.registerCommand(
+            DROP_COMMAND,
+            EventHandlers.onZoneDrop as any,
+            COMMAND_PRIORITY_LOW,
+          ),
+          editor.registerCommand(
+            KEY_DELETE_COMMAND,
+            (payload: KeyboardEvent) => {
+              const deleteSelection = $getSelection();
+              if ($isNodeSelection(deleteSelection)) {
+                const event: KeyboardEvent = payload;
+                event.preventDefault();
+                editor.update(() => {
+                  deleteSelection.getNodes().forEach((node) => {
+                    if (node instanceof ComponentNode) {
+                      node.remove();
+                    }
+                  });
                 });
-              });
-            }
-            return false;
-          },
-          COMMAND_PRIORITY_LOW,
-        ),
-      )
-    }
-  }, [editor])
+              }
+              return false;
+            },
+            COMMAND_PRIORITY_LOW,
+          ),
+        )
+      }
+    }, [editor])*/
 
+  const layout = model?.base?.layout as LDXDocumentExpr
   return <ManageSettings id="settings:lexical-editor">
     <FlashMessageContext>
       <LexicalComposer initialConfig={initialConfig}>
         <SharedHistoryContext>
           <TableContext>
-            <SharedAutocompleteContext>
-              <div className="editor-shell">
-                <InstrumentationSupport>
-                  <Editor />
-                </InstrumentationSupport>
-              </div>
-            </SharedAutocompleteContext>
+            <DocumentContext.Provider value={layout}>
+              <SharedAutocompleteContext>
+                <div className="editor-shell">
+                  <InstrumentationSupport>
+                    <Editor />
+                  </InstrumentationSupport>
+                </div>
+              </SharedAutocompleteContext>
+            </DocumentContext.Provider>
           </TableContext>
         </SharedHistoryContext>
       </LexicalComposer>

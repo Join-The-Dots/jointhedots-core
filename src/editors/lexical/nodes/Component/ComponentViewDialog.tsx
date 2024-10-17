@@ -4,9 +4,11 @@ import { ComponentEntry, ComponentsRegistry } from '@livedoc/core/library'
 import { $insertNodeToNearestRoot } from '@lexical/utils'
 import { ComponentNode } from './ComponentNode'
 import { PanelNodeCreation } from '@livedoc/editors/ui/PanelNodeCreation'
+import { emitJSXElementFromData } from '@livedoc/core/ast/evaluate'
+import { LDXDocumentExpr, LDXElementExpr } from '@livedoc/core/interpreter/exprs'
 import "@livedoc/editors/datas/register"
 
-export async function insertComponentDialog(activeEditor: LexicalEditor, component_id: string, data: any) {
+export async function insertComponentDialog(activeEditor: LexicalEditor, layout: LDXDocumentExpr, component_id: string, data: any) {
   const component = await ComponentsRegistry.acquireComponent(component_id)
   const lexicalNode = await component.fetchResource<Klass<LexicalNode>>("view.lexical")
   if (lexicalNode) {
@@ -23,11 +25,14 @@ export async function insertComponentDialog(activeEditor: LexicalEditor, compone
     const reactView = await component.fetchResource<Klass<LexicalNode>>("view.react")
     if (reactView) {
       activeEditor.update(async () => {
-        const node = new ComponentNode({
+        const expr = layout.NewFrom(emitJSXElementFromData({
           tag: component.id,
           props: data as any,
-        })
-        $insertNodeToNearestRoot(node)
+        }))
+        if (expr instanceof LDXElementExpr) {
+          const node = new ComponentNode(expr)
+          $insertNodeToNearestRoot(node)
+        }
       })
     }
   }
@@ -35,14 +40,16 @@ export async function insertComponentDialog(activeEditor: LexicalEditor, compone
 
 export function ComponentViewDialog({
   activeEditor,
+  layout,
   onClose,
 }: {
   activeEditor: LexicalEditor
+  layout: LDXDocumentExpr
   onClose: () => void
 }): JSX.Element {
 
   const complete = useCallback(async (component: ComponentEntry, data: any) => {
-    await insertComponentDialog(activeEditor, component.id, data)
+    await insertComponentDialog(activeEditor, layout, component.id, data)
     onClose()
   }, null)
 
