@@ -22,10 +22,13 @@
     "jsx": "react-jsx",
     "paths": {
       "@livedoc/core/*": [
-        "src/core/*"
+        "./packages/livedoc-core/*"
       ],
       "@livedoc/editors/*": [
-        "src/editors/*"
+        "./packages/livedoc-editors/*"
+      ],
+      "@livedoc/playground/*": [
+        "./packages/livedoc-playground/*"
       ]
     },
     "plugins": [
@@ -35,6 +38,6 @@
     ]
   },
   "include": [
-    "src"
+    "packages"
   ]
 }

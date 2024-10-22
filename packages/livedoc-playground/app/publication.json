@@ -1,0 +1,7 @@
+{
+   "application": {
+      "name": "builder",
+      "entry": "./startup.tsx",
+      "favicon": "../favicon.webp"
+   }
+}

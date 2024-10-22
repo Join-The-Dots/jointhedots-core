@@ -1,6 +1,0 @@
-{
-   "application": {
-      "name": "builder",
-      "entry": "./startup.tsx"
-   }
-}
