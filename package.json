@@ -1,6 +1,6 @@
 {
    "name": "sf-explorer",
-   "version": "2.0.0",
+   "version": "2.0.1",
    "type": "module",
    "private": true,
    "license": "MIT",
@@ -23,6 +23,7 @@
    "scripts": {
       "watch": "tspc --watch --noEmit",
       "serve": "explorer-gear serve --mode development",
+      "build": "explorer-gear make --versioned * --deliver --dist ./dist",
       "make": "explorer-gear make --dist ../sf-explorer-app/react-chrome-app/dist",
       "test": "mocha"
    },

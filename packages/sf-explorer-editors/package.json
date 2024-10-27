@@ -1,6 +1,6 @@
 {
    "name": "@sf-explorer/editors",
-   "version": "2.0.0",
+   "version": "0.0.0",
    "type": "module",
    "private": true,
    "license": "MIT",
@@ -10,7 +10,6 @@
       "./ui/Button": "./ui/Button"
    },
    "dependencies": {
-      "@sf-explorer/core": "*",
       "@emotion/css": "~11.11.2",
       "@emotion/react": "~11.11.1",
       "@emotion/styled": "~11.11.0",
@@ -42,13 +41,16 @@
       "monaco-editor": "~0.47.0",
       "prettier": "^2.3.2",
       "prismjs": "~1.29.0",
-      "react": "~18.2.0",
       "react-bootstrap": "^2.10.5",
-      "react-dom": "~18.2.0",
       "react-toastify": "~9.1.3",
       "slate": "^0.101.5",
       "slate-history": "^0.100.0",
       "slate-react": "^0.101.6",
       "y-websocket": "^1.5.4"
+   },
+   "peerDependencies": {
+      "@sf-explorer/core": "*",
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0"
    }
 }

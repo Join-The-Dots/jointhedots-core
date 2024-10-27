@@ -3,16 +3,26 @@ import { StorageFiles } from "./storage.js"
 import { create_esbuild_context } from "./esbuild-plugins.js"
 import DtsGenerator from "./dts-generator.js"
 import Fs from "fs"
+import ChildProcess from "child_process"
 
-export async function build_library(ws: Workspace, lib: Library, lib_path: string) {
-   console.log(`> Build library: ${lib.name} -> ${lib_path}`)
+type BuildLibraryOptions = {
+   outputDir: string
+   deliverDir?: string
+   version?: string
+}
+
+export async function build_library(ws: Workspace, lib: Library, opts: BuildLibraryOptions) {
+   const { outputDir } = opts
+   console.log(`> Build library: ${lib.name} -> ${outputDir}`)
 
    // Prepare storage
-   const storage = new StorageFiles(lib_path)
+   const storage = new StorageFiles(outputDir)
    storage.begin(true)
 
    // Emit package.json
-   storage.commitFile("package.json", JSON.stringify(lib.delivered, null, 2))
+   let package_json = { ...lib.delivered }
+   package_json.version = opts.version || package_json.version
+   storage.commitFile("package.json", JSON.stringify(package_json, null, 2))
 
    // Emit basic  assets
    await emit_library_assets(lib, storage, [])
@@ -33,7 +43,7 @@ export async function build_library(ws: Workspace, lib: Library, lib_path: strin
    }
 
    // Build javascripts assets
-   const context = await create_esbuild_context(lib, storage, lib_path, true, [
+   const context = await create_esbuild_context(lib, storage, outputDir, true, [
       {
          name: "externals",
          setup(build) {
@@ -51,6 +61,10 @@ export async function build_library(ws: Workspace, lib: Library, lib_path: strin
    await context.rebuild()
    storage.end()
    context.dispose()
+
+   if (opts.deliverDir) {
+      ChildProcess.execSync("npm pack --pack-destination " + opts.deliverDir, { cwd: opts.outputDir })
+   }
 }
 
 export function make_libname(pattern: string) {

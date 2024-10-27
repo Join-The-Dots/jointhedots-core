@@ -2,6 +2,7 @@
 import "source-map-support/register.js"
 import Process from "node:process"
 import Path from 'node:path'
+import Fs from 'node:fs'
 import Yargs from "yargs"
 import { hideBin } from 'yargs/helpers'
 import { publish_aws_s3 } from './publish.js'
@@ -85,15 +86,33 @@ export function command_make() {
             type: "number",
             default: 3000,
          })
+         .option("deliver", {
+            type: "boolean",
+            describe: "Ask to create tarball delivery"
+         })
+         .option("versioned", {
+            type: "string",
+            describe: "Version applied to delivered package (use * for root package version)"
+         })
          .option("dist", {
             type: "string",
             default: "./dist",
          }),
       handler: async (argv) => {
+         let version = argv["versioned"]
+         if (version === "*") {
+            version = JSON.parse(Fs.readFileSync("package.json").toString())?.version
+            console.log(`> use version: ${version}`)
+         }
+
          const ws = await open_workspace(".", argv.features)
          for (const lib of ws.libraries) {
             const lib_path = Path.resolve(argv.dist, make_libname(lib.name))
-            await build_library(ws, lib, lib_path)
+            await build_library(ws, lib, {
+               outputDir: lib_path,
+               deliverDir: argv.deliver ? Path.resolve(argv.dist) : null,
+               version: version,
+            })
          }
       }
    }
