@@ -1,0 +1,7 @@
+{
+   "application": {
+      "name": "livedoc",
+      "entry": "./startup.tsx",
+      "favicon": "../favicon.webp"
+   }
+}

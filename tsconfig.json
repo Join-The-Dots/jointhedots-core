@@ -21,20 +21,20 @@
     "outDir": "dist/lib",
     "jsx": "react-jsx",
     "paths": {
-      "@livedoc/core/*": [
-        "./packages/livedoc-core/*"
+      "@sf-explorer/core/*": [
+        "./packages/sf-explorer-core/*"
       ],
-      "@livedoc/editors/*": [
-        "./packages/livedoc-editors/*"
+      "@sf-explorer/editors/*": [
+        "./packages/sf-explorer-editors/*"
       ],
-      "@livedoc/playground/*": [
-        "./packages/livedoc-playground/*"
+      "@sf-explorer/playground/*": [
+        "./packages/sf-explorer-playground/*"
       ]
     },
     "plugins": [
       {
         "transform": "typescript-transform-paths"
-      },
+      }
     ]
   },
   "include": [

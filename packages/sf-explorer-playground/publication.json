@@ -1,0 +1,8 @@
+{
+   "_assets": [
+      {
+         "from": "@salesforce-ux/design-system/assets",
+         "to": "assets"
+      }
+   ]
+}

@@ -1,5 +1,5 @@
 {
-  "window.title": "LiveDoc",
+  "window.title": "SFE.Core",
   "terminal.integrated.env.windows": {
     "Path": "${env:PATH};node_modules/.bin"
  },

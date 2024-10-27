@@ -1,5 +1,5 @@
 {
-   "name": "livedoc",
+   "name": "sf-explorer",
    "version": "2.0.0",
    "type": "module",
    "private": true,
@@ -8,7 +8,7 @@
       "packages/*"
    ],
    "devDependencies": {
-      "@livedoc/gear": "./packages/livedoc-gear",
+      "@sf-explorer/gear": "./packages/sf-explorer-gear",
       "@types/mocha": "^10.0.8",
       "@types/node": "^22.7.4",
       "@types/typescript": "^2.0.0",
@@ -23,6 +23,7 @@
    "scripts": {
       "watch": "tspc --watch --noEmit",
       "serve": "explorer-gear serve --mode development",
+      "make": "explorer-gear make --dist ../sf-explorer-app/react-chrome-app/dist",
       "test": "mocha"
    },
    "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"
