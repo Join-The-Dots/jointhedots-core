@@ -2,6 +2,7 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $wrapNodeInElement, CAN_USE_DOM, mergeRegister } from '@lexical/utils';
 import {
+   $createNodeSelection,
    $createParagraphNode,
    $createRangeSelection,
    $getNodeByKey,
@@ -10,6 +11,7 @@ import {
    $isNodeSelection,
    $isRootOrShadowRoot,
    $setSelection,
+   CLICK_COMMAND,
    COMMAND_PRIORITY_EDITOR,
    COMMAND_PRIORITY_HIGH,
    COMMAND_PRIORITY_LOW,
@@ -25,7 +27,7 @@ import { ComponentNode } from "./ComponentNode";
 import * as AST from "@sf-explorer/core"
 import { useDocumentContext } from '../../context/DocumentContext';
 import { LDXElementExpr } from '@sf-explorer/core';
-import { ElementTransferEndpoint, EventHandlers } from '@sf-explorer/core/ui/Instrumentation';
+import { EventHandlers, Instrumentation, InstrumentationEndpoints } from '@sf-explorer/core/ui/Instrumentation';
 
 const TRANSPARENT_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 const img = document.createElement('img');
@@ -86,6 +88,26 @@ export default function ComponentPluginDragDrop(): JSX.Element | null {
             },
             COMMAND_PRIORITY_HIGH,
          ),
+         editor.registerCommand<MouseEvent>(
+            CLICK_COMMAND,
+            (event) => {
+               return EventHandlers.onZoneSelect(event)
+            },
+            COMMAND_PRIORITY_LOW,
+         ),
+         InstrumentationEndpoints.Select.register((payload) => {
+            const { zone, controller } = payload
+            if (controller instanceof ComponentNode) {
+               editor.update(() => {
+                  const selection = $createNodeSelection()
+                  selection.add(controller.getKey())
+                  $setSelection(selection)
+                  Instrumentation.select(zone, false)
+               });
+               return true
+            }
+            return false
+         })
       )
    }, [editor, layout]);
 
@@ -113,7 +135,7 @@ function canDropComponent(event: DragEvent): boolean {
    );
 }
 
-ElementTransferEndpoint.register((payload) => {
+InstrumentationEndpoints.Transfer.register((payload) => {
    const { controller, dataTransfer } = payload
    if (controller instanceof ComponentNode) {
       dataTransfer.setDragImage(img, 0, 0)

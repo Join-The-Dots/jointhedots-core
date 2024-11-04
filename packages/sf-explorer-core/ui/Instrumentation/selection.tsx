@@ -3,16 +3,16 @@ import ReactDOMClient from 'react-dom/client'
 import ReactTools, { ReactFiberNode } from "../../common/react-tools"
 import { ElementTooling, ElementInstrumentation, ElementBoundingBox, InstrumentationKind } from "./instrumentation"
 
-export class DOMSelection {
+export class ZoneSelection {
    overlay: HTMLElement = null
-   parent: DOMSelection = null
-   next: DOMSelection = null
+   parent: ZoneSelection = null
    isLeaf: boolean = false
    isExiting: boolean = false
 
    // Rendering state
    element: HTMLElement = null
    root: ReactDOMClient.Root = null
+   renderer?: (sel: ZoneSelection) => void = null
 
    // Instrumentation location
    node: ReactFiberNode = null
@@ -36,9 +36,17 @@ export class DOMSelection {
       if (!this.root) this.root = ReactDOMClient.createRoot(this.element)
       return this.root
    }
-   renderOverlay(renderer: (sel: DOMSelection) => void, rendererParent?: (sel: DOMSelection) => void) {
+   setRenderer(
+      renderer?: (sel: ZoneSelection) => void,
+      rendererParent?: (sel: ZoneSelection) => void,
+   ) {
+      this.renderer = renderer
+      if (this.parent) this.parent.setRenderer(rendererParent, rendererParent)
+   }
+   updateOverlay(): this {
       const rect = this.getRect()
-      if (!rect) return
+      if (!rect) return null
+
       let new_element: HTMLElement
       if (!this.element) {
          this.element = new_element = document.createElement("div")
@@ -49,15 +57,13 @@ export class DOMSelection {
       this.element.style.width = `${rect.width}px`
       this.element.style.height = `${rect.height}px`
       if (new_element) {
-         if (renderer) renderer(this)
+         if (this.renderer) this.renderer(this)
          this.overlay.appendChild(this.element)
       }
-      if (this.parent && rendererParent) {
-         this.parent.renderOverlay(rendererParent, rendererParent)
+      if (this.parent && this.parent.renderer) {
+         this.parent.updateOverlay()
       }
-      if (this.next) {
-         this.next.renderOverlay(renderer, rendererParent)
-      }
+      return this
    }
    cleanOverlay() {
       if (this.element) {
@@ -71,17 +77,18 @@ export class DOMSelection {
       if (this.parent) {
          this.parent.cleanOverlay()
       }
-      if (this.next) {
-         this.next.cleanOverlay()
-      }
    }
-   static computeElementSelection(element: HTMLElement, overlay: HTMLElement): DOMSelection {
+   static computeZoneSelection(zone: ElementInstrumentation, overlay: HTMLElement): ZoneSelection {
+      const node = ReactTools.findNodeFromInstance(zone.getBase())
+      return ZoneSelection.computeNodeSelection(node, overlay)
+   }
+   static computeElementSelection(element: HTMLElement, overlay: HTMLElement): ZoneSelection {
       const node = ReactTools.findNodeFromHTMLElement(element)
-      return DOMSelection.computeNodeSelection(node, overlay)
+      return ZoneSelection.computeNodeSelection(node, overlay)
    }
-   static computeNodeSelection(node: ReactFiberNode, overlay: HTMLElement): DOMSelection {
-      let firstselection: DOMSelection = null
-      let lastSelection: DOMSelection = null
+   static computeNodeSelection(node: ReactFiberNode, overlay: HTMLElement): ZoneSelection {
+      let firstselection: ZoneSelection = null
+      let lastSelection: ZoneSelection = null
       node = node?.child || node
       while (node) {
          const { elementType } = node
@@ -104,7 +111,7 @@ export class DOMSelection {
 
             // Append selection layer for the instrumentation zone
             if (zone.enabled === true) {
-               const sel = new DOMSelection(overlay)
+               const sel = new ZoneSelection(overlay)
                sel.node = node
                sel.zone = zone
                if (lastSelection) {
@@ -122,6 +129,21 @@ export class DOMSelection {
       }
       return firstselection
    }
+}
+
+export function findIntrumentationFromDOM(element: HTMLElement): ElementInstrumentation {
+   let node = ReactTools.findNodeFromHTMLElement(element)
+   while (node) {
+      const { elementType } = node
+      const kind = (elementType instanceof Object) && elementType.$$instrumentation as InstrumentationKind
+      const zone = (kind === InstrumentationKind.Tooling) ? (node.stateNode as ElementTooling).getZone()
+         : (kind === InstrumentationKind.Zone) ? (node.stateNode as ElementInstrumentation) : null
+      if (zone !== null) {
+         return zone
+      }
+      node = ReactTools.getNodeParent(node)
+   }
+   return null
 }
 
 function findDOMNode(instance: React.Component): HTMLElement | null {

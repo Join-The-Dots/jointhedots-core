@@ -13,6 +13,8 @@ export * from "./ast/producer"
 
 export * from "./ast/serde/markdown"
 
+export * from "./interpreter/generator"
+export * from "./interpreter/builder"
 export * from "./interpreter/exprs"
 export * from "./interpreter/context"
 

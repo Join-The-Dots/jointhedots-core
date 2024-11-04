@@ -1,5 +1,4 @@
-import ReactTools from "../../common/react-tools"
-import { DOMSelection } from "./DOMSelection"
+import { findIntrumentationFromDOM, ZoneSelection } from "./selection"
 import ReactDOMClient from 'react-dom/client'
 import EventEmitter from "events"
 import dragImageUrl from './drag_icon.svg'
@@ -53,6 +52,7 @@ export interface ElementTooling {
 
 export interface ElementInstrumentation {
    readonly enabled: boolean
+   selection: ZoneSelection
    getBase(): React.Component
    getController(): ElementController
    getElement(): Expr
@@ -71,62 +71,189 @@ export function useInstrumentation(): ElementInstrumentation {
    return useContext(InstrumentationContext)
 }
 
+export class InstrumentationState {
+   instrumenteds = new Map<Expr, ElementInstrumentation[]>()
+   selections = new Set<Expr>()
+   focused: ElementInstrumentation = null
+   hovered: ZoneSelection = null
+   overlay: HTMLElement = null
+
+   constructor() {
+      this.overlay = document.createElement("div")
+      this.overlay.className = "LDX-Instrumentation-Overlay"
+      document.body.appendChild(this.overlay)
+   }
+   update() {
+      for (const target of this.selections) {
+         if (this.instrumenteds.has(target)) {
+            for (const zone of this.instrumenteds.get(target)) {
+               zone.selection?.updateOverlay()
+            }
+         }
+      }
+      this.hovered = this.hovered?.updateOverlay()
+   }
+   select(target: ElementInstrumentation | Expr, multiple: boolean, focused?: ElementInstrumentation) {
+      if (target instanceof Expr) {
+         if (!this.selections.has(target)) {
+            if (!multiple) this.unselect()
+            this.selections.add(target)
+            if (this.instrumenteds.has(target)) {
+               for (const zone of this.instrumenteds.get(target)) {
+                  const selection = ZoneSelection.computeZoneSelection(zone, this.overlay)
+                  selection.setRenderer(zoneSelectedRenderer, zoneSelectedParentRenderer)
+                  zone.selection = selection
+                  zone.updateZone()
+               }
+            }
+            this.focused = focused
+            this.unhighligth()
+         }
+      }
+      else if (target) {
+         this.select(target.getElement(), multiple, target)
+      }
+      else {
+         this.unselect()
+      }
+   }
+   unselect(target?: Expr) {
+      if (target instanceof Expr) {
+         this.selections.delete(target)
+         if (this.focused?.getElement() === target) {
+            this.focused = null
+         }
+      }
+      else {
+         for (const target of this.selections) {
+            if (this.instrumenteds.has(target)) {
+               for (const zone of this.instrumenteds.get(target)) {
+                  zone.selection?.cleanOverlay()
+                  zone.selection = null
+               }
+            }
+         }
+         this.selections.clear()
+         this.focused = null
+      }
+   }
+   highligth(hovered: ZoneSelection, renderer: (sel: ZoneSelection) => void) {
+      if (!this.hovered || !hovered || this.hovered.zone !== hovered.zone) {
+         this.unhighligth()
+         if (hovered) {
+            this.hovered = hovered
+            this.hovered.setRenderer(renderer)
+            this.hovered = this.hovered.updateOverlay()
+         }
+      }
+      else if (this.hovered) {
+         this.hovered.isExiting = false
+      }
+   }
+   unhighligth() {
+      if (this.hovered) {
+         this.hovered.cleanOverlay()
+         this.hovered = null
+      }
+   }
+   registerElement(element: Expr): ElementInstrumentation[] {
+      const { instrumenteds } = Instrumentation
+      let zones = instrumenteds.get(element)
+      if (!zones) instrumenteds.set(element, zones = [])
+      return zones
+   }
+   unregisterElement(element: Expr) {
+      const { instrumenteds, selections } = Instrumentation
+      if (selections.has(element)) this.unselect(element)
+      instrumenteds.delete(element)
+   }
+   registerZone(zone: ElementInstrumentation) {
+      const { selections } = Instrumentation
+      const element = zone.getElement()
+      this.registerElement(element).push(zone)
+
+      if (selections.has(element)) {
+         const selection = ZoneSelection.computeZoneSelection(zone, Instrumentation.overlay)
+         selection.setRenderer(zoneSelectedRenderer, zoneSelectedParentRenderer)
+         zone.selection = selection
+         zone.updateZone()
+      }
+
+      if (timer === 0) zoneRunRefresh()
+   }
+   unregisterZone(zone: ElementInstrumentation) {
+      const { instrumenteds } = Instrumentation
+      const element = zone.getElement()
+
+      if (zone.selection) {
+         const { selection } = zone
+         zone.selection = null
+         setTimeout(() => selection.cleanOverlay(), 0)
+      }
+
+      let zones = instrumenteds.get(element)
+      let index = zones ? zones.indexOf(zone) : -1
+      if (index >= 0) {
+         zones.splice(index, 1)
+         if (zones.length === 0) {
+            Instrumentation.unregisterElement(element)
+         }
+      }
+   }
+
+}
+
+export const Instrumentation = new InstrumentationState()
+
+export const InstrumentationEndpoints = {
+   "Transfer": new HandlersManifold<{
+      zone: ElementInstrumentation
+      controller: ElementController
+      dataTransfer: DataTransfer
+   }>(),
+   "Drop": new HandlersManifold<{
+      zone: ElementInstrumentation
+      controller: ElementController
+      dataTransfer: DataTransfer
+      event: DragEvent
+   }>(),
+   "Command": new HandlersManifold<{
+      cmd: ElementCommand
+      target: Expr
+   }>(),
+   "Select": new HandlersManifold<{
+      zone: ElementInstrumentation
+      controller: ElementController
+   }>(),
+}
+
+let timer: any = 0
+let compactedDisplay: boolean = true
 const drag_img = new Image()
 drag_img.src = dragImageUrl.toString()
 
-const overlay: HTMLElement = document.createElement("div")
-overlay.className = "LDX-Instrumentation-Overlay"
-document.body.appendChild(overlay)
-
-const zones: Set<ElementInstrumentation> = new Set()
-
-let compactedDisplay: boolean = true
-
-let selectedZone: DOMSelection = null
-let hoveredZone: DOMSelection = null
-let timer: any = 0
-
-const InstrumentationEvents = new EventEmitter()
-
-function zoneUpdate() {
-   if (selectedZone) {
-      requestAnimationFrame(() => {
-         selectedZone?.renderOverlay(zoneSelectedRenderer, zoneSelectedParentRenderer)
-      })
-   }
+function zoneRunRefresh() {
+   timer = setInterval(() => {
+      if (Instrumentation.selections.size > 0 || Instrumentation.hovered) {
+         requestAnimationFrame(() => Instrumentation.update())
+      }
+   }, 25)
 }
-function zoneSelectedRenderer(sel: DOMSelection) {
+function zoneSelectedRenderer(sel: ZoneSelection) {
    sel.element.className = "LDX-Overlay-Selected"
    sel.zone.displayTooling(sel.getRoot(), false)
 }
-function zoneSelectedParentRenderer(sel: DOMSelection) {
+function zoneSelectedParentRenderer(sel: ZoneSelection) {
    sel.element.className = "LDX-Overlay-Selected-Parent"
 }
-function zoneDragOverRenderer(sel: DOMSelection) {
+function zoneDragOverRenderer(sel: ZoneSelection) {
    sel.element.className = "LDX-Overlay-DragOver"
    sel.zone.displayTooling(sel.getRoot(), true)
 }
-function zoneHoverRenderer(sel: DOMSelection) {
+function zoneHoverRenderer(sel: ZoneSelection) {
    sel.element.className = "LDX-Overlay-Hover"
-   if (selectedZone?.zone !== sel.zone) {
-      sel.zone.displayTooling(sel.getRoot(), true)
-   }
-}
-
-export function registerZone(target: ElementInstrumentation) {
-   if (zones.size === 0) {
-      timer = setInterval(zoneUpdate, 25)
-   }
-   zones.add(target)
-   InstrumentationEvents.emit("RegisterZone", target)
-}
-
-export function unregisterZone(target: ElementInstrumentation) {
-   zones.delete(target)
-   InstrumentationEvents.emit("UnregisterZone", target)
-   if (zones.size === 0) {
-      clearInterval(timer)
-      timer = 0
+   if (Instrumentation.focused !== sel.zone) {
+      //sel.zone.displayTooling(sel.getRoot(), true)
    }
 }
 
@@ -135,9 +262,12 @@ export function executeZoneCommand(target: ElementInstrumentation, cmd: ElementC
 }
 
 export function setInstrumentationMode(_compacted: boolean) {
+   const { instrumenteds } = Instrumentation
    compactedDisplay = _compacted
-   for (const zone of zones.values()) {
-      zone.updateZone()
+   for (const zones of instrumenteds.values()) {
+      for (const zone of zones) {
+         zone.updateZone()
+      }
    }
 }
 
@@ -145,130 +275,53 @@ export function isInstrumentationCompacted(): boolean {
    return compactedDisplay
 }
 
-export function isSelectedZone(zone: ElementInstrumentation): boolean {
-   return selectedZone?.zone === zone
-}
-
-export function selectZone(zone: ElementInstrumentation): boolean {
-   if (zone) {
-      const target = ReactTools.findNodeFromInstance(zone.getBase())
-      const newSelected = DOMSelection.computeNodeSelection(target, overlay)
-      if (newSelected) {
-         newSelected.next = selectedZone
-         selectedZone = newSelected
-         zone.updateZone()
-         unhighligthZone()
-         return true
-      }
-      return false
-   }
-   else {
-      unselectZone()
-      return true
-   }
-}
-
-export function unselectZone() {
-   if (selectedZone) {
-      for (let sel = selectedZone; sel; sel = sel.next) {
-         sel.zone?.updateZone()
-      }
-      selectedZone.cleanOverlay()
-      selectedZone = null
-   }
-}
-
-export function selectOnController(controller: ElementController): boolean {
-   if (selectedZone?.zone?.getController() === controller) {
-      return true
-   }
-
-   let result = false
-   unselectZone()
-   for (const zone of zones.values()) {
-      if (zone.getController() === controller) {
-         result = selectZone(zone) || result
-      }
-   }
-   return result
-}
-
-export function selectOnElement(element: Expr): boolean {
-   if (selectedZone?.zone?.getController()?.getElement() === element) {
-      return true
-   }
-
-   let result = false
-   unselectZone()
-   for (const zone of zones.values()) {
-      if (zone.getController()?.getElement() === element) {
-         result = selectZone(zone) || result
-      }
-   }
-   return result
-}
-
-export function highligthZone(hovered: DOMSelection, renderer: (sel: DOMSelection) => void) {
-   if (!hoveredZone || !hovered || hoveredZone.zone !== hovered.zone) {
-      unhighligthZone()
-      if (hovered) {
-         hoveredZone = hovered
-         hoveredZone.renderOverlay(renderer)
-      }
-   }
-   else if (hoveredZone) {
-      hoveredZone.isExiting = false
-   }
-}
-
-export function unhighligthZone() {
-   if (hoveredZone) {
-      hoveredZone.cleanOverlay()
-      hoveredZone = null
-   }
-}
-
-export const ElementTransferEndpoint = new HandlersManifold<{
-   zone: ElementInstrumentation
-   controller: ElementController
-   dataTransfer: DataTransfer
-}>()
-
-export const ElementDropEndpoint = new HandlersManifold<{
-   zone: ElementInstrumentation
-   controller: ElementController
-   dataTransfer: DataTransfer
-   event: DragEvent
-}>()
-
 export const EventHandlers = {
    onZoneKeyDown(e: KeyboardEvent) {
-      const zone = selectedZone?.zone
-      if (zone) {
+      const { instrumenteds } = Instrumentation
+      for (const target of instrumenteds.keys()) {
          if (e.ctrlKey === true) {
             if (e.key === "c") {
-               InstrumentationEvents.emit("CopyZone", zone)
+               InstrumentationEndpoints.Command.apply({
+                  cmd: ElementCommand.Copy,
+                  target,
+               })
             }
             if (e.key === "v") {
-               InstrumentationEvents.emit("PasteZone", zone)
+               InstrumentationEndpoints.Command.apply({
+                  cmd: ElementCommand.Paste,
+                  target,
+               })
             }
          }
          else {
             if (e.key === "Delete") {
-               InstrumentationEvents.emit("DeleteZone", zone)
+               InstrumentationEndpoints.Command.apply({
+                  cmd: ElementCommand.Delete,
+                  target,
+               })
             }
          }
       }
    },
    onZoneDragStart(e: DragEvent): boolean {
       try {
-         const ctl = selectedZone?.zone?.getController()
-         if (ctl) {
-            ElementTransferEndpoint.apply({
-               zone: selectedZone?.zone,
-               controller: ctl,
-               dataTransfer: e.dataTransfer,
-            })
+         const { selections, instrumenteds } = Instrumentation
+         if (selections.size === 1) {
+            for (const target of selections) {
+               const zones = instrumenteds.get(target)
+               if (zones && zones.length > 0) {
+                  InstrumentationEndpoints.Transfer.apply({
+                     zone: zones[0],
+                     controller: zones[0].getController(),
+                     dataTransfer: e.dataTransfer,
+                  })
+                  e.stopPropagation()
+                  return true
+               }
+            }
+         }
+         else if (selections.size > 1) {
+            e.preventDefault()
             e.stopPropagation()
             return true
          }
@@ -277,29 +330,29 @@ export const EventHandlers = {
       return false
    },
    onZoneDragOver(e: DragEvent) {
-      const hovered = DOMSelection.computeElementSelection(e.target as HTMLElement, overlay)
+      const hovered = ZoneSelection.computeElementSelection(e.target as HTMLElement, Instrumentation.overlay)
       if (hovered) {
-         highligthZone(hovered, zoneDragOverRenderer)
+         Instrumentation.highligth(hovered, zoneDragOverRenderer)
          e.preventDefault()
          e.stopPropagation()
       }
       else {
-         unhighligthZone()
+         Instrumentation.unhighligth()
       }
    },
    onZoneDragLeave(e: DragEvent) {
       const relatedTarget = e.relatedTarget
       if (relatedTarget instanceof HTMLElement) {
          if (relatedTarget?.parentElement === null) {
-            unhighligthZone()
+            Instrumentation.unhighligth()
          }
       }
    },
    onZoneDrop(e: DragEvent): boolean {
       try {
-         return ElementDropEndpoint.apply({
-            zone: hoveredZone?.zone,
-            controller: hoveredZone?.zone?.getController(),
+         return InstrumentationEndpoints.Drop.apply({
+            zone: Instrumentation.hovered?.zone,
+            controller: Instrumentation.hovered?.zone?.getController(),
             dataTransfer: e.dataTransfer,
             event: e,
          })
@@ -312,39 +365,43 @@ export const EventHandlers = {
          e.stopPropagation()
       }
    },
-   onZoneSelect(e: MouseEvent) {
+   onZoneSelect(e: MouseEvent): boolean {
       const target = e.target as HTMLElement
       try {
-         const newSelected = DOMSelection.computeElementSelection(target, overlay)
-         if (newSelected === undefined) {
-            return // avoid to change selection on handle
-         }
-         if (e.ctrlKey) {
-            e.stopPropagation()
-         }
-         if (newSelected?.zone !== selectedZone?.zone) {
-            InstrumentationEvents.emit("SelectZone", newSelected?.zone)
+         const zone = findIntrumentationFromDOM(target)
+         if (zone) {
+            if (e.ctrlKey) {
+               e.stopPropagation()
+            }
+            if (InstrumentationEndpoints.Select.apply({
+               controller: zone.getController(),
+               zone,
+            })) {
+               return true
+            }
          }
       }
       catch (e) { console.error("onSelect", e) }
+      Instrumentation.unselect()
+      return false
    },
    onZoneHover(e: MouseEvent) {
-      const hovered = DOMSelection.computeElementSelection(e.target as HTMLElement, overlay)
-      if (hovered && hovered.zone !== selectedZone?.zone) {
-         highligthZone(hovered, zoneHoverRenderer)
+      const hovered = ZoneSelection.computeElementSelection(e.target as HTMLElement, Instrumentation.overlay)
+      if (hovered && !hovered.zone.selection) {
+         Instrumentation.highligth(hovered, zoneHoverRenderer)
       }
       else {
-         unhighligthZone()
+         Instrumentation.unhighligth()
       }
    },
    onZoneUnhover() {
-      if (hoveredZone?.isExiting) {
-         unhighligthZone()
+      if (Instrumentation.hovered?.isExiting) {
+         Instrumentation.unhighligth()
       }
    },
    onZoneExit(e: MouseEvent) {
-      if (hoveredZone) {
-         hoveredZone.isExiting = true
+      if (Instrumentation.hovered) {
+         Instrumentation.hovered.isExiting = true
          setTimeout(EventHandlers.onZoneUnhover, 1)
       }
    },
@@ -368,7 +425,7 @@ function dataTransfertToObject(dataTransfer: DataTransfer): any {
    }
 }
 
-ElementTransferEndpoint.register((payload) => {
+InstrumentationEndpoints.Transfer.register((payload) => {
    const { controller } = payload
    const xpr = controller.getElement()
    const data = {
@@ -378,9 +435,4 @@ ElementTransferEndpoint.register((payload) => {
       origin: controller.getLocation(),
    }
    objectToDataTransfert(data, payload.dataTransfer)
-})
-
-// TO REMOVE: the editor shall register itself
-InstrumentationEvents.on("SelectZone", (target: ElementInstrumentation) => {
-   selectZone(target)
 })

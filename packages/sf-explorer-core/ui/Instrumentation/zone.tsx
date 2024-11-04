@@ -1,8 +1,9 @@
 import React from "react"
 import ReactDOMClient from 'react-dom/client'
-import { ElementInstrumentation, InstrumentationContext, ElementController, InstrumentationKind, InstrumentationLayout, isInstrumentationCompacted, isSelectedZone, registerZone, unregisterZone } from "./instrumentation"
+import { ElementInstrumentation, InstrumentationContext, ElementController, InstrumentationKind, InstrumentationLayout, isInstrumentationCompacted, Instrumentation } from "./instrumentation"
 import { InstrumentationHandle, InstrumentationToolBox } from "./handle"
 import { ErrorDisplayer } from "../ErrorBoundary"
+import type { ZoneSelection } from "./selection"
 
 export type PropsType = {
    controller: ElementController
@@ -12,6 +13,7 @@ export type PropsType = {
 export class InstrumentationZone extends React.Component<PropsType> implements ElementInstrumentation {
    static $$instrumentation = InstrumentationKind.Zone
    enabled: boolean = false
+   selection: ZoneSelection = null
    handle: InstrumentationHandle = null
    header: ZoneHeader = null
    error: Error = null
@@ -19,9 +21,7 @@ export class InstrumentationZone extends React.Component<PropsType> implements E
    /***************************************************************
     * Instrumentation interface
     **************************************************************/
-   get isSelected(): boolean {
-      return isSelectedZone(this)
-   }
+
    getTitle(): string {
       return this.getController()?.getDisplayInfos()?.title
    }
@@ -64,11 +64,13 @@ export class InstrumentationZone extends React.Component<PropsType> implements E
    constructor(props: PropsType) {
       super(props)
       this.enabled = true// isInstrumentedModel(props.controller.getProgram())
-      if (this.enabled) registerZone(this)
+      if (this.enabled) {
+         Instrumentation.registerZone(this)
+      }
    }
    componentWillUnmount() {
       if (this.enabled) {
-         unregisterZone(this)
+         Instrumentation.unregisterZone(this)
       }
    }
    componentDidCatch(e) {
@@ -149,10 +151,9 @@ class ZoneHeader extends React.Component<{
       const infos = controller.getDisplayInfos()
       return (<div
          ref={this.useElement}
-         className={instrumentation.isSelected
+         className={instrumentation.selection
             ? "LDX-Instrumentation-ZoneHeader selected"
             : "LDX-Instrumentation-ZoneHeader"
-
          }
          title={infos.title}
       >
