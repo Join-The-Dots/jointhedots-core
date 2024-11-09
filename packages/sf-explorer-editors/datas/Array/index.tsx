@@ -29,7 +29,7 @@ const editor: EditorDescriptor = {
 }
 
 DataEditors.registerController({
-   type: "array",
+   name: "array",
    icon: "code:symbol/list",
    editor,
    matchType(schema: JSONSchema): EditorValueMatch {

@@ -6,13 +6,14 @@ import { JSONSchema } from '@sf-explorer/core'
 import { EditorValueMatch } from '@sf-explorer/editors/ui/editor-context'
 import { ExpressionsEditors } from '..'
 import { convertTextToExpression } from '@sf-explorer/core'
+import { LiteralExpr } from '@sf-explorer/core/interpreter/exprs'
 
-function LiteralInput(props: ValueProps) {
+function LiteralInput(props: ValueProps<LiteralExpr>) {
    const { value, typing, onChange } = props
    const onValidate = onChange && React.useCallback((text) => {
       onChange(convertTextToExpression(text, typing))
    }, [typing, onChange])
-   const text = value !== undefined ? value.toString() : ""
+   const text = value.value !== undefined ? value.value.toString() : ""
    const placeholder = typing.examples && typing.examples.toString()
    return (<>
       <TextInput value={text} placeholder={placeholder} onChange={onValidate} />
@@ -24,7 +25,7 @@ const editor: EditorDescriptor = {
 }
 
 ExpressionsEditors.registerController({
-   type: "Literal",
+   name: "Literal",
    icon: "code:symbol/literal",
    editor,
    matchType(schema: JSONSchema): EditorValueMatch {
@@ -33,7 +34,7 @@ ExpressionsEditors.registerController({
       if (Schema.isType(schema, "boolean")) return EditorValueMatch.Valid
       return EditorValueMatch.None
    },
-   matchValue(value: any): EditorValueMatch {
+   matchValue(value: LiteralExpr): EditorValueMatch {
       const type = typeof value
       if (type === "string") return EditorValueMatch.Valid
       if (type === "number") return EditorValueMatch.Valid

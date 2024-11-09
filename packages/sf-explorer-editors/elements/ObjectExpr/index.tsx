@@ -5,15 +5,23 @@ import { JSONSchema } from '@sf-explorer/core'
 import { PropertyRows, PropertyTable } from '@sf-explorer/editors/ui/TableProperties'
 import { ExpressionsEditors } from '..'
 import { ExpandableInputHOC } from '@sf-explorer/editors/ui/InputExpandable'
+import { ObjectAssignProperty, ObjectExpr } from '@sf-explorer/core/interpreter/exprs'
 
-function ObjectEditor(props: ValueProps) {
+function ObjectEditor(props: ValueProps<ObjectExpr>) {
    const { value, typing, onChange } = props
+   const items = value.properties?.reduce((obj, field) => {
+      if (field instanceof ObjectAssignProperty) {
+         obj[field.key.read(null)] = field
+      }
+      return obj
+   }, {})
    return <PropertyTable>
       <PropertyRows
-         values={value}
+         values={items}
          typings={typing.properties}
          provider={ExpressionsEditors}
-         onChange={(value) => onChange(value)}
+         onChange={(props) => {
+         }}
       />
    </PropertyTable>
 }
@@ -28,7 +36,7 @@ const editor: EditorDescriptor = {
 }
 
 ExpressionsEditors.registerController({
-   type: "ObjectExpression",
+   name: "Object",
    icon: "code:symbol/object",
    editor,
    matchType(schema: JSONSchema): EditorValueMatch {
@@ -36,7 +44,7 @@ ExpressionsEditors.registerController({
       if (!schema.type && schema.properties) return EditorValueMatch.Valid
       return EditorValueMatch.None
    },
-   matchValue(value: any): EditorValueMatch {
+   matchValue(value: ObjectExpr): EditorValueMatch {
       if (value instanceof Object && !Array.isArray(value)) return EditorValueMatch.Valid
       return EditorValueMatch.None
    },

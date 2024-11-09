@@ -1,6 +1,6 @@
 # Welcome
 
-<my.comp1 propA={"f"}/>
+<my.comp1 propA={"f"} propC={["a","b","c"]}/>
 
 This is a **live demo** of MDXEditor with all default features on.
 
@@ -9,8 +9,6 @@ This is a **live demo** of MDXEditor with all default features on.
 > without looking like it’s been marked up with tags or formatting instructions.
 
 [— Daring Fireball](https://daringfireball.net/projects/markdown/).
-
-![Yellow flower in tilt shift lens](./yellow-flower-R72KOP74.jpg)
 
 ## A code sample
 

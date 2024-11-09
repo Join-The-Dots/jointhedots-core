@@ -45,7 +45,7 @@ export default function ValueInput(props: ValueProps & {
          }
          for (const ctl of sortMatchedControllers(matchings)) {
             items.push(<Menu.Item
-               title={ctl.type}
+               title={ctl.name}
                icon={ctl.icon}
                onClick={apply(ctl)}
             />)

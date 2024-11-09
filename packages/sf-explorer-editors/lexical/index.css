@@ -14,7 +14,6 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #eee;
   padding: 0 20px;
 }
 
@@ -53,7 +52,6 @@ header h1 {
 }
 
 .editor-shell .editor-container {
-  background: #fff;
   position: relative;
   display: block;
 }
@@ -429,7 +427,6 @@ i.page-break,
 
 .link-editor .button.active,
 .toolbar .button.active {
-  background-color: rgb(223, 232, 250);
 }
 
 .link-editor .link-input {
@@ -1234,14 +1231,14 @@ button.action-button:disabled {
 .toolbar {
   display: flex;
   margin-bottom: 1px;
-  background: #fff;
+  background: #666;
   padding: 4px;
   vertical-align: middle;
   overflow: auto;
   height: 36px;
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 10000001;
 }
 
 button.toolbar-item {

@@ -1,6 +1,6 @@
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $wrapNodeInElement, CAN_USE_DOM, mergeRegister } from '@lexical/utils';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { $wrapNodeInElement, CAN_USE_DOM, mergeRegister } from '@lexical/utils'
 import {
    $createNodeSelection,
    $createParagraphNode,
@@ -19,22 +19,26 @@ import {
    DRAGOVER_COMMAND,
    DRAGSTART_COMMAND,
    DROP_COMMAND,
+   KEY_BACKSPACE_COMMAND,
+   KEY_DELETE_COMMAND,
    LexicalCommand,
    LexicalEditor,
-} from 'lexical';
-import { useEffect } from "react";
-import { ComponentNode } from "./ComponentNode";
+   SELECTION_CHANGE_COMMAND,
+} from 'lexical'
+import { useCallback, useEffect, useState } from "react"
+import { ComponentNode } from "./ComponentNode"
 import * as AST from "@sf-explorer/core"
-import { useDocumentContext } from '../../context/DocumentContext';
-import { LDXElementExpr } from '@sf-explorer/core';
-import { EventHandlers, Instrumentation, InstrumentationEndpoints } from '@sf-explorer/core/ui/Instrumentation';
+import { useDocumentContext } from '../../context/DocumentContext'
+import { LDXElementExpr } from '@sf-explorer/core'
+import { ElementController, EventHandlers, Instrumentation, InstrumentationEndpoints } from '@sf-explorer/core/ui/Instrumentation'
+import { ElementEditor } from '@sf-explorer/editors/elements/panel'
 
-const TRANSPARENT_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-const img = document.createElement('img');
-img.src = TRANSPARENT_IMAGE;
+const TRANSPARENT_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+const img = document.createElement('img')
+img.src = TRANSPARENT_IMAGE
 
 export const INSERT_COMPONENT_COMMAND: LexicalCommand<AST.Any> =
-   createCommand('INSERT_COMPONENT_COMMAND');
+   createCommand('INSERT_COMPONENT_COMMAND')
 
 
 export function getDOMSelection(targetWindow: Window | null): Selection | null {
@@ -42,12 +46,45 @@ export function getDOMSelection(targetWindow: Window | null): Selection | null {
 }
 
 export default function ComponentPluginDragDrop(): JSX.Element | null {
-   const [editor] = useLexicalComposerContext();
-   const layout = useDocumentContext();
+   const [editor] = useLexicalComposerContext()
+   const layout = useDocumentContext()
+   const [selected, setSelected] = useState<ElementController>(null)
+
+   const $onDelete = useCallback(
+      (payload: KeyboardEvent) => {
+         const deleteSelection = $getSelection();
+         if (selected && $isNodeSelection(deleteSelection)) {
+            const event: KeyboardEvent = payload;
+            event.preventDefault();
+            editor.update(() => {
+               deleteSelection.getNodes().forEach((node) => {
+                  if (node instanceof ComponentNode) {
+                     node.remove();
+                  }
+               });
+            });
+         }
+         else {
+            editor.update(() => {
+               deleteSelection.getNodes().forEach((node) => {
+                  if (node instanceof ComponentNode) {
+                     const selection = $createNodeSelection()
+                     selection.add(node.getKey())
+                     $setSelection(selection)
+                     Instrumentation.select(node.getElement(), false)
+                     setSelected(node)
+                  }
+               });
+            });
+         }
+         return false;
+      },
+      [editor, selected],
+   );
 
    useEffect(() => {
       if (!editor.hasNodes([ComponentNode])) {
-         throw new Error('ImagesPlugin: ImageNode not registered on editor');
+         throw new Error('ImagesPlugin: ImageNode not registered on editor')
       }
 
       return mergeRegister(
@@ -56,35 +93,35 @@ export default function ComponentPluginDragDrop(): JSX.Element | null {
             (payload) => {
                const expr = layout.NewFrom(payload)
                if (expr instanceof LDXElementExpr) {
-                  const node = new ComponentNode(expr);
-                  $insertNodes([node]);
+                  const node = new ComponentNode(expr)
+                  $insertNodes([node])
                   if ($isRootOrShadowRoot(node.getParentOrThrow())) {
-                     $wrapNodeInElement(node, $createParagraphNode).selectEnd();
+                     $wrapNodeInElement(node, $createParagraphNode).selectEnd()
                   }
-                  return true;
+                  return true
                }
-               return false;
+               return false
             },
             COMMAND_PRIORITY_EDITOR,
          ),
          editor.registerCommand<DragEvent>(
             DRAGSTART_COMMAND,
             (event) => {
-               return EventHandlers.onZoneDragStart(event);
+               return EventHandlers.onZoneDragStart(event)
             },
             COMMAND_PRIORITY_HIGH,
          ),
          editor.registerCommand<DragEvent>(
             DRAGOVER_COMMAND,
             (event) => {
-               return onComponentDragover(event);
+               return onComponentDragover(event)
             },
             COMMAND_PRIORITY_LOW,
          ),
          editor.registerCommand<DragEvent>(
             DROP_COMMAND,
             (event) => {
-               return onComponentDrop(event, editor);
+               return onComponentDrop(event, editor)
             },
             COMMAND_PRIORITY_HIGH,
          ),
@@ -92,6 +129,25 @@ export default function ComponentPluginDragDrop(): JSX.Element | null {
             CLICK_COMMAND,
             (event) => {
                return EventHandlers.onZoneSelect(event)
+            },
+            COMMAND_PRIORITY_LOW,
+         ),
+         editor.registerCommand(
+            KEY_DELETE_COMMAND,
+            $onDelete,
+            COMMAND_PRIORITY_LOW,
+         ),
+         editor.registerCommand(
+            KEY_BACKSPACE_COMMAND,
+            $onDelete,
+            COMMAND_PRIORITY_LOW,
+         ),
+         editor.registerCommand(
+            SELECTION_CHANGE_COMMAND,
+            (payload) => {
+               Instrumentation.unselect()
+               setSelected(null)
+               return false
             },
             COMMAND_PRIORITY_LOW,
          ),
@@ -103,36 +159,45 @@ export default function ComponentPluginDragDrop(): JSX.Element | null {
                   selection.add(controller.getKey())
                   $setSelection(selection)
                   Instrumentation.select(zone, false)
-               });
+                  setSelected(zone.getController())
+               })
                return true
             }
+            setSelected(null)
             return false
          })
       )
-   }, [editor, layout]);
+   }, [editor, layout, $onDelete])
 
-   return null;
+   return <>
+      {Instrumentation.selections.size === 1 && <>
+         <ElementEditor
+            value={Instrumentation.selections[0]}
+            typing={AST.CommonTypes.any}
+         />
+      </>}
+   </>
 }
 
 function getComponentNodeInSelection(): ComponentNode | null {
-   const selection = $getSelection();
+   const selection = $getSelection()
    if (!$isNodeSelection(selection)) {
-      return null;
+      return null
    }
-   const nodes = selection.getNodes();
-   const node = nodes[0];
-   return (node instanceof ComponentNode) ? node : null;
+   const nodes = selection.getNodes()
+   const node = nodes[0]
+   return (node instanceof ComponentNode) ? node : null
 }
 
 function canDropComponent(event: DragEvent): boolean {
-   const target = event.target;
+   const target = event.target
    return !!(
       target &&
       target instanceof HTMLElement &&
       !target.closest('code, span.editor-image') &&
       target.parentElement &&
       target.parentElement.closest('div.ContentEditable__root')
-   );
+   )
 }
 
 InstrumentationEndpoints.Transfer.register((payload) => {
@@ -150,58 +215,58 @@ InstrumentationEndpoints.Transfer.register((payload) => {
 })
 
 function onComponentDragover(event: DragEvent): boolean {
-   const node = getComponentNodeInSelection();
+   const node = getComponentNodeInSelection()
    if (!node) {
-      return false;
+      return false
    }
    if (!canDropComponent(event)) {
-      event.preventDefault();
+      event.preventDefault()
    }
-   return true;
+   return true
 }
 
 function onComponentDrop(event: DragEvent, editor: LexicalEditor): boolean {
-   const dragData = event.dataTransfer?.getData('application/x-lexical-drag');
+   const dragData = event.dataTransfer?.getData('application/x-lexical-drag')
    if (!dragData) {
-      return null;
+      return null
    }
-   const { key, type, descriptor } = JSON.parse(dragData);
+   const { key, type, descriptor } = JSON.parse(dragData)
    if (type !== 'component') {
-      return null;
+      return null
    }
-   event.preventDefault();
+   event.preventDefault()
    if (canDropComponent(event)) {
-      const range = getDragSelection(event);
+      const range = getDragSelection(event)
       const node = $getNodeByKey(key)
-      if (node) node.remove();
-      const rangeSelection = $createRangeSelection();
+      if (node) node.remove()
+      const rangeSelection = $createRangeSelection()
       if (range !== null && range !== undefined) {
-         rangeSelection.applyDOMRange(range);
+         rangeSelection.applyDOMRange(range)
       }
-      $setSelection(rangeSelection);
-      editor.dispatchCommand(INSERT_COMPONENT_COMMAND, descriptor);
+      $setSelection(rangeSelection)
+      editor.dispatchCommand(INSERT_COMPONENT_COMMAND, descriptor)
    }
-   return true;
+   return true
 }
 
 function getDragSelection(event: DragEvent): Range | null | undefined {
-   let range;
-   const target = event.target as null | Element | Document;
+   let range
+   const target = event.target as null | Element | Document
    const targetWindow =
       target == null
          ? null
          : target.nodeType === 9
             ? (target as Document).defaultView
-            : (target as Element).ownerDocument.defaultView;
-   const domSelection = getDOMSelection(targetWindow);
+            : (target as Element).ownerDocument.defaultView
+   const domSelection = getDOMSelection(targetWindow)
    if (document.caretRangeFromPoint) {
-      range = document.caretRangeFromPoint(event.clientX, event.clientY);
+      range = document.caretRangeFromPoint(event.clientX, event.clientY)
    } else if (event.rangeParent && domSelection !== null) {
-      domSelection.collapse(event.rangeParent, event.rangeOffset || 0);
-      range = domSelection.getRangeAt(0);
+      domSelection.collapse(event.rangeParent, event.rangeOffset || 0)
+      range = domSelection.getRangeAt(0)
    } else {
-      throw Error(`Cannot get the selection when dragging`);
+      throw Error(`Cannot get the selection when dragging`)
    }
 
-   return range;
+   return range
 }

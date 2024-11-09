@@ -6,15 +6,18 @@ import { ExpressionsEditors } from '..'
 import { ExpandableInputHOC } from '@sf-explorer/editors/ui/InputExpandable'
 import { createValueFromTyping } from '@sf-explorer/core'
 import { JSONSchema } from '@sf-explorer/core'
+import { ArrayExpr } from '@sf-explorer/core/interpreter/exprs'
 
-function ArrayEditor(props: ValueProps) {
-   const { value, typing, onChange } = props
+function ArrayEditor(props: ValueProps<ArrayExpr>) {
+   const { value, typing } = props
    const itemTyping = typing?.items as JSONSchema || CommonTypes.any
    return (<ArrayTable
-      items={value}
+      items={value.elements}
       itemTyping={typing?.items as JSONSchema || CommonTypes.any}
       provider={ExpressionsEditors}
-      onChange={(value) => onChange(value)}
+      onChange={(elements) => {
+         value.elements = elements
+      }}
       onCreate={() => createValueFromTyping(itemTyping)}
    />)
 }
@@ -29,7 +32,7 @@ const editor: EditorDescriptor = {
 }
 
 ExpressionsEditors.registerController({
-   type: "ArrayExpression",
+   name: "Array",
    icon: "code:symbol/list",
    editor,
    matchType(schema: JSONSchema): EditorValueMatch {
@@ -37,7 +40,7 @@ ExpressionsEditors.registerController({
       if (!schema.type && schema.items) return EditorValueMatch.Valid
       return EditorValueMatch.None
    },
-   matchValue(value: any): EditorValueMatch {
+   matchValue(value: ArrayExpr): EditorValueMatch {
       if (Array.isArray(value)) return EditorValueMatch.Valid
       return EditorValueMatch.None
    },

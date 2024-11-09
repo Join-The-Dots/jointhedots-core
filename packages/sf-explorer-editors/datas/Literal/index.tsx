@@ -24,7 +24,7 @@ const editor: EditorDescriptor = {
 }
 
 DataEditors.registerController({
-   type: "string",
+   name: "string",
    icon: "code:symbol/literal",
    editor,
    matchType(schema: JSONSchema): EditorValueMatch {

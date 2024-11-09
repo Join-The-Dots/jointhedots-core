@@ -47,17 +47,16 @@ export type EditorDescriptor = {
 }
 
 export type EditionController = {
-   type: string
-   kind?: string
+
+   // UI
+   name: string
+   icon?: string
+   editor?: EditorDescriptor
 
    // Handlers
    matchType?: (schema: JSONSchema) => EditorValueMatch
    matchValue?: (value: any, handler?: ComponentResource) => EditorValueMatch
    createValue?: (schema: JSONSchema, prevValue?: any) => any
-
-   // UI
-   icon?: string
-   editor?: EditorDescriptor
 }
 
 export interface IEditionOperation {
@@ -73,8 +72,8 @@ export interface IEditionContext {
 }
 
 export interface IEditorProvider {
-   findControllerOf(value: AST.Node, typing: JSONSchema): Promise<EditionController>
-   listControllerOf(value: AST.Node, typing: JSONSchema): Promise<Map<EditionController, EditorValueMatch>>
+   findControllerOf(value: any, typing: JSONSchema): Promise<EditionController>
+   listControllerOf(value: any, typing: JSONSchema): Promise<Map<EditionController, EditorValueMatch>>
 }
 
 export const EditionContext = React.createContext<IEditionContext>(null)
@@ -83,7 +82,7 @@ export function sortMatchedControllers(matcheds: Map<EditionController, EditorVa
    return Array.from(matcheds.keys()).sort((a, b) => {
       const clvl = matcheds.get(a) - matcheds.get(b)
       if (clvl !== 0) return clvl
-      return a.type.localeCompare(b.type)
+      return a.name.localeCompare(b.name)
    })
 }
 
