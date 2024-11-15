@@ -7,9 +7,13 @@ import {
    ArrayAppendElement, ArrayExpr, ArraySpreadElement, AssignmentExpr,
    BinaryExpr, CallExpr, ConditionalExpr, DeleteMemberExpr, DocumentLayer, DocumentModel,
    Expr, ExprClass, FunctionExpr, IdentifierExpr, LDXDocumentExpr,
-   LDXElementExpr, LogicalExpr, MemberExpr, ObjectAssignProperty,
-   ObjectExpr, ObjectSpreadProperty, ThisExpr, UnaryExpr, UpdateExpr
+   LDXElementExpr, LogicalExpr, MemberExpr,
+   ObjectDynamicProperty,
+   ObjectExpr, ObjectNamedProperty, ObjectSpreadProperty, ThisExpr, UnaryExpr, UpdateExpr
 } from "./exprs"
+import { ComponentsRegistry } from "../library/components"
+import { JSONSchema } from "../ast/schema/schema"
+import { CommonTypes } from "../ast/schema/helpers"
 
 let model_ids = 0
 
@@ -20,134 +24,142 @@ export function createDocumentID(): string {
 export class Builder {
    constructor(public model: DocumentModel) {
    }
-   New<T extends Expr>(Cls: ExprClass<T>, owner: Expr): T {
+   New<T extends Expr>(Cls: ExprClass<T>, owner: Expr, typing: JSONSchema): T {
       const key = createLDXKey()
-      const xpr = new Cls(this.model, key, owner)
+      const xpr = new Cls(this.model, key, owner, typing)
       this.model.nodes.set(key, xpr)
       return xpr
    }
 }
 
-function buildArrayFromElements(elements: Array<AST.Expression | AST.SpreadElement | null>, owner: Expr) {
+async function buildArrayFromElements(elements: Array<AST.Expression | AST.SpreadElement | null>, owner: Expr, typing: JSONSchema) {
    const xpr = owner.New(ArrayExpr)
    for (const item of elements) {
       if (item.type === "SpreadElement") {
          const xitem = new ArraySpreadElement()
-         xitem.value = xpr.NewFrom(item)
+         xitem.value = await xpr.NewFrom(item, typing)
          xpr.elements.push(xitem)
       }
       else {
          const xitem = new ArrayAppendElement()
-         xitem.value = xpr.NewFrom(item)
+         xitem.value = await xpr.NewFrom(item, typing)
          xpr.elements.push(xitem)
       }
    }
    return xpr
 }
 
-export function buildExpression(node: AST.Any, owner: Expr): Expr {
+export async function buildExpression(node: AST.Any, owner: Expr, typing: JSONSchema): Promise<Expr> {
    switch (node.type) {
       case 'Literal': {
-         const xpr = owner.NewConst(node.value)
+         const xpr = owner.NewConst(node.value, typing)
          return xpr
       }
       case 'Identifier': {
-         const xpr = owner.New(IdentifierExpr)
+         const xpr = owner.New(IdentifierExpr, typing)
          xpr.name = node.name
          return xpr
       }
       case 'BinaryExpression': {
          const { left, right, operator } = node as AST.BinaryExpression
-         const xpr = owner.New(BinaryExpr)
+         const xpr = owner.New(BinaryExpr, typing)
          xpr.operator = operator
-         xpr.left = xpr.NewFrom(left)
-         xpr.right = xpr.NewFrom(right)
+         xpr.left = await xpr.NewFrom(left)
+         xpr.right = await xpr.NewFrom(right)
          return xpr
       }
       case 'LogicalExpression': {
          const { left, right, operator } = node as AST.LogicalExpression
-         const xpr = owner.New(LogicalExpr)
+         const xpr = owner.New(LogicalExpr, typing)
          xpr.operator = operator
-         xpr.left = xpr.NewFrom(left)
-         xpr.right = xpr.NewFrom(right)
+         xpr.left = await xpr.NewFrom(left)
+         xpr.right = await xpr.NewFrom(right)
          return xpr
       }
       case 'UnaryExpression': {
          const { argument, operator, prefix } = node as AST.UnaryExpression
          if (operator === 'delete' && argument.type === 'MemberExpression') {
             const { object, property, computed } = argument as AST.MemberExpression
-            const xpr = owner.New(DeleteMemberExpr)
-            xpr.object = xpr.NewFrom(object)
-            xpr.property = computed ? xpr.NewFrom(property) : owner.NewConst((property as AST.Identifier).name)
+            const xpr = owner.New(DeleteMemberExpr, typing)
+            xpr.object = await xpr.NewFrom(object)
+            xpr.property = computed ? await xpr.NewFrom(property) : owner.NewConst((property as AST.Identifier).name)
             return xpr
          } else {
-            const xpr = owner.New(UnaryExpr)
+            const xpr = owner.New(UnaryExpr, typing)
             xpr.operator = operator
-            xpr.argument = xpr.NewFrom(argument)
+            xpr.argument = await xpr.NewFrom(argument)
             return xpr
          }
       }
       case 'UpdateExpression': {
          const { argument, operator, prefix } = node as AST.UpdateExpression
-         const xpr = owner.New(UpdateExpr)
+         const xpr = owner.New(UpdateExpr, typing)
          xpr.operator = operator
-         xpr.argument = xpr.NewFrom(argument)
+         xpr.argument = await xpr.NewFrom(argument)
          return xpr
       }
       case 'AssignmentExpression': {
          const { left, right, operator } = node as AST.AssignmentExpression
-         const xpr = owner.New(AssignmentExpr)
+         const xpr = owner.New(AssignmentExpr, typing)
          xpr.operator = operator
-         xpr.left = xpr.NewFrom(left)
-         xpr.right = xpr.NewFrom(right)
+         xpr.left = await xpr.NewFrom(left)
+         xpr.right = await xpr.NewFrom(right)
          return xpr
       }
       case 'MemberExpression': {
          const { object, property, computed } = node as AST.MemberExpression
-         const xpr = owner.New(MemberExpr)
-         xpr.object = xpr.NewFrom(object)
-         xpr.property = computed ? xpr.NewFrom(property) : xpr.NewConst((property as AST.Identifier).name)
+         const xpr = owner.New(MemberExpr, typing)
+         xpr.object = await xpr.NewFrom(object)
+         xpr.property = computed ? await xpr.NewFrom(property) : xpr.NewConst((property as AST.Identifier).name)
          return xpr
       }
       case 'ConditionalExpression': {
          const { test, consequent, alternate } = node as AST.ConditionalExpression
-         const xpr = owner.New(ConditionalExpr)
-         xpr.test = xpr.NewFrom(test)
-         xpr.consequent = xpr.NewFrom(consequent)
-         xpr.alternate = xpr.NewFrom(alternate)
+         const xpr = owner.New(ConditionalExpr, typing)
+         xpr.test = await xpr.NewFrom(test)
+         xpr.consequent = await xpr.NewFrom(consequent)
+         xpr.alternate = await xpr.NewFrom(alternate)
          return xpr
       }
       case 'ThisExpression': {
-         const xpr = owner.New(ThisExpr)
+         const xpr = owner.New(ThisExpr, typing)
          return xpr
       }
       case 'CallExpression': {
          const { callee, arguments: args } = node as AST.CallExpression
-         const xpr = owner.New(CallExpr)
-         xpr.callee = xpr.NewFrom(callee)
-         xpr.arguments = buildArrayFromElements(args, xpr)
+         const xpr = owner.New(CallExpr, typing)
+         xpr.callee = await xpr.NewFrom(callee, CommonTypes.function)
+         xpr.arguments = await buildArrayFromElements(args, xpr, CommonTypes.any)
          return xpr
       }
       case 'ArrayExpression': {
          const { elements } = node as AST.ArrayExpression
-         const xpr = buildArrayFromElements(elements, owner)
+         const xpr = buildArrayFromElements(elements, owner, typing)
          return xpr
       }
       case 'ObjectExpression': {
          const { properties } = node as AST.ObjectExpression
-         const xpr = owner.New(ObjectExpr)
+         const xpr = owner.New(ObjectExpr, typing)
          for (const prop of properties) {
             if (prop.type === "Property") {
                const { key, value } = prop
-               const xprop = new ObjectAssignProperty()
-               xprop.key = xpr.NewFrom(key)
-               xprop.value = xpr.NewFrom(value)
-               xpr.properties.push(xprop)
+               if (key.type === "Literal") {
+                  const xprop = new ObjectNamedProperty()
+                  xprop.key = xpr.NewConst(key.value)
+                  xprop.value = await xpr.NewFrom(value)
+                  xpr.properties.push(xprop)
+               }
+               else {
+                  const xprop = new ObjectDynamicProperty()
+                  xprop.key = await xpr.NewFrom(key)
+                  xprop.value = await xpr.NewFrom(value)
+                  xpr.properties.push(xprop)
+               }
             }
             else {
                const { argument } = prop
                const xprop = new ObjectSpreadProperty()
-               xprop.value = xpr.NewFrom(argument)
+               xprop.value = await xpr.NewFrom(argument)
                xpr.properties.push(xprop)
             }
          }
@@ -171,13 +183,13 @@ export function buildExpression(node: AST.Any, owner: Expr): Expr {
       }
 
       case 'JSXExpressionContainer': {
-         return buildExpression(node.expression, owner)
+         return buildExpression(node.expression, owner, typing)
       }
       case 'JSXElement': {
-         return buildLDXElement(node, owner)
+         return buildLDXElement(node, owner, typing)
       }
       case 'LDXDocument': {
-         return buildLDXDocument(node, owner)
+         return buildLDXDocument(node, owner, typing)
       }
 
       default:
@@ -191,13 +203,19 @@ export function createLDXKey(): string {
    return (ldx_keys++).toString()
 }
 
-export function buildLDXElement(node: AST.JSXElement, owner: Expr): LDXElementExpr {
+export async function buildLDXElement(node: AST.JSXElement, owner: Expr, typing: JSONSchema): Promise<LDXElementExpr> {
    const { name, attributes } = node.openingElement
-   const xpr = owner.New(LDXElementExpr)
-   xpr.tag = getSymbolFromNode(name)
-   xpr.props = xpr.New(ObjectExpr)
+   const component_id = getSymbolFromNode(name)
+   const entry = ComponentsRegistry.acquireComponent(component_id)
+   const manifest = await entry.fetch()
+
+   const xpr = owner.New(LDXElementExpr, typing)
+   xpr.typing = typing
+   xpr.tag = component_id
+   xpr.props = xpr.New(ObjectExpr, manifest["view"])
    xpr.dock = xpr.New(ObjectExpr)
-   //xpr.children = null
+   xpr.entry = entry
+
    for (const attr of attributes) {
       if (attr.type === "JSXAttribute") {
          const { name } = attr
@@ -212,9 +230,10 @@ export function buildLDXElement(node: AST.JSXElement, owner: Expr): LDXElementEx
          }
          let target = xpr[ns]
          if (target instanceof ObjectExpr) {
-            const xprop = new ObjectAssignProperty()
+            const xprop = new ObjectNamedProperty()
+            const xtyping = xpr.props?.properties?.[key] || CommonTypes.any
             xprop.key = target.NewConst(key)
-            xprop.value = target.NewFrom(attr.value)
+            xprop.value = await target.NewFrom(attr.value, xtyping)
             target.properties.push(xprop)
          }
          else {
@@ -228,14 +247,14 @@ export function buildLDXElement(node: AST.JSXElement, owner: Expr): LDXElementEx
    return xpr
 }
 
-export function buildLDXDocument(node: AST.LDXDocument, owner: Expr): LDXDocumentExpr {
+export async function buildLDXDocument(node: AST.LDXDocument, owner: Expr, typing: JSONSchema): Promise<LDXDocumentExpr> {
    const { items } = node
    const xpr = owner.New(LDXDocumentExpr)
    const chunks: string[] = []
    for (const item of items) {
       if (item instanceof Object) {
          const key = createLDXKey()
-         const value = xpr.NewFrom(item)
+         const value = await xpr.NewFrom(item)
          xpr.embeds.set(key, value)
          chunks.push(`\x00${key}\x01`)
       }
@@ -254,8 +273,8 @@ export async function createDocumentModel(id: string, ast: AST.LDXLayer | string
    const model = new DocumentModel(id)
    model.builder = new Builder(model)
 
-   const layer = new DocumentLayer(model, createLDXKey(), null)
-   layer.layout = layer.NewFrom(ast.layout)
+   const layer = new DocumentLayer(model, createLDXKey(), null, CommonTypes.display)
+   layer.layout = await layer.NewFrom(ast.layout)
 
    model.base = layer
    return model

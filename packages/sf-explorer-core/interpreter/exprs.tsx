@@ -5,26 +5,41 @@ import { EditorState } from 'lexical'
 import { emitASTFromValue } from "../ast/producer"
 import { IGenerator } from "./generator"
 import { Builder, buildExpression } from "./builder"
+import { CommonTypes } from "../ast/schema/helpers"
+import { JSONSchema } from "../ast/schema/schema"
+import { ComponentEntry } from "../library/components"
 
-export type ExprClass<T extends Expr> = new (model: DocumentModel, $key: string, owner: Expr) => T
+export type ExprClass<T extends Expr> = new (model: DocumentModel, $key: string, owner: Expr, typing: JSONSchema) => T
 
 export abstract class Expr {
-   constructor(readonly model: DocumentModel, readonly $key: string, public owner: Expr) { }
+   constructor(
+      readonly model: DocumentModel,
+      readonly $key: string,
+      public owner: Expr,
+      public typing: JSONSchema,
+   ) {
+   }
    abstract exportAST(gen: IGenerator): AST.Any
    abstract read(ctx: IContext): any
    write(value: any, ctx: IContext): any {
       throw new Error(`Cannot be write`)
    }
-   New<T extends Expr>(Cls: ExprClass<T>): T {
-      return this.model.builder.New(Cls, this)
+   New<T extends Expr>(Cls: ExprClass<T>, typing: JSONSchema = CommonTypes.any): T {
+      return this.model.builder.New(Cls, this, typing)
    }
-   NewFrom(node: AST.Any): Expr {
-      return buildExpression(node, this)
+   NewFrom(node: AST.Any, typing: JSONSchema = CommonTypes.any): Promise<Expr> {
+      return buildExpression(node, this, typing)
    }
-   NewConst(value: any): Expr {
-      const xpr = this.New(LiteralExpr)
+   NewConst(value: any, typing: JSONSchema = CommonTypes.any): LiteralExpr {
+      const xpr = this.New(LiteralExpr, typing)
       xpr.value = value
       return xpr
+   }
+   async update(updater: (target: this, builder: Builder) => Expr | Promise<Expr>): Promise<Expr> {
+      return this.model.update(this, updater)
+   }
+   toString() {
+      return `${this.constructor.name}:${this.$key}`
    }
 }
 
@@ -252,9 +267,15 @@ export class ArrayExpr extends Expr {
    }
 }
 
-export class ObjectAssignProperty {
-   key: Expr
-   value: Expr
+export abstract class ObjectProperty<K extends any = any> {
+   key?: K = null
+   value: Expr = null
+   get name(): string { return null }
+   abstract assign(object: MapLike<any>, ctx: IContext)
+   abstract exportAST(gen: IGenerator, from: Expr)
+}
+
+export class ObjectDynamicProperty extends ObjectProperty<Expr> {
    assign(object: MapLike<any>, ctx: IContext) {
       const key = this.key.read(ctx)
       const value = this.value.read(ctx)
@@ -269,8 +290,24 @@ export class ObjectAssignProperty {
    }
 }
 
-export class ObjectSpreadProperty {
-   value: Expr
+export class ObjectNamedProperty extends ObjectProperty<LiteralExpr> {
+   get name(): string {
+      return this.key.value
+   }
+   assign(object: MapLike<any>, ctx: IContext) {
+      const value = this.value.read(ctx)
+      object[this.key.value] = value
+   }
+   exportAST(gen: IGenerator, from: Expr) {
+      return {
+         type: "Property",
+         key: gen.generateXpr(from, this.key),
+         value: gen.generateXpr(from, this.value),
+      } as AST.Property
+   }
+}
+
+export class ObjectSpreadProperty extends ObjectProperty<never> {
    assign(object: MapLike<any>, ctx: IContext) {
       const value = this.value.read(ctx)
       Object.assign(object, value)
@@ -284,7 +321,7 @@ export class ObjectSpreadProperty {
 }
 
 export class ObjectExpr extends Expr {
-   properties: (ObjectAssignProperty | ObjectSpreadProperty)[] = []
+   properties: ObjectProperty[] = []
    override read(ctx: IContext): any {
       const object: MapLike<any> = {}
       for (const prop of this.properties) {
@@ -405,6 +442,7 @@ export class AssignmentExpr extends Expr {
 
 export class LDXElementExpr extends Expr {
    tag: string
+   entry: ComponentEntry
    props: ObjectExpr
    dock: ObjectExpr
    override read(ctx: IContext): any {
@@ -415,13 +453,13 @@ export class LDXElementExpr extends Expr {
          const attrs = this[ns]
          if (attrs instanceof ObjectExpr) {
             for (const att of attrs.properties) {
-               const key = ((att as ObjectAssignProperty).key as LiteralExpr).value
+               const name = att.name
                const value = att.value
                attributes.push({
                   type: "JSXAttribute",
                   name: (ns === "props") ? {
                      type: "JSXIdentifier",
-                     name: key,
+                     name,
                   } : {
                      type: "JSXNamespacedName",
                      namespace: {
@@ -430,7 +468,7 @@ export class LDXElementExpr extends Expr {
                      },
                      name: {
                         type: "JSXIdentifier",
-                        name: key,
+                        name,
                      }
                   },
                   value: {
@@ -478,7 +516,9 @@ export class LDXDocumentExpr extends Expr {
    }
 }
 
-function LDXDocumentEditor(props: { model: LDXDocumentExpr }) {
+function LDXDocumentEditor(props: {
+   model: LDXDocumentExpr,
+}) {
    return <></>
 }
 
@@ -504,12 +544,16 @@ export class DocumentModel {
    constructor(readonly id: string) {
       DocumentModel.models.set(id, this)
    }
-   update(updater: (builder: Builder) => void) {
+   async update<T extends Expr>(target: T, updater: (target: T, builder: Builder) => Expr | Promise<Expr>): Promise<Expr> {
       const builder = new Builder(this)
-      updater(builder)
+      let result = updater(target, builder)
+      if (result instanceof Promise) {
+         result = await result
+      }
       for (const listener of this.listeners) {
          listener()
       }
+      return result
    }
    listen(listener: () => void) {
       this.listeners.add(listener)

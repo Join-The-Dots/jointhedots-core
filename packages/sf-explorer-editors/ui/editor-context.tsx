@@ -2,7 +2,6 @@ import React from 'react'
 import { MapLike } from '@sf-explorer/core'
 import { ComponentResource } from '@sf-explorer/core'
 import { JSONSchema } from '@sf-explorer/core'
-import * as AST from '@sf-explorer/core'
 
 export type ValueProps<T = any> = {
    name?: string
@@ -10,7 +9,9 @@ export type ValueProps<T = any> = {
    typing: JSONSchema
    onChange?: (value: T) => void
    onExpand?: (content: React.ReactElement) => void
+   provider?: IEditorProvider
 }
+
 export enum EditorValueMatch {
    None = 0,
    Valid = 1,
@@ -18,35 +19,35 @@ export enum EditorValueMatch {
    Best = 3,
 }
 
-export type EditorPanel = {
+export type EditorPanel<T = any> = {
    icon?: string
-   view: React.ComponentType<ValueProps>
+   view: React.ComponentType<ValueProps<T>>
 }
 
-export type EditorMenuItem = {
+export type EditorMenuItem<T = any> = {
    title: string
    icon?: string
-   condition?: (value: any, typing: JSONSchema, context: IEditionContext) => boolean
-   execute: (value: any, typing: JSONSchema, context: IEditionContext, onChange: any) => void
+   condition?: (value: T, typing: JSONSchema, context: IEditionEnvironment) => boolean
+   execute: (value: T, typing: JSONSchema, context: IEditionEnvironment, onChange: T) => void
 }
 
-export type EditorMenu = {
+export type EditorMenu<T = any> = {
    icon?: string
    sections: {
       title?: string
-      condition?: (value: any, typing: JSONSchema) => boolean
-      items: EditorMenuItem[]
+      condition?: (value: T, typing: JSONSchema) => boolean
+      items: EditorMenuItem<T>[]
    }[]
 }
 
-export type EditorDescriptor = {
-   input?: React.ComponentType<ValueProps>
-   heading?: React.ComponentType<ValueProps>
-   panels?: MapLike<EditorPanel>
-   menu?: EditorMenu
+export type EditorDescriptor<T = any> = {
+   input?: React.ComponentType<ValueProps<T>>
+   heading?: React.ComponentType<ValueProps<T>>
+   panels?: MapLike<EditorPanel<T>>
+   menu?: EditorMenu<T>
 }
 
-export type EditionController = {
+export type EditionDriver<T = any> = {
 
    // UI
    name: string
@@ -55,8 +56,8 @@ export type EditionController = {
 
    // Handlers
    matchType?: (schema: JSONSchema) => EditorValueMatch
-   matchValue?: (value: any, handler?: ComponentResource) => EditorValueMatch
-   createValue?: (schema: JSONSchema, prevValue?: any) => any
+   matchValue?: (value: T, handler?: ComponentResource) => EditorValueMatch
+   createValue?: (schema: JSONSchema, prevValue?: T) => T
 }
 
 export interface IEditionOperation {
@@ -64,21 +65,49 @@ export interface IEditionOperation {
    cancel()
 }
 
-export interface IEditionContext {
+export interface IEditionEnvironment {
    readonly editing: boolean
    getAttachment<T = any>(name: string): T
    registerOperation(op: IEditionOperation)
    unregisterOperation(op: IEditionOperation)
 }
 
-export interface IEditorProvider {
-   findControllerOf(value: any, typing: JSONSchema): Promise<EditionController>
-   listControllerOf(value: any, typing: JSONSchema): Promise<Map<EditionController, EditorValueMatch>>
+export interface IEditorProvider<T = any> {
+   findControllerOf<Tx extends T>(value: Tx, typing: JSONSchema): Promise<EditionDriver<Tx>>
+   listControllerOf<Tx extends T>(value: Tx, typing: JSONSchema): Promise<Map<EditionDriver<Tx>, EditorValueMatch>>
+   stringify(value: T): { text: string, lang: string }
 }
 
-export const EditionContext = React.createContext<IEditionContext>(null)
+export class EditionEnvironment implements IEditionEnvironment {
+   operations = new Set<IEditionOperation>
+   attachements = {}
+   get editing(): boolean {
+      return this.operations.size > 0
+   }
+   getAttachment<T = any>(name: string): T {
+      return this.attachements[name]
+   }
+   registerOperation(op: IEditionOperation) {
+      this.operations.add(op)
+   }
+   unregisterOperation(op: IEditionOperation) {
+      this.operations.delete(op)
+   }
+   validate() {
+      for (const op of this.operations.values()) {
+         op.validate()
+      }
+   }
+   cancel() {
+      for (const op of this.operations.values()) {
+         op.cancel()
+      }
+   }
+}
 
-export function sortMatchedControllers(matcheds: Map<EditionController, EditorValueMatch>): EditionController[] {
+export const EditionContext = React.createContext<IEditionEnvironment>(null)
+
+export function sortMatchedControllers(matcheds: Map<EditionDriver, EditorValueMatch>): EditionDriver[] {
    return Array.from(matcheds.keys()).sort((a, b) => {
       const clvl = matcheds.get(a) - matcheds.get(b)
       if (clvl !== 0) return clvl

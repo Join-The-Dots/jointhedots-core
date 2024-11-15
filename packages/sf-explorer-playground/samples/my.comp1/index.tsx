@@ -8,12 +8,13 @@ export default function (props) {
 
     const onClick = () => {
         const xpr = instr.getElement() as LDXElementExpr
-        xpr.model.update((builder) => {
+        xpr.update(async (self, B) => {
             //builder.modify(xpr)
-            xpr.props.properties[0].value = xpr.props.NewFrom({
+            xpr.props.properties[0].value = await xpr.props.NewFrom({
                 type: "Literal",
                 value: "oo",
             } as any)
+            return xpr
         })
     }
 

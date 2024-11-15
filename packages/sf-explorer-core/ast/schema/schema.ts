@@ -134,7 +134,7 @@ export type JSONSchemaCustom = {
 
    // Component related schema
    docking?: DockingSchema
-   template?: TemplateSchema // descriptor to create a valid expression for this schema
+   templates?: TemplateSchema[] // descriptor to create a valid expression for this schema
    binding?: BindingSchema
    aliases?: MapLike<string>
 }
@@ -147,6 +147,8 @@ export type BindingSchema = {
 
 export type TemplateSchema = {
    title?: string
+   icon?: string
+   description?: string
    args?: JSONSchema[]
    content: ExpressionSchema
 }

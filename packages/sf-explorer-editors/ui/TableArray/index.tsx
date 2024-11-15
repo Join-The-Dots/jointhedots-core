@@ -4,7 +4,7 @@ import { DragZone, DropZone, getEventInElementPosition } from '../DragAndDrop'
 import { IEditorProvider } from '@sf-explorer/editors/ui/editor-context'
 import { JSONSchema } from '@sf-explorer/core'
 import Button from '@sf-explorer/editors/ui/ButtonIcon'
-import ValueInput from '../InputValue'
+import ValueInput from '../ValueInput'
 import "./index.scss"
 
 export function ArrayRow(props: {

@@ -2,7 +2,7 @@ import React from 'react'
 import { ValueProps, EditorDescriptor, EditorValueMatch } from "@sf-explorer/editors/ui/editor-context"
 import { Schema, CommonTypes } from '@sf-explorer/core'
 import { ArrayTable } from '@sf-explorer/editors/ui/TableArray'
-import { ExpressionsEditors } from '..'
+import { ElementsEditors } from '..'
 import { ExpandableInputHOC } from '@sf-explorer/editors/ui/InputExpandable'
 import { createValueFromTyping } from '@sf-explorer/core'
 import { JSONSchema } from '@sf-explorer/core'
@@ -14,7 +14,7 @@ function ArrayEditor(props: ValueProps<ArrayExpr>) {
    return (<ArrayTable
       items={value.elements}
       itemTyping={typing?.items as JSONSchema || CommonTypes.any}
-      provider={ExpressionsEditors}
+      provider={ElementsEditors}
       onChange={(elements) => {
          value.elements = elements
       }}
@@ -31,20 +31,14 @@ const editor: EditorDescriptor = {
    }
 }
 
-ExpressionsEditors.registerController({
+ElementsEditors.registerController({
    name: "Array",
-   icon: "code:symbol/list",
+   icon: "bi:list-task",
+   cls: ArrayExpr,
    editor,
    matchType(schema: JSONSchema): EditorValueMatch {
       if (Schema.isType(schema, "array")) return EditorValueMatch.Valid
       if (!schema.type && schema.items) return EditorValueMatch.Valid
       return EditorValueMatch.None
-   },
-   matchValue(value: ArrayExpr): EditorValueMatch {
-      if (Array.isArray(value)) return EditorValueMatch.Valid
-      return EditorValueMatch.None
-   },
-   createValue(schema: JSONSchema, prevValue: any): any {
-      return []
    }
 })

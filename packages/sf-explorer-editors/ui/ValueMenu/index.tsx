@@ -1,10 +1,10 @@
 import React from 'react'
 import { Menu } from '@sf-explorer/editors/ui/openContextualMenu'
-import { EditionController, EditorMenu, EditorMenuItem, IEditionContext, ValueProps } from '@sf-explorer/editors/ui/editor-context'
+import { EditionDriver, EditorMenu, EditorMenuItem, IEditionEnvironment, ValueProps } from '@sf-explorer/editors/ui/editor-context'
 import { stringifyDescriptor } from '@sf-explorer/core'
 import { convertTextToExpression } from '@sf-explorer/core'
 
-export function ValueMenu(props: ValueProps & { menu?: EditorMenu, context: IEditionContext, ctl: EditionController, onClose: () => void }) {
+export function ValueMenu(props: ValueProps & { menu?: EditorMenu, context: IEditionEnvironment, ctl: EditionDriver, onClose: () => void }) {
    const { ctl, context, menu, value, typing, onChange, onClose } = props
 
    const onCopy = async () => {

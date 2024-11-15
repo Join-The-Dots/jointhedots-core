@@ -1,6 +1,5 @@
 import { JSONSchema } from "@sf-explorer/core"
 import { PropertyRows, PropertyTable } from "../TableProperties"
-import { DataEditors } from "@sf-explorer/editors/datas"
 import { useCallback, useEffect, useState } from "react"
 import { ComponentPublication } from "@sf-explorer/core"
 import { ComponentEntry, ComponentManifest, ComponentsRegistry } from "@sf-explorer/core"
@@ -11,58 +10,33 @@ import Icon from "@sf-explorer/core/ui/Icon"
 import Button from "@sf-explorer/editors/ui/Button"
 import * as AST from "@sf-explorer/core"
 
-export function DataEditor(props: {
-   data: any
-   schema: JSONSchema
-   onChange: (data: any) => void
-}) {
-   const { data, schema, onChange } = props
-   return <PropertyTable>
-      {schema?.properties && <PropertyRows
-         typings={schema?.properties}
-         values={data}
-         provider={DataEditors}
-         onChange={onChange}
-      />}
-   </PropertyTable>
-}
-
-export function DataEditorDialog(props: {
-   manifest: ComponentManifest
-   data: any
-   schema: JSONSchema
-   onValidate: (data: any) => void
-   onCancel: () => void
-}) {
-   const { manifest, data, schema, onValidate, onCancel } = props
-   const [edited, setEdited] = useState(data)
-   const { title, icon } = manifest
-   return <Stack padding={10} vertical>
-      <Stack title={manifest.description} padding={10}>
-         <Stack.FixedDock><Icon name={icon} /></Stack.FixedDock>
-         <Stack.FlexDock> <b style={{ textTransform: "capitalize" }}>{title || manifest['id']}</b></Stack.FlexDock>
-      </Stack>
-      <DataEditor
-         schema={schema}
-         data={edited}
-         onChange={setEdited}
-      />
-      <Stack gap={5} padding={10}>
-         <Stack.FixedDock>
-            <Button onClick={() => onValidate(edited)}>OK</Button>
-         </Stack.FixedDock>
-         <Stack.FixedDock>
-            <Button onClick={() => onCancel()}>Cancel</Button>
-         </Stack.FixedDock>
-      </Stack>
-   </Stack >
-}
-
 type Selected = {
    component: ComponentEntry
    manifest: ComponentManifest
+   templates: AST.TemplateSchema[]
    schema: JSONSchema
-   data: any
+}
+
+export function PanelSelectTemplate(props: {
+   templates: AST.TemplateSchema[]
+   onValidate: (data: any) => void
+   onCancel: () => void
+}) {
+   const { templates, onValidate, onCancel } = props
+   return <Stack padding={10} vertical>
+      {templates.map((template) => {
+         const { title, icon, description } = template
+         return <Stack title={description} padding={10} onClick={() => {
+            onValidate(template.content)
+         }}>
+            <Stack.FixedDock><Icon name={icon} /></Stack.FixedDock>
+            <Stack.FlexDock> <b style={{ textTransform: "capitalize" }}>{title}</b></Stack.FlexDock>
+         </Stack>
+      })}
+      <Stack.FixedDock>
+         <Button onClick={() => onCancel()}>Cancel</Button>
+      </Stack.FixedDock>
+   </Stack >
 }
 
 export function PanelNodeCreation(props: {
@@ -78,12 +52,18 @@ export function PanelNodeCreation(props: {
    useEffect(() => {
       component && component.fetch().then(manifest => {
          const schema = manifest[service] || AST.CommonTypes.any as JSONSchema
-         setSelected({
-            component,
-            manifest,
-            schema,
-            data: createValueFromTyping(schema)
-         })
+         const { templates } = manifest
+         if (templates) {
+            setSelected({
+               component,
+               manifest,
+               schema,
+               templates,
+            })
+         }
+         else {
+            onComplete(component)
+         }
       })
    }, [component])
 
@@ -101,11 +81,9 @@ export function PanelNodeCreation(props: {
          onSelect={select}
       />
    }
-   else {
-      return <DataEditorDialog
-         manifest={selected.manifest}
-         schema={selected.schema}
-         data={selected.data}
+   else if (selected) {
+      return <PanelSelectTemplate
+         templates={selected.templates}
          onValidate={complete}
          onCancel={onCancel ? onCancel : () => setSelected(null)}
       />

@@ -11,7 +11,7 @@ import './index.css';
 import * as React from 'react';
 import {ReactNode} from 'react';
 
-import joinClasses from '../../lexical/utils/joinClasses';
+import joinClasses from '../../designer/utils/joinClasses';
 
 export default function Button({
   'data-test-id': dataTestId,

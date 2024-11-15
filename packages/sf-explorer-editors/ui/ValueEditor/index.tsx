@@ -2,10 +2,8 @@ import React from 'react'
 import { IEditorProvider, ValueProps } from '../editor-context'
 import "./index.scss"
 import { useAsyncState } from '@sf-explorer/editors/hooks/useAsyncState'
-
-function NoPanel(): JSX.Element {
-   return <>unsupported</>
-}
+import { NoInput } from '../ValueInput'
+import "./index.scss"
 
 export default function ValueEditor(props: ValueProps & {
    provider: IEditorProvider
@@ -23,7 +21,7 @@ export default function ValueEditor(props: ValueProps & {
       const { ctl, value, typing } = state
       let View = ctl.editor?.panels?.main?.view
       if (!View) View = ctl.editor?.input
-      if (!View) View = NoPanel
+      if (!View) View = NoInput
       return (<div className="LDX-ValueEditor">
          <View {...props} typing={typing} value={value} />
       </div>)
@@ -32,6 +30,6 @@ export default function ValueEditor(props: ValueProps & {
       return <>...</>
    }
    else {
-      return <>unsupported</>
+      return <NoInput {...props} />
    }
 }

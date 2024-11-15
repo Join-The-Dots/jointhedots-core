@@ -3,7 +3,7 @@ import { CommonTypes, Schema } from '@sf-explorer/core'
 import { MapLike } from '@sf-explorer/core'
 import { EditorMenu, IEditorProvider } from '@sf-explorer/editors/ui/editor-context'
 import { DocumentationSchema, JSONSchema } from '@sf-explorer/core'
-import ValueInput from '@sf-explorer/editors/ui/InputValue'
+import ValueInput from '@sf-explorer/editors/ui/ValueInput'
 import "./index.scss"
 
 type SectionsMap = {

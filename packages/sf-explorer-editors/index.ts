@@ -1,1 +1,1 @@
-export * from "./lexical"
+export * from "./designer"

@@ -104,11 +104,13 @@ export class InstrumentationState {
                   selection.setRenderer(zoneSelectedRenderer, zoneSelectedParentRenderer)
                   zone.selection = selection
                   zone.updateZone()
+                  if (!focused) focused = zone
                }
             }
-            this.focused = focused
             this.unhighligth()
+            InstrumentationEvents.onSelect.apply(this)
          }
+         this.focus(focused)
       }
       else if (target) {
          this.select(target.getElement(), multiple, target)
@@ -121,10 +123,10 @@ export class InstrumentationState {
       if (target instanceof Expr) {
          this.selections.delete(target)
          if (this.focused?.getElement() === target) {
-            this.focused = null
+            this.focus(null)
          }
       }
-      else {
+      else if (this.selections.size > 0) {
          for (const target of this.selections) {
             if (this.instrumenteds.has(target)) {
                for (const zone of this.instrumenteds.get(target)) {
@@ -134,7 +136,28 @@ export class InstrumentationState {
             }
          }
          this.selections.clear()
-         this.focused = null
+         InstrumentationEvents.onSelect.apply(this)
+         this.focus(null)
+      }
+   }
+   focus(target: ElementInstrumentation) {
+      if (this.focused !== target) {
+         if (target && !this.selections.has(target.getElement())) {
+            this.select(target, false, target)
+         }
+         else {
+            this.focused = target
+            InstrumentationEvents.onFocus.apply(this)
+         }
+      }
+   }
+   findZone(target: ElementController | Expr): ElementInstrumentation {
+      if (target instanceof Expr) {
+         return this.instrumenteds.get(target)?.[0]
+      }
+      else {
+         const element = target.getElement()
+         return this.instrumenteds.get(element)?.find(x => x.getController() === target)
       }
    }
    highligth(hovered: ZoneSelection, renderer: (sel: ZoneSelection) => void) {
@@ -200,7 +223,6 @@ export class InstrumentationState {
          }
       }
    }
-
 }
 
 export const Instrumentation = new InstrumentationState()
@@ -225,6 +247,11 @@ export const InstrumentationEndpoints = {
       zone: ElementInstrumentation
       controller: ElementController
    }>(),
+}
+
+export const InstrumentationEvents = {
+   "onSelect": new HandlersManifold<InstrumentationState>(),
+   "onFocus": new HandlersManifold<InstrumentationState>(),
 }
 
 let timer: any = 0
@@ -382,7 +409,6 @@ export const EventHandlers = {
          }
       }
       catch (e) { console.error("onSelect", e) }
-      Instrumentation.unselect()
       return false
    },
    onZoneHover(e: MouseEvent) {

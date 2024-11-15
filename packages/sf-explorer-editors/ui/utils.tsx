@@ -1,9 +1,9 @@
-import { EditionController, EditorValueMatch, IEditionContext, IEditionOperation, IEditorProvider } from "./editor-context"
+import { EditionDriver, EditorValueMatch, IEditionEnvironment, IEditionOperation, IEditorProvider } from "./editor-context"
 import { MapLike } from "@sf-explorer/core"
 import { JSONSchema } from "@sf-explorer/core"
 import * as AST from '@sf-explorer/core'
 
-export abstract class DescriptorEditionContext implements IEditionContext {
+export abstract class DescriptorEditionContext implements IEditionEnvironment {
    operations = new Set<IEditionOperation>
    attachements = {}
    get editing(): boolean {

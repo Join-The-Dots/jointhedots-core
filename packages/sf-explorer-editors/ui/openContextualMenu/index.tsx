@@ -174,7 +174,7 @@ export default function openContextualMenu<T>(
       if (node) {
 
          // Remove popup
-         document.body.removeEventListener("mousedown", clickOutside)
+         window.removeEventListener("mousedown", clickOutside)
          document.body.removeChild(node)
          root.unmount()
          node = null
@@ -192,7 +192,7 @@ export default function openContextualMenu<T>(
 
    // Append popup in document on top of stack
    document.body.appendChild(node)
-   document.body.addEventListener("mousedown", clickOutside)
+   window.addEventListener("mousedown", clickOutside, { capture: true })
    computeEdgeBoxDOM(position, node, tracked, document.body)
    stack.push({ node, close })
 

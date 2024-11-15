@@ -7,7 +7,7 @@ import openContextualMenu, { Menu } from '@sf-explorer/editors/ui/openContextual
 import { MapLike } from '@sf-explorer/core'
 import { ComponentsRegistry } from '@sf-explorer/core'
 import { ComponentPublication, IComponentProvider } from '@sf-explorer/core'
-import TextInput from '@sf-explorer/editors/lexical/ui/TextInput'
+import TextInput from '@sf-explorer/editors/designer/ui/TextInput'
 import './index.scss'
 import { getComponentSmallName, groupComponentPublications } from '@sf-explorer/editors/common/pub-helpers'
 

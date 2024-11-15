@@ -2,33 +2,36 @@ import { MapLike } from "../../common/types"
 import { JSONSchema7TypeName } from "json-schema"
 import { JSONSchema } from "./schema"
 
-export const CommonTypes: MapLike<JSONSchema> = {
+export const CommonTypes = {
    boolean: {
       type: "boolean"
-   },
+   } as JSONSchema,
    string: {
       type: "string"
-   },
+   } as JSONSchema,
    number: {
       type: "number"
-   },
+   } as JSONSchema,
    object: {
       type: "object"
-   },
+   } as JSONSchema,
    view: {
       type: "view"
-   },
-   element: {
-      type: "element"
-   },
+   } as JSONSchema,
+   display: {
+      type: "display"
+   } as JSONSchema,
    function: {
       type: "function"
-   },
+   } as JSONSchema,
+   null: {
+      type: "null"
+   } as JSONSchema,
    unknown: {
       type: "null"
-   },
+   } as JSONSchema,
    any: {
-   },
+   } as JSONSchema,
 }
 
 export const CommonMakers = {

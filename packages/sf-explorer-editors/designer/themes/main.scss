@@ -1,0 +1,52 @@
+
+.theme-light {
+  --app-windows-tab-inactive-backColor: #ddd;
+  --app-windows-tab-inactive-foreColor: #666;
+  --app-windows-tab-active-backColor: #999;
+  --app-windows-tab-active-foreColor: #234;
+  --app-windows-tab-hover-backColor: #def;
+  --app-windows-tab-hover-foreColor: #567;
+  --app-windows-tab-focus-color: #fb0;
+  --app-windows-bar-backColor: #ddd;
+
+  --app-windows-btn-backColor: #ccc;
+  --app-windows-btn-foreColor: #789;
+
+  --app-windows-scroll-backColor: var(--vscode-scrollbarSlider-background);
+  --app-windows-scroll-hoverColor: var(--vscode-scrollbarSlider-hoverBackground);
+  --app-windows-scroll-activeColor: var(--vscode-scrollbarSlider-activeBackground);
+
+  --app-windows-toolbar-backColor: #444;
+
+  --app-windows-body-backColor: #eee;
+  --app-windows-body-fontColor: #111;
+
+  --app-windows-borderColor: #aaa;
+}
+
+.theme-dark {
+  --app-windows-tab-inactive-backColor: #222;
+  --app-windows-tab-inactive-foreColor: #bbb;
+  --app-windows-tab-active-backColor: #aaa;
+  --app-windows-tab-active-foreColor: #333;
+  --app-windows-tab-hover-backColor: #999;
+  --app-windows-tab-hover-foreColor: #666;
+  --app-windows-tab-focus-color: #666;
+  --app-windows-bar-backColor: #111;
+  --app-windows-btn-backColor: #111;
+  --app-windows-btn-foreColor: #888;
+
+  --app-windows-btn-backColor: #111;
+  --app-windows-btn-foreColor: #888;
+
+  --app-windows-scroll-backColor: var(--vscode-scrollbarSlider-background);
+  --app-windows-scroll-hoverColor: var(--vscode-scrollbarSlider-hoverBackground);
+  --app-windows-scroll-activeColor: var(--vscode-scrollbarSlider-activeBackground);
+
+  --app-windows-toolbar-backColor: #444;
+
+  --app-windows-body-backColor: #262626;
+  --app-windows-body-fontColor: #bbb;
+  
+  --app-windows-borderColor: #111;
+}

@@ -7,7 +7,7 @@ import { EditionContext, IEditionOperation } from '@sf-explorer/editors/ui/edito
 import { stringifyDescriptor } from '@sf-explorer/core'
 import { JSONSchema } from '@sf-explorer/core'
 
-type PropsType = {
+export type PropsType = {
    typing: JSONSchema
    value: any
    onChange?: (value: string) => void
