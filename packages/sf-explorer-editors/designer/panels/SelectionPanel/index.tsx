@@ -1,17 +1,16 @@
 import React from 'react'
 import { ViewEditor } from '../../editor'
-import { EditionContext } from '@sf-explorer/editors/ui/editor-context'
+import { EditionContext } from '../../../elements/interfaces'
 import ValuePanel from '@sf-explorer/editors/ui/ValuePanel'
-import { ElementsEditors } from '@sf-explorer/editors/elements'
 import { PanelComponent, PanelDescriptor } from '@sf-explorer/editors/ui/FeaturesLayout'
 import { ElementEditionSelection, ModelEditionSession } from '../../EditionSession'
-import { Expr } from '@sf-explorer/core/index'
+import { Element, ElementJSON } from '@sf-explorer/core'
 
 export class SelectionPanel extends PanelComponent<ViewEditor> {
    static descriptor: PanelDescriptor = {
-      layouting: "fitted", 
-      defaultTitle: "Editor",
-      defaultIcon: "fa:pencil",
+      layouting: "fitted",
+      defaultTitle: "Selection",
+      defaultIcon: "bi:fullscreen",
       defaultDockId: "right",
       parameters: {
          session: true,
@@ -25,11 +24,12 @@ export class SelectionPanel extends PanelComponent<ViewEditor> {
    get model() {
       return this.props.session.model
    }
-   onElementChange = (value: Expr) => {
-      const { selection } = this.props
-      //selection.changeElement(value)
+   onElementChange = (data: ElementJSON) => {
+      /* const { selection } = this.props
+      cset.updates[selection.element.$key] = node
+      selection.element.model.commit(cset) */
    }
-   select(descriptor: Expr, focused: boolean) {
+   select(descriptor: Element, focused: boolean) {
       this.feature.select(new ElementEditionSelection(descriptor, this.feature.session), focused)
    }
    render() {
@@ -40,7 +40,6 @@ export class SelectionPanel extends PanelComponent<ViewEditor> {
                name={selection.getName()}
                value={selection.element}
                typing={selection.getTyping()}
-               provider={ElementsEditors}
                onChange={this.onElementChange}
             />
          </EditionContext.Provider>)

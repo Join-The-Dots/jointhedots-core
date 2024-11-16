@@ -25,6 +25,15 @@
       }
    }
 
+   &.watermark {
+      background-color: transparent;
+      color: var(--app-button-sec-foreground);
+
+      &:hover {
+         background-color: var(--app-highlight-background);
+      }
+   }
+
    &>* {
       margin: auto;
    }

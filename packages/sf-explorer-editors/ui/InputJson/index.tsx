@@ -3,7 +3,7 @@ import * as monaco from "monaco-editor"
 import Button from '@sf-explorer/editors/ui/ButtonIcon'
 import "./style.scss"
 import { toast } from 'react-toastify'
-import { EditionContext, IEditionOperation } from '@sf-explorer/editors/ui/editor-context'
+import { EditionContext, IEditionOperation } from '../../elements/interfaces'
 import { stringifyDescriptor } from '@sf-explorer/core'
 import { JSONSchema } from '@sf-explorer/core'
 
@@ -128,8 +128,8 @@ export class JsonInput extends React.Component<PropsType> implements IEditionOpe
       const { edit } = this.state
       return <div className='json-edit-component'>
          {edit ? <div>
-            <Button name="code:action/ok" onClick={this.onValidate} />
-            <Button name="code:action/cancel" onClick={this.onCancel} />
+            <Button name="bi:check-lg" onClick={this.onValidate} />
+            <Button name="bi:x-lg" onClick={this.onCancel} />
          </div> : <div />}
          <div ref={this.useElement} />
       </div>

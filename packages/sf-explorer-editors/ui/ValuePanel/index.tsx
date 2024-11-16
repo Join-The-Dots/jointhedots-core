@@ -1,9 +1,8 @@
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { toast } from 'react-toastify'
 import Icon from '@sf-explorer/core/ui/Icon'
-import { JsonInput } from '../InputJson'
 import { Tabs } from '@sf-explorer/editors/ui/Tabs'
-import { EditionDriver, EditionContext, IEditorProvider, ValueProps } from '../editor-context'
+import { EditionDriver, EditionContext, ValueProps } from '../../elements/interfaces'
 import Stack from '@sf-explorer/editors/ui/Stack'
 import "./index.scss"
 import Button from '@sf-explorer/editors/ui/ButtonIcon'
@@ -11,6 +10,7 @@ import openContextualMenu from '@sf-explorer/editors/ui/openContextualMenu'
 import { ValueMenu } from '../ValueMenu'
 import { useAsyncState } from '@sf-explorer/editors/hooks/useAsyncState'
 import { JSXInput } from '../InputCode'
+import { ElementsEditors } from '@sf-explorer/editors/elements'
 
 function ValueHeading(props: ValueProps & {
    ctl: EditionDriver
@@ -25,22 +25,35 @@ function ValueHeading(props: ValueProps & {
       })
    }
 
-   return (<Stack>
+   return (<Stack style={{ paddingLeft: 5 }}>
       <Stack.FixedDock><Icon name={ctl.icon} /></Stack.FixedDock>
-      <Stack.FlexDock>{name && <b>{name}</b>} <i>{value?.type || "<error>"}</i></Stack.FlexDock>
-      <Stack.FixedDock><Button secondary name={"bi:gear"} onClick={onToolsMenu} /></Stack.FixedDock>
-      {onClose && <Stack.FixedDock><Button secondary name={"bi:x"} onClick={onClose} /></Stack.FixedDock>}
+      <Stack.FlexDock>{name && <b>{name}</b>} <i>{value?.typing?.type || ""}</i></Stack.FlexDock>
+      <Stack.FixedDock><Button variant="watermark" name={"bi:gear"} onClick={onToolsMenu} /></Stack.FixedDock>
+      {onClose && <Stack.FixedDock><Button variant="secondary" name={"bi:x"} onClick={onClose} /></Stack.FixedDock>}
    </Stack>)
 }
 
+function ValueCodeEditor(props: ValueProps) {
+   const { value, onChange } = props
+   const code = useMemo(() => {
+      return ElementsEditors.stringify(value)
+   }, [value])
+   const validate = useCallback((text: string) => {
+
+   }, [onChange])
+   return <JSXInput
+      value={code.text}
+      language={code.lang}
+      onChange={validate}
+   />
+}
+
 export default function ValuePanel(props: ValueProps & {
-   provider: IEditorProvider
    className?: string
    fallback?: React.ReactNode
    onClose?: () => void
 }) {
-   const { provider, value, typing, className, onChange, onClose } = props
-   if (!provider) throw new Error("provider missing")
+   const { value, typing, className, onChange, onClose } = props
 
    const [selection, setSelection] = React.useState("main")
 
@@ -55,7 +68,7 @@ export default function ValuePanel(props: ValueProps & {
    }, null)
 
    const ctl_state = useAsyncState(async () => {
-      return provider.findControllerOf(value, typing)
+      return ElementsEditors.findControllerOf(value, typing)
    }, [value, typing])
 
    const ctl = ctl_state.get()
@@ -112,16 +125,4 @@ export default function ValuePanel(props: ValueProps & {
          onSelect={onSelect}
       />
    </div>)
-}
-
-function ValueCodeEditor(props: ValueProps) {
-   const { value, provider, onChange } = props
-   const code = useMemo(() => {
-      return provider.stringify(value)
-   }, [value])
-   return <JSXInput
-      value={code.text}
-      language={code.lang}
-      onChange={onChange}
-   />
 }

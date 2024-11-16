@@ -42,9 +42,6 @@ export class InstrumentationToolBox extends React.Component<PropsType> implement
          title={infos.title}
       >
          <span className="icon">
-            <Icon name="code:action/gripper" inversed />
-         </span>
-         <span className="icon">
             <Icon name="fa:clone" inversed />
          </span>
          <span className="icon">

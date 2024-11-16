@@ -8,7 +8,7 @@ function parseJson(text: string): any {
    catch (e) { return undefined }
 }
 
-export function emitASTFromValue(value: any): AST.Expression {
+export function emitASTFromValue(value: any): AST.Literal | AST.ArrayExpression | AST.ObjectExpression {
    if (value instanceof Object) {
       if (Array.isArray(value)) {
          return {
@@ -95,42 +95,46 @@ export function emitASTFromTyping(typing: JSONSchema): AST.Any {
    }
 }
 
-export function convertTextToExpression(text: string, schema: JSONSchema, canBeExpression?: boolean): any {
+export function convertValueToLiteral(value: AST.Literal["value"]): AST.Literal {
+   return {
+      type: "Literal",
+      value: value,
+   } as AST.Literal
+}
+
+export function convertTextToAST(text: string, schema: JSONSchema, canBeAST?: boolean): AST.Any {
    const data = parseJson(text)
    const canBeAny = Schema.isType(schema, "any") || !schema.type
-   if (canBeExpression && typeof data?.type === "string") {
+   if (canBeAST && typeof data?.type === "string") {
       return data
    }
    else if (isNaN(data)) {
       if (Schema.isType(schema, "boolean") || canBeAny) {
-         if (text === "true") return true
-         if (text === "false") return false
+         if (text === "true") return convertValueToLiteral(true)
+         if (text === "false") return convertValueToLiteral(false)
       }
       if (Schema.isType(schema, "string") || canBeAny) {
-         return text
+         return convertValueToLiteral(text)
       }
       if (Schema.isType(schema, "number")) {
-         return 0
+         return convertValueToLiteral(0)
       }
    }
    else {
       if (Schema.isType(schema, "number") || canBeAny) {
-         return data
+         return convertValueToLiteral(data)
       }
       if (Schema.isType(schema, "string")) {
-         return text
+         return convertValueToLiteral(text)
       }
       if (Schema.isType(schema, "boolean")) {
-         return data !== 0
+         return convertValueToLiteral(data !== 0)
       }
    }
    if (data !== undefined) {
-      return {
-         type: "const",
-         value: data,
-      }
+      return convertValueToLiteral(data)
    }
-   return text
+   return convertValueToLiteral(text)
 }
 
 export function createValueProps(properties: MapLike<JSONSchema>): any {

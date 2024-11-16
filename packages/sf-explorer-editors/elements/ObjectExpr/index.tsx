@@ -1,11 +1,11 @@
-import React from 'react'
-import { EditorDescriptor, EditorValueMatch, IEditorProvider, ValueProps } from "@sf-explorer/editors/ui/editor-context"
-import { CommonTypes, DocumentationSchema, MapLike, Schema } from '@sf-explorer/core'
+import React, { useContext } from 'react'
+import { EditionContext, EditorDescriptor, EditorValueMatch, ValueProps } from "../interfaces"
+import { AST, CommonTypes, convertValueToLiteral, DocumentationSchema, MapLike, Schema } from '@sf-explorer/core'
 import { JSONSchema } from '@sf-explorer/core'
 import { PropertyDecoration, PropertyRow, PropertyTable } from '@sf-explorer/editors/ui/TableProperties'
 import { ElementsEditors } from '..'
 import { ExpandableInputHOC } from '@sf-explorer/editors/ui/InputExpandable'
-import { ObjectExpr, ObjectProperty } from '@sf-explorer/core/interpreter/exprs'
+import { ElementJSON, ObjectExpr, ObjectProperty } from '@sf-explorer/core/interpreter/elements'
 
 export function ObjectPropertyRows(props: {
    heading?: React.ReactNode
@@ -13,11 +13,10 @@ export function ObjectPropertyRows(props: {
    typings: MapLike<JSONSchema>
    additionals?: JSONSchema
    documentation?: DocumentationSchema
-   provider: IEditorProvider
    decorator?: (prop: string, value: any) => PropertyDecoration
-   onChange?: (values: { [name: string]: any }) => void
+   onChange?: (name: string, value: any) => void
 }) {
-   let { heading, fields, additionals: additional, typings, provider, decorator } = props
+   let { heading, fields, additionals: additional, typings, decorator, onChange } = props
 
    const values = fields?.reduce((obj, field) => {
       const { name } = field
@@ -25,12 +24,9 @@ export function ObjectPropertyRows(props: {
       return obj
    }, {})
 
-   const onChange = React.useCallback((name) => (value) => {
-      /* props.onChange?.({
-         ...props.values,
-         [name]: value,
-      }) */
-   }, null)
+   const onPropertyChange = React.useCallback((name) => (node) => {
+      onChange(name, node)
+   }, [onChange])
 
    const rows = []
    for (const name in typings) {
@@ -39,9 +35,8 @@ export function ObjectPropertyRows(props: {
          name={name}
          typing={typings[name]}
          value={values[name]}
-         provider={provider}
          decoration={decorator && decorator(name, values[name])}
-         onChange={onChange(name)}
+         onChange={onPropertyChange(name)}
       />)
    }
    for (const name in values) {
@@ -51,9 +46,8 @@ export function ObjectPropertyRows(props: {
             name={name}
             typing={additional || CommonTypes.any}
             value={values[name]}
-            provider={provider}
             decoration={decorator && decorator(name, values[name])}
-            onChange={onChange(name)}
+            onChange={onPropertyChange(name)}
          />)
       }
    }
@@ -63,13 +57,36 @@ export function ObjectPropertyRows(props: {
       {rows}
    </>)
 }
+
 export function ObjectEditor(props: ValueProps<ObjectExpr>) {
    const { value, typing, onChange } = props
+   const env = useContext(EditionContext)
+   const onPropertyChange = React.useCallback((p_name: string, p_value: ElementJSON) => {
+      const data = value.serialize()
+      let found = false
+      for (const prop of data.properties) {
+         if (prop.key?.value === p_name) {
+            prop.value = p_value
+            found = true
+         }
+      }
+      if (!found) {
+         data.properties.push({
+            $type: "ObjectNamedProperty",
+            key: {
+               $type: "LiteralExpr",
+               value: p_name,
+            },
+            value: p_value,
+         })
+      }
+      value.update(data)
+   }, null)
    return <PropertyTable>
       <ObjectPropertyRows
          fields={value.properties}
          typings={typing?.properties}
-         provider={ElementsEditors}
+         onChange={onPropertyChange}
       />
    </PropertyTable>
 }

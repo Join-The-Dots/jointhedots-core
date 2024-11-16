@@ -1,16 +1,11 @@
-import { JSONSchema } from "@sf-explorer/core"
-import { EditionDriver, EditorValueMatch, IEditorProvider } from "@sf-explorer/editors/ui/editor-context"
-import * as AST from "@sf-explorer/core"
+import { ASTGenerator, Element, JSONSchema, stringify_node_jsx } from "@sf-explorer/core"
+import { EditionDriver, EditorValueMatch } from "./interfaces"
 
-export interface ElementEditor<T extends AST.Expr> extends EditionDriver<T> {
-   cls: AST.ExprClass<T>
-}
-
-export class ElementEditorProvider implements IEditorProvider<AST.Expr> {
+export class ElementDriverProvider {
    controllers: EditionDriver[] = []
    defaultController: EditionDriver = null
 
-   registerController<T extends AST.Expr>(ctl: ElementEditor<T>, isDefault?: boolean) {
+   registerController<T extends Element>(ctl: EditionDriver<T>, isDefault?: boolean) {
       if (!ctl.matchType) ctl.matchType = () => EditorValueMatch.None
       if (!ctl.matchValue) ctl.matchValue = (value: T) => {
          if (value instanceof ctl.cls) {
@@ -23,9 +18,9 @@ export class ElementEditorProvider implements IEditorProvider<AST.Expr> {
       this.controllers.push(ctl)
    }
 
-   async findControllerOf<T extends AST.Expr>(value: T, typing: JSONSchema): Promise<EditionDriver<T>> {
+   async findControllerOf<T extends Element>(value: T, typing: JSONSchema): Promise<EditionDriver<T>> {
       let best_level = EditorValueMatch.None
-      let best_match = this.defaultController as EditionDriver
+      let best_match = this.defaultController
       for (const ctl of this.controllers) {
          const lvl = ctl.matchValue(value)
          if (lvl > best_level) {
@@ -33,25 +28,16 @@ export class ElementEditorProvider implements IEditorProvider<AST.Expr> {
             best_match = ctl
          }
       }
-      if (best_level === EditorValueMatch.None) {
-         for (const ctl of this.controllers) {
-            const lvl = ctl.matchType(typing)
-            if (lvl > best_level) {
-               best_level = lvl
-               best_match = ctl
-            }
-         }
-      }
-      return best_match
+      return best_match as EditionDriver<T>
    }
 
-   async listControllerOf<T extends AST.Expr>(value: T, typing: JSONSchema): Promise<Map<EditionDriver<T>, EditorValueMatch>> {
-      const matchings = new Map<EditionDriver, EditorValueMatch>()
+   async listControllerOf<T extends Element>(value: T, typing: JSONSchema): Promise<Map<EditionDriver<T>, EditorValueMatch>> {
+      const matchings = new Map<EditionDriver<T>, EditorValueMatch>()
       if (typing) {
          for (const ctl of this.controllers) {
             const lvl = ctl.matchType(typing)
             if (lvl > EditorValueMatch.None) {
-               matchings.set(ctl, lvl)
+               matchings.set(ctl as EditionDriver<T>, lvl)
             }
          }
       }
@@ -59,20 +45,20 @@ export class ElementEditorProvider implements IEditorProvider<AST.Expr> {
          for (const ctl of this.controllers) {
             const lvl = ctl.matchValue(value)
             if (lvl > EditorValueMatch.None) {
-               matchings.set(ctl, lvl)
+               matchings.set(ctl as EditionDriver<T>, lvl)
             }
          }
       }
       return matchings
    }
    stringify(value: any) {
-      const ctx = new AST.SubTreeGenerator()
-      const ast = ctx.generateXpr(null, value)
+      const ctx = new ASTGenerator()
+      const ast = ctx.generate(null, value)
       return {
-         lang: 'mdx',
-         text: AST.stringify_node_jsx(ast),
+         lang: 'javascript',
+         text: stringify_node_jsx(ast),
       }
    }
 }
 
-export const ElementsEditors = new ElementEditorProvider()
+export const ElementsEditors = new ElementDriverProvider() 

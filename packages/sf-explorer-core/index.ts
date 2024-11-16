@@ -5,7 +5,7 @@ export * from "./ast/schema/helpers"
 export * from "./ast/schema/schema"
 export * from "./ast/schema/json"
 
-export * from "./ast/nodes"
+export * as AST from "./ast/nodes"
 export * from "./ast/interpreter"
 export * from "./ast/evaluate"
 export * from "./ast/updater"
@@ -15,7 +15,7 @@ export * from "./ast/serde/markdown"
 
 export * from "./interpreter/generator"
 export * from "./interpreter/builder"
-export * from "./interpreter/exprs"
+export * from "./interpreter/elements"
 export * from "./interpreter/context"
 
 export * from "./library/interfaces"

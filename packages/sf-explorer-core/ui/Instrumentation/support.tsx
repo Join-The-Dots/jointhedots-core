@@ -1,5 +1,5 @@
 import React from "react"
-import { EventHandlers } from "./instrumentation"
+import { EventHandlers, Instrumentation } from "./instrumentation"
 
 export class InstrumentationSupport extends React.Component<{
    draggable?: boolean
@@ -44,12 +44,20 @@ export class InstrumentationSupport extends React.Component<{
       e.preventDefault()
    }
    useSupport = (element: HTMLElement) => {
+      if (element) {
+         element.appendChild(Instrumentation.overlay)
+      }
+      else if (Instrumentation.overlay.parentElement === this.support) {
+         this.support.removeChild(Instrumentation.overlay)
+      }
       this.support = element
    }
    render() {
       const { children } = this.props
       return (<div ref={this.useSupport} className="LDX-Instrumentation-Support">
-         {children}
+         <div className="LDX-Instrumentation-Content">
+            {children}
+         </div>
       </div>)
    }
 }

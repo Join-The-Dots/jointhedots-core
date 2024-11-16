@@ -1,13 +1,13 @@
-import { EditorDescriptor, EditorValueMatch, ValueProps } from "@sf-explorer/editors/ui/editor-context"
+import { EditorDescriptor, EditorValueMatch, ValueProps } from "../interfaces"
 import { Schema } from '@sf-explorer/core'
 import { JSONSchema } from '@sf-explorer/core'
 import { PropertyTable } from '@sf-explorer/editors/ui/TableProperties'
 import { ElementsEditors } from '..'
 import { ExpandableInputHOC } from '@sf-explorer/editors/ui/InputExpandable'
-import { LDXElementExpr } from '@sf-explorer/core/interpreter/exprs'
+import { LDXDisplayExpr } from '@sf-explorer/core/interpreter/elements'
 import { ObjectEditor } from '../ObjectExpr'
 
-function LDXElementEditor(props: ValueProps<LDXElementExpr>) {
+function LDXDisplayEditor(props: ValueProps<LDXDisplayExpr>) {
    const { value, typing, onChange } = props
    return <PropertyTable>
       <ObjectEditor
@@ -19,18 +19,18 @@ function LDXElementEditor(props: ValueProps<LDXElementExpr>) {
 }
 
 const editor: EditorDescriptor = {
-   input: ExpandableInputHOC("Element", LDXElementEditor),
+   input: ExpandableInputHOC("Display", LDXDisplayEditor),
    panels: {
       "main": {
-         view: LDXElementEditor,
+         view: LDXDisplayEditor,
       }
    }
 }
 
 ElementsEditors.registerController({
-   name: "Object",
+   name: "Display",
    icon: "bi:columns",
-   cls: LDXElementExpr,
+   cls: LDXDisplayExpr,
    editor,
    matchType(schema: JSONSchema): EditorValueMatch {
       if (Schema.isType(schema, "display")) return EditorValueMatch.Valid

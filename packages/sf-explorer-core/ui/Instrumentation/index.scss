@@ -1,12 +1,21 @@
 .LDX-Instrumentation-Overlay {
    all: unset;
-   position: fixed;
+   position: absolute;
    pointer-events: none;
-   z-index: 10000000;
+   z-index: 1;
    left: 0;
    right: 0;
    top: 0;
    bottom: 0;
+}
+
+.LDX-Instrumentation-Content {
+   z-index: 0;
+}
+
+.LDX-Instrumentation-Support {
+   position: relative;
+   overflow: auto;
 }
 
 .LDX-Instrumentation-Error {

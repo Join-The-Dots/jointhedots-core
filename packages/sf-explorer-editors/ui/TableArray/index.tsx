@@ -1,8 +1,7 @@
 import React from 'react'
 import Icon from '@sf-explorer/core/ui/Icon'
 import { DragZone, DropZone, getEventInElementPosition } from '../DragAndDrop'
-import { IEditorProvider } from '@sf-explorer/editors/ui/editor-context'
-import { JSONSchema } from '@sf-explorer/core'
+import { ElementJSON, JSONSchema } from '@sf-explorer/core'
 import Button from '@sf-explorer/editors/ui/ButtonIcon'
 import ValueInput from '../ValueInput'
 import "./index.scss"
@@ -11,11 +10,10 @@ export function ArrayRow(props: {
   index: number
   value: any
   typing: JSONSchema
-  provider: IEditorProvider
-  onChange: (value: any) => void
+  onChange: (value: ElementJSON) => void
   onMove: (fromIndex: number, toIndex: number) => void
 }) {
-  const { typing, value, provider, onChange } = props
+  const { typing, value, onChange } = props
   const [expanded, setExpanded] = React.useState(null)
   return <DropZone
     className="GrabItem"
@@ -48,12 +46,11 @@ export function ArrayRow(props: {
           }
         }}
       >
-        <Icon name="code:action/gripper" />
+        <Icon name="bi:grip-vertical" />
       </DragZone>
       <ValueInput
         value={value}
         typing={typing}
-        provider={provider}
         onExpand={setExpanded}
         onChange={onChange}
       />
@@ -70,13 +67,12 @@ export function ArrayTable(props: {
   items: any[]
   itemTyping: JSONSchema
   documentation?: any
-  provider: IEditorProvider
-  onChange?: (values: any[]) => void
+  onChange?: (values: ElementJSON[]) => void
   onCreate?: (index: number) => any
 }) {
-  const { items, itemTyping, provider, onCreate, onChange } = props
+  const { items, itemTyping, onCreate, onChange } = props
 
-  const change = React.useCallback((index) => (value) => {
+  const change = React.useCallback((index) => (value: ElementJSON) => {
     const new_items = Array.isArray(items) ? [...items] : []
     new_items[index] = value
     onChange?.(new_items)
@@ -90,7 +86,7 @@ export function ArrayTable(props: {
     onChange?.(new_items)
   }
 
-  function add(atIndex: number) {
+  function add(atIndex: number,) {
     const new_value = onCreate(atIndex)
     const new_items = Array.isArray(items) ? [...items] : []
     if (atIndex < 0) new_items.push(new_value)
@@ -105,13 +101,12 @@ export function ArrayTable(props: {
         index={i}
         value={value}
         typing={itemTyping}
-        provider={provider}
         onChange={change(i)}
         onMove={move}
       />
     })}
     {onCreate && <div>
-      <Button name="bi:plus" secondary onClick={() => add(-1)} />
+      <Button name="bi:plus" variant="secondary" onClick={() => add(-1)} />
     </div>}
   </div>)
 }

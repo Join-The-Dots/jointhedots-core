@@ -85,8 +85,8 @@ export function ComponentPluginPickerMenu(): JSX.Element {
               return <PanelNodeCreation
                 service='view'
                 component={component}
-                onComplete={async (data) => {
-                  await insertComponentDialog(editor, layout, entry.component_id, data)
+                onComplete={async (entry, data) => {
+                  await insertComponentDialog(editor, entry.id, data)
                   onClose()
                 }}
                 onCancel={onClose}

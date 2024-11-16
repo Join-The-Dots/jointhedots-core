@@ -1,7 +1,7 @@
 import React from 'react'
 import { CommonTypes, Schema } from '@sf-explorer/core'
 import { MapLike } from '@sf-explorer/core'
-import { EditorMenu, IEditorProvider } from '@sf-explorer/editors/ui/editor-context'
+import { EditorMenu } from '../../elements/interfaces'
 import { DocumentationSchema, JSONSchema } from '@sf-explorer/core'
 import ValueInput from '@sf-explorer/editors/ui/ValueInput'
 import "./index.scss"
@@ -40,12 +40,11 @@ export function PropertyRow(props: {
    name?: string
    typing: JSONSchema
    value: any
-   provider: IEditorProvider
    above?: boolean
    decoration?: PropertyDecoration
    onChange: (value: any) => void
 }) {
-   const { name, decoration, typing, value, provider, above, onChange } = props
+   const { name, decoration, typing, value, above, onChange } = props
    const [expanded, setExpanded] = React.useState(null)
    return <>
       <div className={above ? "Line Vertical" : "Line Horizontal"} >
@@ -56,7 +55,6 @@ export function PropertyRow(props: {
             <ValueInput
                value={value}
                typing={typing}
-               provider={provider}
                menu={decoration?.menu}
                onExpand={setExpanded}
                onChange={onChange}
@@ -77,11 +75,10 @@ export function PropertyRows(props: {
    typings: MapLike<JSONSchema>
    additionals?: JSONSchema
    documentation?: DocumentationSchema
-   provider: IEditorProvider
    decorator?: (prop: string, value: any) => PropertyDecoration
    onChange?: (values: { [name: string]: any }) => void
 }) {
-   let { heading, values, additionals: additional, typings, provider, decorator } = props
+   let { heading, values, additionals: additional, typings, decorator } = props
    if (!values) values = {}
 
    const onChange = React.useCallback((name) => (value) => {
@@ -98,7 +95,6 @@ export function PropertyRows(props: {
          name={name}
          typing={typings[name]}
          value={values[name]}
-         provider={provider}
          decoration={decorator && decorator(name, values[name])}
          onChange={onChange(name)}
       />)
@@ -110,7 +106,6 @@ export function PropertyRows(props: {
             name={name}
             typing={additional || CommonTypes.any}
             value={values[name]}
-            provider={provider}
             decoration={decorator && decorator(name, values[name])}
             onChange={onChange(name)}
          />)

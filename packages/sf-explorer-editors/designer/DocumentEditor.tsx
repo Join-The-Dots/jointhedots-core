@@ -15,7 +15,7 @@ import { DocumentContext } from './context/DocumentContext'
 import { FeaturesContext, FeaturesMaterializer } from '../ui/FeaturesLayout'
 import WindowedContainer, { DisplayLayout } from '../ui/WindowedContainer'
 import { ViewEditor } from './editor'
-import { CommentStore, CommentStoreContext } from './commenting'
+import { CommentStore, CommentStoreContext } from './editor/commenting'
 import "./themes/main.scss"
 import "./index.css"
 

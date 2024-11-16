@@ -25,6 +25,6 @@ export const styles: React.CSSProperties = {
    height: "1em",
    width: "1em",
    display: "inline-flex",
-   flexDirection: "column",
+   flexDirection: "row",
    alignItems: "center",
 }

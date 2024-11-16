@@ -1,27 +1,33 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import TextInput from "@sf-explorer/editors/ui/InputText"
-import { ValueProps, EditorDescriptor } from "@sf-explorer/editors/ui/editor-context"
-import { Schema } from '@sf-explorer/core'
+import { ValueProps, EditorDescriptor, EditorValueMatch } from "../interfaces"
+import { emitASTFromValue, Schema } from '@sf-explorer/core'
 import { JSONSchema } from '@sf-explorer/core'
-import { EditorValueMatch } from '@sf-explorer/editors/ui/editor-context'
 import { ElementsEditors } from '..'
-import { convertTextToExpression } from '@sf-explorer/core'
-import { LiteralExpr, ObjectExpr } from '@sf-explorer/core/interpreter/exprs'
+import { convertTextToAST } from '@sf-explorer/core'
+import { LiteralExpr } from '@sf-explorer/core/interpreter/elements'
 
-function LiteralInput(props: ValueProps<LiteralExpr>) {
-   const { value, typing, onChange } = props
-   const onValidate = onChange && React.useCallback((text) => {
-      onChange(convertTextToExpression(text, typing))
-   }, [typing, onChange])
-   const text = value?.value !== undefined ? `${value.value}` : ""
-   const placeholder = typing.examples && typing.examples.toString()
-   return (<>
-      <TextInput value={text} placeholder={placeholder} onChange={onValidate} />
-   </>)
+export function LiteralInputHOC(defaultPlaceholder?: string) {
+   return function LiteralInput(props: ValueProps<LiteralExpr>) {
+      const { value, typing, onChange } = props
+      const onValidate = onChange && React.useCallback((text) => {
+         if (value) {
+            value.update({ $type: "LiteralExpr", value: text })
+         }
+         else {
+            onChange({ $type: "LiteralExpr", value: text })
+         }
+      }, [typing, onChange])
+      const text = value?.value !== undefined ? `${value.value}` : ""
+      const placeholder = typing.examples && typing.examples.toString() || defaultPlaceholder
+      return (<>
+         <TextInput value={text} placeholder={placeholder} onChange={onValidate} />
+      </>)
+   }
 }
 
 const editor: EditorDescriptor = {
-   input: LiteralInput,
+   input: LiteralInputHOC(""),
 }
 
 ElementsEditors.registerController({

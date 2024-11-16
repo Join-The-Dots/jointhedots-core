@@ -1,10 +1,10 @@
 import React from 'react'
 import { Menu } from '@sf-explorer/editors/ui/openContextualMenu'
-import { EditionDriver, EditorMenu, EditorMenuItem, IEditionEnvironment, ValueProps } from '@sf-explorer/editors/ui/editor-context'
+import { EditionDriver, EditorMenu, EditorMenuItem, EditionEnvironment, ValueProps } from '../../elements/interfaces'
 import { stringifyDescriptor } from '@sf-explorer/core'
-import { convertTextToExpression } from '@sf-explorer/core'
+import { convertTextToAST } from '@sf-explorer/core'
 
-export function ValueMenu(props: ValueProps & { menu?: EditorMenu, context: IEditionEnvironment, ctl: EditionDriver, onClose: () => void }) {
+export function ValueMenu(props: ValueProps & { menu?: EditorMenu, context: EditionEnvironment, ctl: EditionDriver, onClose: () => void }) {
    const { ctl, context, menu, value, typing, onChange, onClose } = props
 
    const onCopy = async () => {
@@ -15,8 +15,9 @@ export function ValueMenu(props: ValueProps & { menu?: EditorMenu, context: IEdi
    const onPaste = async () => {
       try {
          const text = await navigator.clipboard.readText()
-         const data = convertTextToExpression(text, value.typing, true)
-         value.change(data)
+         const data = convertTextToAST(text, value.typing, true)
+         //value.change(data)
+         console.log("TODO: paste", data)
       } catch (err) {
          console.error('Failed to read clipboard:', err);
       }

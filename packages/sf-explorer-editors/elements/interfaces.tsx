@@ -1,15 +1,12 @@
 import React from 'react'
-import { MapLike } from '@sf-explorer/core'
-import { ComponentResource } from '@sf-explorer/core'
-import { JSONSchema } from '@sf-explorer/core'
+import { JSONSchema, Element, MapLike, ComponentResource, ElementClass, ElementJSON } from '@sf-explorer/core'
 
-export type ValueProps<T = any> = {
+export type ValueProps<T extends Element = Element> = {
    name?: string
    value: T
    typing: JSONSchema
-   onChange?: (value: T) => void
+   onChange?: (value: ElementJSON) => void
    onExpand?: (content: React.ReactElement) => void
-   provider?: IEditorProvider
 }
 
 export enum EditorValueMatch {
@@ -19,19 +16,19 @@ export enum EditorValueMatch {
    Best = 3,
 }
 
-export type EditorPanel<T = any> = {
+export type EditorPanel<T extends Element = Element> = {
    icon?: string
    view: React.ComponentType<ValueProps<T>>
 }
 
-export type EditorMenuItem<T = any> = {
+export type EditorMenuItem<T extends Element = Element> = {
    title: string
    icon?: string
-   condition?: (value: T, typing: JSONSchema, context: IEditionEnvironment) => boolean
-   execute: (value: T, typing: JSONSchema, context: IEditionEnvironment, onChange: T) => void
+   condition?: (value: T, typing: JSONSchema, context: EditionEnvironment) => boolean
+   execute: (value: T, typing: JSONSchema, context: EditionEnvironment, onChange: (value: ElementJSON) => void) => void
 }
 
-export type EditorMenu<T = any> = {
+export type EditorMenu<T extends Element = Element> = {
    icon?: string
    sections: {
       title?: string
@@ -40,24 +37,25 @@ export type EditorMenu<T = any> = {
    }[]
 }
 
-export type EditorDescriptor<T = any> = {
+export type EditorDescriptor<T extends Element = Element> = {
    input?: React.ComponentType<ValueProps<T>>
    heading?: React.ComponentType<ValueProps<T>>
    panels?: MapLike<EditorPanel<T>>
    menu?: EditorMenu<T>
 }
 
-export type EditionDriver<T = any> = {
+export type EditionDriver<T extends Element = Element> = {
 
    // UI
    name: string
    icon?: string
    editor?: EditorDescriptor
+   cls: ElementClass<T>
 
    // Handlers
    matchType?: (schema: JSONSchema) => EditorValueMatch
    matchValue?: (value: T, handler?: ComponentResource) => EditorValueMatch
-   createValue?: (schema: JSONSchema, prevValue?: T) => T
+   createValue?: (schema: JSONSchema, prevValue?: T) => ElementJSON
 }
 
 export interface IEditionOperation {
@@ -65,26 +63,13 @@ export interface IEditionOperation {
    cancel()
 }
 
-export interface IEditionEnvironment {
-   readonly editing: boolean
-   getAttachment<T = any>(name: string): T
-   registerOperation(op: IEditionOperation)
-   unregisterOperation(op: IEditionOperation)
-}
-
-export interface IEditorProvider<T = any> {
-   findControllerOf<Tx extends T>(value: Tx, typing: JSONSchema): Promise<EditionDriver<Tx>>
-   listControllerOf<Tx extends T>(value: Tx, typing: JSONSchema): Promise<Map<EditionDriver<Tx>, EditorValueMatch>>
-   stringify(value: T): { text: string, lang: string }
-}
-
-export class EditionEnvironment implements IEditionEnvironment {
+export class EditionEnvironment {
    operations = new Set<IEditionOperation>
    attachements = {}
    get editing(): boolean {
       return this.operations.size > 0
    }
-   getAttachment<T = any>(name: string): T {
+   getAttachment<T extends Element = Element>(name: string): T {
       return this.attachements[name]
    }
    registerOperation(op: IEditionOperation) {
@@ -105,7 +90,7 @@ export class EditionEnvironment implements IEditionEnvironment {
    }
 }
 
-export const EditionContext = React.createContext<IEditionEnvironment>(null)
+export const EditionContext = React.createContext<EditionEnvironment>(null)
 
 export function sortMatchedControllers(matcheds: Map<EditionDriver, EditorValueMatch>): EditionDriver[] {
    return Array.from(matcheds.keys()).sort((a, b) => {

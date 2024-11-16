@@ -1,16 +1,20 @@
 import * as AST from "../ast/nodes"
-import { IContext } from "./context"
 import { getSymbolFromNode } from '../ast/evaluate'
 import { deserialize_jsx_document } from "../ast/serde/markdown"
-import { IGenerator } from "./generator"
 import {
    ArrayAppendElement, ArrayExpr, ArraySpreadElement, AssignmentExpr,
    BinaryExpr, CallExpr, ConditionalExpr, DeleteMemberExpr, DocumentLayer, DocumentModel,
-   Expr, ExprClass, FunctionExpr, IdentifierExpr, LDXDocumentExpr,
-   LDXElementExpr, LogicalExpr, MemberExpr,
+   Element, ElementClass, FunctionExpr, IdentifierExpr, LDXDocumentExpr,
+   LDXDisplayExpr, LogicalExpr, MemberExpr,
    ObjectDynamicProperty,
-   ObjectExpr, ObjectNamedProperty, ObjectSpreadProperty, ThisExpr, UnaryExpr, UpdateExpr
-} from "./exprs"
+   ObjectExpr, ObjectNamedProperty, ObjectSpreadProperty, ThisExpr, UnaryExpr, UpdateExpr,
+   DocumentChangeLog,
+   DocumentChangeSet,
+   ElementInstanciers,
+   IDeserializerContext,
+   ElementDeserializers,
+   ElementClasses,
+} from "./elements"
 import { ComponentsRegistry } from "../library/components"
 import { JSONSchema } from "../ast/schema/schema"
 import { CommonTypes } from "../ast/schema/helpers"
@@ -21,35 +25,102 @@ export function createDocumentID(): string {
    return "memory:doc#" + (model_ids++)
 }
 
-export class Builder {
+export class Builder implements IDeserializerContext {
    constructor(public model: DocumentModel) {
    }
-   New<T extends Expr>(Cls: ExprClass<T>, owner: Expr, typing: JSONSchema): T {
-      const key = createLDXKey()
-      const xpr = new Cls(this.model, key, owner, typing)
-      this.model.nodes.set(key, xpr)
+   New<T extends Element>(Cls: ElementClass<T>, owner: Element, typing: JSONSchema): T {
+      const xpr = new Cls(this.model)
+      xpr.$key = createLDXKey()
+      xpr.owner = owner
+      xpr.typing = typing
+      this.model.nodes.set(xpr.$key, xpr)
       return xpr
+   }
+   NewFrom(owner: Element, node: AST.Any, typing: JSONSchema = CommonTypes.any): Promise<Element> {
+      return buildExpression(this, node, owner, typing)
+   }
+   consolidate<T extends Element>(target: T, typing?: JSONSchema): T {
+      if (target.$key) {
+         target = this.model.nodes.get(target.$key) as T
+      }
+      else {
+         target.$key = createLDXKey()
+         this.model.nodes.set(target.$key, target)
+      }
+      return target
+   }
+   resolveReference($ref: string): Element {
+      return this.model.nodes.get($ref)
+   }
+   async update(changeset: DocumentChangeSet) {
+      const { model } = this
+      const { log } = model
+      model.builder = this
+
+      for (const key in changeset.updates) {
+         const data = changeset.updates[key]
+         const prev = model.nodes.get(key)
+         if (prev.constructor !== ElementClasses.get(data.$type)) {
+            const instancier = ElementInstanciers.get(data.$type)
+            if (!instancier) throw new Error(`Unknow $type '${data.$type}' constructor`)
+            const element = instancier(this) as Element
+            element.$key = key
+            element.owner = prev.owner
+            model.nodes.set(key, element)
+         }
+      }
+
+      for (const key in changeset.updates) {
+         const data = changeset.updates[key]
+         const deserializer = ElementDeserializers.get(data.$type)
+         if (!deserializer) throw new Error(`Unknow $type '${data.$type}' deserializer`)
+
+         const element = model.nodes.get(key)
+         await deserializer(element, data, element.owner, this)
+         console.log(element)
+      }
+
+      log.commit(changeset)
+      for (const key in changeset.updates) {
+         const element = model.nodes.get(key)
+         element.owner.consolidate(this)
+      }
+
+      model.builder = null
+   }
+   async build(ast: AST.LDXLayer) {
+      const { model } = this
+      model.builder = this
+
+      const layer = new DocumentLayer(model)
+      layer.$key = createLDXKey()
+      layer.typing = CommonTypes.display
+      layer.layout = await this.NewFrom(layer, ast.layout)
+
+      model.base = layer
+      model.log = new DocumentChangeLog(model)
+      model.builder = null
    }
 }
 
-async function buildArrayFromElements(elements: Array<AST.Expression | AST.SpreadElement | null>, owner: Expr, typing: JSONSchema) {
+async function buildArrayFromElements(builder: Builder, elements: Array<AST.Expression | AST.SpreadElement | null>, owner: Element, typing: JSONSchema) {
    const xpr = owner.New(ArrayExpr)
    for (const item of elements) {
       if (item.type === "SpreadElement") {
          const xitem = new ArraySpreadElement()
-         xitem.value = await xpr.NewFrom(item, typing)
+         xitem.value = await builder.NewFrom(xpr, item, typing)
          xpr.elements.push(xitem)
       }
       else {
          const xitem = new ArrayAppendElement()
-         xitem.value = await xpr.NewFrom(item, typing)
+         xitem.value = await builder.NewFrom(xpr, item, typing)
          xpr.elements.push(xitem)
       }
    }
    return xpr
 }
 
-export async function buildExpression(node: AST.Any, owner: Expr, typing: JSONSchema): Promise<Expr> {
+export async function buildExpression(builder: Builder, node: AST.Any, owner: Element, typing: JSONSchema): Promise<Element> {
    switch (node.type) {
       case 'Literal': {
          const xpr = owner.NewConst(node.value, typing)
@@ -64,16 +135,16 @@ export async function buildExpression(node: AST.Any, owner: Expr, typing: JSONSc
          const { left, right, operator } = node as AST.BinaryExpression
          const xpr = owner.New(BinaryExpr, typing)
          xpr.operator = operator
-         xpr.left = await xpr.NewFrom(left)
-         xpr.right = await xpr.NewFrom(right)
+         xpr.left = await builder.NewFrom(xpr, left)
+         xpr.right = await builder.NewFrom(xpr, right)
          return xpr
       }
       case 'LogicalExpression': {
          const { left, right, operator } = node as AST.LogicalExpression
          const xpr = owner.New(LogicalExpr, typing)
          xpr.operator = operator
-         xpr.left = await xpr.NewFrom(left)
-         xpr.right = await xpr.NewFrom(right)
+         xpr.left = await builder.NewFrom(xpr, left)
+         xpr.right = await builder.NewFrom(xpr, right)
          return xpr
       }
       case 'UnaryExpression': {
@@ -81,13 +152,13 @@ export async function buildExpression(node: AST.Any, owner: Expr, typing: JSONSc
          if (operator === 'delete' && argument.type === 'MemberExpression') {
             const { object, property, computed } = argument as AST.MemberExpression
             const xpr = owner.New(DeleteMemberExpr, typing)
-            xpr.object = await xpr.NewFrom(object)
-            xpr.property = computed ? await xpr.NewFrom(property) : owner.NewConst((property as AST.Identifier).name)
+            xpr.object = await builder.NewFrom(xpr, object)
+            xpr.property = computed ? await builder.NewFrom(xpr, property) : owner.NewConst((property as AST.Identifier).name)
             return xpr
          } else {
             const xpr = owner.New(UnaryExpr, typing)
             xpr.operator = operator
-            xpr.argument = await xpr.NewFrom(argument)
+            xpr.argument = await builder.NewFrom(xpr, argument)
             return xpr
          }
       }
@@ -95,30 +166,30 @@ export async function buildExpression(node: AST.Any, owner: Expr, typing: JSONSc
          const { argument, operator, prefix } = node as AST.UpdateExpression
          const xpr = owner.New(UpdateExpr, typing)
          xpr.operator = operator
-         xpr.argument = await xpr.NewFrom(argument)
+         xpr.argument = await builder.NewFrom(xpr, argument)
          return xpr
       }
       case 'AssignmentExpression': {
          const { left, right, operator } = node as AST.AssignmentExpression
          const xpr = owner.New(AssignmentExpr, typing)
          xpr.operator = operator
-         xpr.left = await xpr.NewFrom(left)
-         xpr.right = await xpr.NewFrom(right)
+         xpr.left = await builder.NewFrom(xpr, left)
+         xpr.right = await builder.NewFrom(xpr, right)
          return xpr
       }
       case 'MemberExpression': {
          const { object, property, computed } = node as AST.MemberExpression
          const xpr = owner.New(MemberExpr, typing)
-         xpr.object = await xpr.NewFrom(object)
-         xpr.property = computed ? await xpr.NewFrom(property) : xpr.NewConst((property as AST.Identifier).name)
+         xpr.object = await builder.NewFrom(xpr, object)
+         xpr.property = computed ? await builder.NewFrom(xpr, property) : xpr.NewConst((property as AST.Identifier).name)
          return xpr
       }
       case 'ConditionalExpression': {
          const { test, consequent, alternate } = node as AST.ConditionalExpression
          const xpr = owner.New(ConditionalExpr, typing)
-         xpr.test = await xpr.NewFrom(test)
-         xpr.consequent = await xpr.NewFrom(consequent)
-         xpr.alternate = await xpr.NewFrom(alternate)
+         xpr.test = await builder.NewFrom(xpr, test)
+         xpr.consequent = await builder.NewFrom(xpr, consequent)
+         xpr.alternate = await builder.NewFrom(xpr, alternate)
          return xpr
       }
       case 'ThisExpression': {
@@ -128,13 +199,13 @@ export async function buildExpression(node: AST.Any, owner: Expr, typing: JSONSc
       case 'CallExpression': {
          const { callee, arguments: args } = node as AST.CallExpression
          const xpr = owner.New(CallExpr, typing)
-         xpr.callee = await xpr.NewFrom(callee, CommonTypes.function)
-         xpr.arguments = await buildArrayFromElements(args, xpr, CommonTypes.any)
+         xpr.callee = await builder.NewFrom(xpr, callee, CommonTypes.function)
+         xpr.arguments = await buildArrayFromElements(builder, args, xpr, CommonTypes.any)
          return xpr
       }
       case 'ArrayExpression': {
          const { elements } = node as AST.ArrayExpression
-         const xpr = buildArrayFromElements(elements, owner, typing)
+         const xpr = buildArrayFromElements(builder, elements, owner, typing)
          return xpr
       }
       case 'ObjectExpression': {
@@ -146,20 +217,20 @@ export async function buildExpression(node: AST.Any, owner: Expr, typing: JSONSc
                if (key.type === "Literal") {
                   const xprop = new ObjectNamedProperty()
                   xprop.key = xpr.NewConst(key.value)
-                  xprop.value = await xpr.NewFrom(value)
+                  xprop.value = await builder.NewFrom(xpr, value)
                   xpr.properties.push(xprop)
                }
                else {
                   const xprop = new ObjectDynamicProperty()
-                  xprop.key = await xpr.NewFrom(key)
-                  xprop.value = await xpr.NewFrom(value)
+                  xprop.key = await builder.NewFrom(xpr, key)
+                  xprop.value = await builder.NewFrom(xpr, value)
                   xpr.properties.push(xprop)
                }
             }
             else {
                const { argument } = prop
                const xprop = new ObjectSpreadProperty()
-               xprop.value = await xpr.NewFrom(argument)
+               xprop.value = await builder.NewFrom(xpr, argument)
                xpr.properties.push(xprop)
             }
          }
@@ -183,13 +254,13 @@ export async function buildExpression(node: AST.Any, owner: Expr, typing: JSONSc
       }
 
       case 'JSXExpressionContainer': {
-         return buildExpression(node.expression, owner, typing)
+         return buildExpression(builder, node.expression, owner, typing)
       }
       case 'JSXElement': {
-         return buildLDXElement(node, owner, typing)
+         return buildLDXElement(builder, node, owner, typing)
       }
       case 'LDXDocument': {
-         return buildLDXDocument(node, owner, typing)
+         return buildLDXDocument(builder, node, owner, typing)
       }
 
       default:
@@ -203,13 +274,13 @@ export function createLDXKey(): string {
    return (ldx_keys++).toString()
 }
 
-export async function buildLDXElement(node: AST.JSXElement, owner: Expr, typing: JSONSchema): Promise<LDXElementExpr> {
+export async function buildLDXElement(builder: Builder, node: AST.JSXElement, owner: Element, typing: JSONSchema): Promise<LDXDisplayExpr> {
    const { name, attributes } = node.openingElement
    const component_id = getSymbolFromNode(name)
    const entry = ComponentsRegistry.acquireComponent(component_id)
    const manifest = await entry.fetch()
 
-   const xpr = owner.New(LDXElementExpr, typing)
+   const xpr = owner.New(LDXDisplayExpr, typing)
    xpr.typing = typing
    xpr.tag = component_id
    xpr.props = xpr.New(ObjectExpr, manifest["view"])
@@ -233,7 +304,7 @@ export async function buildLDXElement(node: AST.JSXElement, owner: Expr, typing:
             const xprop = new ObjectNamedProperty()
             const xtyping = xpr.props?.properties?.[key] || CommonTypes.any
             xprop.key = target.NewConst(key)
-            xprop.value = await target.NewFrom(attr.value, xtyping)
+            xprop.value = await builder.NewFrom(target, attr.value, xtyping)
             target.properties.push(xprop)
          }
          else {
@@ -247,15 +318,15 @@ export async function buildLDXElement(node: AST.JSXElement, owner: Expr, typing:
    return xpr
 }
 
-export async function buildLDXDocument(node: AST.LDXDocument, owner: Expr, typing: JSONSchema): Promise<LDXDocumentExpr> {
+export async function buildLDXDocument(builder: Builder, node: AST.LDXDocument, owner: Element, typing: JSONSchema): Promise<LDXDocumentExpr> {
    const { items } = node
    const xpr = owner.New(LDXDocumentExpr)
    const chunks: string[] = []
    for (const item of items) {
       if (item instanceof Object) {
          const key = createLDXKey()
-         const value = await xpr.NewFrom(item)
-         xpr.embeds.set(key, value)
+         const value = await builder.NewFrom(xpr, item)
+         xpr.embeds[key] = value
          chunks.push(`\x00${key}\x01`)
       }
       else {
@@ -271,11 +342,7 @@ export async function createDocumentModel(id: string, ast: AST.LDXLayer | string
       ast = deserialize_jsx_document(ast)
    }
    const model = new DocumentModel(id)
-   model.builder = new Builder(model)
-
-   const layer = new DocumentLayer(model, createLDXKey(), null, CommonTypes.display)
-   layer.layout = await layer.NewFrom(ast.layout)
-
-   model.base = layer
+   const builder = new Builder(model)
+   await builder.build(ast)
    return model
 }

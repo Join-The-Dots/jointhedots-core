@@ -4,7 +4,7 @@ import EventEmitter from "events"
 import dragImageUrl from './drag_icon.svg'
 import React, { useContext } from "react"
 import "./index.scss"
-import { Expr } from "../../interpreter/exprs"
+import { Element } from "../../interpreter/elements"
 import { HandlersManifold } from "../../common/handlers"
 
 export type ASTLocation = any
@@ -41,7 +41,7 @@ export interface ElementController {
    readonly layout: InstrumentationLayout
    readonly stretch: ElementBoundingBox
    getDisplayInfos(): DisplayInfos
-   getElement(): Expr
+   getElement(): Element
    getLocation(): ASTLocation
    /* getProgram(): Program */
 }
@@ -55,7 +55,7 @@ export interface ElementInstrumentation {
    selection: ZoneSelection
    getBase(): React.Component
    getController(): ElementController
-   getElement(): Expr
+   getElement(): Element
    displayTooling(target: ReactDOMClient.Root, hasPreview: boolean)
    updateZone()
 }
@@ -72,8 +72,8 @@ export function useInstrumentation(): ElementInstrumentation {
 }
 
 export class InstrumentationState {
-   instrumenteds = new Map<Expr, ElementInstrumentation[]>()
-   selections = new Set<Expr>()
+   instrumenteds = new Map<Element, ElementInstrumentation[]>()
+   selections = new Set<Element>()
    focused: ElementInstrumentation = null
    hovered: ZoneSelection = null
    overlay: HTMLElement = null
@@ -81,7 +81,6 @@ export class InstrumentationState {
    constructor() {
       this.overlay = document.createElement("div")
       this.overlay.className = "LDX-Instrumentation-Overlay"
-      document.body.appendChild(this.overlay)
    }
    update() {
       for (const target of this.selections) {
@@ -93,8 +92,8 @@ export class InstrumentationState {
       }
       this.hovered = this.hovered?.updateOverlay()
    }
-   select(target: ElementInstrumentation | Expr, multiple: boolean, focused?: ElementInstrumentation) {
-      if (target instanceof Expr) {
+   select(target: ElementInstrumentation | Element, multiple: boolean, focused?: ElementInstrumentation) {
+      if (target instanceof Element) {
          if (!this.selections.has(target)) {
             if (!multiple) this.unselect()
             this.selections.add(target)
@@ -119,8 +118,8 @@ export class InstrumentationState {
          this.unselect()
       }
    }
-   unselect(target?: Expr) {
-      if (target instanceof Expr) {
+   unselect(target?: Element) {
+      if (target instanceof Element) {
          this.selections.delete(target)
          if (this.focused?.getElement() === target) {
             this.focus(null)
@@ -151,8 +150,8 @@ export class InstrumentationState {
          }
       }
    }
-   findZone(target: ElementController | Expr): ElementInstrumentation {
-      if (target instanceof Expr) {
+   findZone(target: ElementController | Element): ElementInstrumentation {
+      if (target instanceof Element) {
          return this.instrumenteds.get(target)?.[0]
       }
       else {
@@ -179,13 +178,13 @@ export class InstrumentationState {
          this.hovered = null
       }
    }
-   registerElement(element: Expr): ElementInstrumentation[] {
+   registerElement(element: Element): ElementInstrumentation[] {
       const { instrumenteds } = Instrumentation
       let zones = instrumenteds.get(element)
       if (!zones) instrumenteds.set(element, zones = [])
       return zones
    }
-   unregisterElement(element: Expr) {
+   unregisterElement(element: Element) {
       const { instrumenteds, selections } = Instrumentation
       if (selections.has(element)) this.unselect(element)
       instrumenteds.delete(element)
@@ -241,7 +240,7 @@ export const InstrumentationEndpoints = {
    }>(),
    "Command": new HandlersManifold<{
       cmd: ElementCommand
-      target: Expr
+      target: Element
    }>(),
    "Select": new HandlersManifold<{
       zone: ElementInstrumentation

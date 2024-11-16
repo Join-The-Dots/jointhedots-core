@@ -1,4 +1,4 @@
-import { JSONSchema } from "@sf-explorer/core"
+import { AST, CommonTypes, ElementJSON, JSONSchema, TemplateSchema } from "@sf-explorer/core"
 import { PropertyRows, PropertyTable } from "../TableProperties"
 import { useCallback, useEffect, useState } from "react"
 import { ComponentPublication } from "@sf-explorer/core"
@@ -8,17 +8,16 @@ import { createValueFromTyping } from "@sf-explorer/core"
 import Stack from "@sf-explorer/editors/ui/Stack"
 import Icon from "@sf-explorer/core/ui/Icon"
 import Button from "@sf-explorer/editors/ui/Button"
-import * as AST from "@sf-explorer/core"
 
 type Selected = {
    component: ComponentEntry
    manifest: ComponentManifest
-   templates: AST.TemplateSchema[]
+   templates: TemplateSchema[]
    schema: JSONSchema
 }
 
 export function PanelSelectTemplate(props: {
-   templates: AST.TemplateSchema[]
+   templates: TemplateSchema[]
    onValidate: (data: any) => void
    onCancel: () => void
 }) {
@@ -42,7 +41,7 @@ export function PanelSelectTemplate(props: {
 export function PanelNodeCreation(props: {
    component?: ComponentEntry,
    service: string
-   onComplete: (component?: ComponentEntry, node?: AST.Any) => void;
+   onComplete: (component?: ComponentEntry, params?: ElementJSON) => void;
    onCancel?: () => void
 }): JSX.Element {
    const { service, onComplete, onCancel } = props
@@ -51,7 +50,7 @@ export function PanelNodeCreation(props: {
 
    useEffect(() => {
       component && component.fetch().then(manifest => {
-         const schema = manifest[service] || AST.CommonTypes.any as JSONSchema
+         const schema = manifest[service] || CommonTypes.any as JSONSchema
          const { templates } = manifest
          if (templates) {
             setSelected({
@@ -71,8 +70,8 @@ export function PanelNodeCreation(props: {
       setComponent(ComponentsRegistry.acquireComponent(pub.component_id))
    }, [])
 
-   const complete = useCallback(async (data?: AST.Any) => {
-      onComplete(selected.component, data)
+   const complete = useCallback(async (params?: ElementJSON) => {
+      onComplete(selected.component, params)
    }, [selected])
 
    if (!selected) {

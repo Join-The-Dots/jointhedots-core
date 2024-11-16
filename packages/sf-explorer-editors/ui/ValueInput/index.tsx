@@ -1,11 +1,12 @@
 import React from 'react'
-import { EditionContext, EditionDriver, EditorMenu, IEditorProvider, ValueProps, sortMatchedControllers } from '../editor-context'
+import { EditionContext, EditionDriver, EditorMenu, ValueProps, sortMatchedControllers } from '../../elements/interfaces'
 import openContextualMenu, { Menu } from '@sf-explorer/editors/ui/openContextualMenu'
 import Icon from '@sf-explorer/core/ui/Icon'
 import "./index.scss"
 import { DropZone } from '../DragAndDrop'
 import { ValueMenu } from '../ValueMenu'
 import { useAsyncState } from '@sf-explorer/editors/hooks/useAsyncState'
+import { ElementsEditors } from '@sf-explorer/editors/elements'
 
 export function NoInput(props: ValueProps): JSX.Element {
    if (props.value instanceof Object) return <>Unsupported: {props.value.toString()}</>
@@ -14,12 +15,11 @@ export function NoInput(props: ValueProps): JSX.Element {
 
 export default function ValueInput(props: ValueProps & {
    menu?: EditorMenu
-   provider: IEditorProvider
 }) {
-   const { provider, value, typing, menu, onChange, onExpand } = props
+   const { value, typing, menu, onChange, onExpand } = props
 
    const resolved = useAsyncState(async () => {
-      const ctl = await provider.findControllerOf(value, typing)
+      const ctl = await ElementsEditors.findControllerOf(value, typing)
       if (ctl) return { ctl, value, typing }
       else return null
    }, [value, typing])
@@ -30,19 +30,17 @@ export default function ValueInput(props: ValueProps & {
    const handleDropWindow = React.useCallback((payload) => {
       const data = payload["text/plain"]
       if (data?.type === "datasource-path") {
-         onChange({
-            type: "get",
-            at: data.path,
-         })
+         console.log("TODO: drop datasource-path", data.path)
       }
    }, [onChange])
 
    const onSelectMenu = (e) => {
       return openContextualMenu(e.currentTarget, async (close) => {
          const items = []
-         const matchings = await provider.listControllerOf(value, typing)
+         const matchings = await ElementsEditors.listControllerOf(value, typing)
          const apply = (ctl: EditionDriver) => () => {
-            close(onChange(ctl.createValue(typing, value)))
+            onChange(ctl.createValue(typing, value))
+            close()
          }
          for (const ctl of sortMatchedControllers(matchings)) {
             items.push(<Menu.Item

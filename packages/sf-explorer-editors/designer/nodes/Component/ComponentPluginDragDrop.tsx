@@ -27,9 +27,8 @@ import {
 } from 'lexical'
 import { useCallback, useEffect } from "react"
 import { ComponentNode } from "./ComponentNode"
-import * as AST from "@sf-explorer/core"
 import { useDocumentContext } from '../../context/DocumentContext'
-import { LDXElementExpr } from '@sf-explorer/core'
+import { LDXDisplayExpr, AST, createLDXKey, ElementJSON } from '@sf-explorer/core'
 import { EventHandlers, Instrumentation, InstrumentationEndpoints, InstrumentationEvents } from '@sf-explorer/core/ui/Instrumentation'
 import { useFeature } from '@sf-explorer/editors/ui/FeaturesLayout'
 import { ViewEditor } from '@sf-explorer/editors/designer/editor'
@@ -39,7 +38,7 @@ const TRANSPARENT_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAE
 const img = document.createElement('img')
 img.src = TRANSPARENT_IMAGE
 
-export const INSERT_COMPONENT_COMMAND: LexicalCommand<AST.Any> =
+export const INSERT_COMPONENT_COMMAND: LexicalCommand<ElementJSON> =
    createCommand('INSERT_COMPONENT_COMMAND')
 
 
@@ -91,25 +90,24 @@ export default function ComponentPluginDragDrop(): JSX.Element | null {
       }
 
       return mergeRegister(
-         editor.registerCommand<AST.Any>(
+         editor.registerCommand<ElementJSON>(
             INSERT_COMPONENT_COMMAND,
             (payload) => {
-               const node = new ComponentNode(layout, AST.createLDXKey())
-               layout.embeds.set(node.__embed, null)
+               const node = new ComponentNode(layout, createLDXKey())
+               layout.embeds[node.__embed] = null
                $insertNodes([node])
                if ($isRootOrShadowRoot(node.getParentOrThrow())) {
                   $wrapNodeInElement(node, $createParagraphNode).selectEnd()
                }
 
-               layout.update(async (self, T) => {
-                  const expr = await self.NewFrom(payload)
-                  if (expr instanceof LDXElementExpr) {
-                     self.embeds.set(node.__embed, expr)
-                     const dock = node.__dock.current
-                     if (dock) dock.forceUpdate()
-                  }
-                  return self
-               })
+               async function update(layout) {
+                  const data = layout.serialize()
+                  data.embeds.inner[node.__embed] = payload
+                  await layout.update(data)
+                  const dock = node.__dock.current
+                  if (dock) dock.forceUpdate()
+               }
+               update(layout)
                return true
             },
             COMMAND_PRIORITY_EDITOR,

@@ -2,7 +2,7 @@ import React from 'react'
 import * as monaco from "monaco-editor"
 import Button from '@sf-explorer/editors/ui/ButtonIcon'
 import { toast } from 'react-toastify'
-import { EditionContext, IEditionOperation } from '@sf-explorer/editors/ui/editor-context'
+import { EditionContext, IEditionOperation } from '../../elements/interfaces'
 import "../InputJson/style.scss"
 
 export type PropsType = {
@@ -130,8 +130,8 @@ export class JSXInput extends React.Component<PropsType> implements IEditionOper
       const { edit } = this.state
       return <div className='json-edit-component'>
          {edit ? <div>
-            <Button name="code:action/ok" onClick={this.onValidate} />
-            <Button name="code:action/cancel" onClick={this.onCancel} />
+            <Button name="bi:check-lg" onClick={this.onValidate} />
+            <Button name="bi:x-lg" onClick={this.onCancel} />
          </div> : <div />}
          <div ref={this.useElement} />
       </div>

@@ -1,5 +1,5 @@
-import { CommonTypes, DocumentLayer, DocumentModel, Expr } from "@sf-explorer/core/index"
-import { EditionEnvironment } from "../ui/editor-context"
+import { CommonTypes, DocumentLayer, DocumentModel, Element } from "@sf-explorer/core/index"
+import { EditionEnvironment } from "../elements/interfaces"
 
 export interface IModelEditionContext {
    updateModel(): Promise<void>
@@ -13,12 +13,12 @@ export class ModelEditionSession {
 }
 
 export class ElementEditionSelection extends EditionEnvironment {
-   constructor(public element: Expr, readonly session: ModelEditionSession) {
+   constructor(public element: Element, readonly session: ModelEditionSession) {
       super()
       this.attachements["model"] = session.model
    }
    getName() {
-      return "<todo>"
+      return this.element.toTitle()
    }
    getTyping() {
       return this.element.typing
@@ -26,8 +26,8 @@ export class ElementEditionSelection extends EditionEnvironment {
    getExpression() {
       return this.element
    }
-   update(element: Expr) {
-      /*  const { context, history } = this.session
+ /*   update(element: Element) {
+       const { context, history } = this.session
        const prevContent = history.lastVersion()
        if (prevContent.revision === this.location.revision) {
           this.descriptor = descriptor
@@ -37,6 +37,6 @@ export class ElementEditionSelection extends EditionEnvironment {
        else {
           console.error(new Error(`Location revision unmatch, expect:${this.location.revision}, have:${prevContent.revision}`))
           context.unselect()
-       } */
-   }
+       }
+   } */
 }

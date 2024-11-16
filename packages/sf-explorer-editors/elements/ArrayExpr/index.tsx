@@ -1,22 +1,25 @@
-import React from 'react'
-import { ValueProps, EditorDescriptor, EditorValueMatch } from "@sf-explorer/editors/ui/editor-context"
-import { Schema, CommonTypes } from '@sf-explorer/core'
+import React, { useContext } from 'react'
+import { ValueProps, EditorDescriptor, EditorValueMatch, EditionContext } from "../interfaces"
+import { AST, Schema, CommonTypes } from '@sf-explorer/core'
 import { ArrayTable } from '@sf-explorer/editors/ui/TableArray'
 import { ElementsEditors } from '..'
 import { ExpandableInputHOC } from '@sf-explorer/editors/ui/InputExpandable'
 import { createValueFromTyping } from '@sf-explorer/core'
 import { JSONSchema } from '@sf-explorer/core'
-import { ArrayExpr } from '@sf-explorer/core/interpreter/exprs'
+import { ArrayExpr } from '@sf-explorer/core/interpreter/elements'
 
 function ArrayEditor(props: ValueProps<ArrayExpr>) {
    const { value, typing } = props
    const itemTyping = typing?.items as JSONSchema || CommonTypes.any
+   const env = useContext(EditionContext)
    return (<ArrayTable
-      items={value.elements}
+      items={value.elements.map(x => x.value)}
       itemTyping={typing?.items as JSONSchema || CommonTypes.any}
-      provider={ElementsEditors}
-      onChange={(elements) => {
-         value.elements = elements
+      onChange={(elements, cset) => {
+         /*    const node = getAST(value)
+            node.elements = elements
+            cset.updates[value.$key] = node
+            value.model.commit(cset) */
       }}
       onCreate={() => createValueFromTyping(itemTyping)}
    />)

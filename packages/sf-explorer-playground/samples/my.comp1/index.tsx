@@ -1,21 +1,18 @@
-import { LDXElementExpr } from "@sf-explorer/core/interpreter/exprs"
-import { useInstrumentation } from "@sf-explorer/core/ui/Instrumentation/instrumentation"
+import { AST, LDXDisplayExpr } from "@sf-explorer/core"
+import { useInstrumentation } from "@sf-explorer/core/ui/Instrumentation"
 import Button from "@sf-explorer/editors/ui/Button"
-
 
 export default function (props) {
     const instr = useInstrumentation()
 
     const onClick = () => {
-        const xpr = instr.getElement() as LDXElementExpr
-        xpr.update(async (self, B) => {
-            //builder.modify(xpr)
-            xpr.props.properties[0].value = await xpr.props.NewFrom({
-                type: "Literal",
-                value: "oo",
-            } as any)
-            return xpr
-        })
+        const element = instr.getElement() as LDXDisplayExpr
+        const xprops = element.props.serialize()
+        xprops.properties[0].value = {
+            $type: "LiteralExpr",
+            value: "oo",
+        }
+        element.props.update(xprops)
     }
 
     return <div style={{ border: "solid thin #484", backgroundColor: "#8b8" }}>

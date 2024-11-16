@@ -61,7 +61,7 @@ import {
   createThread,
   Thread,
   useCommentStore,
-} from '../../commenting';
+} from '../../editor/commenting';
 import useModal from '../../hooks/useModal';
 import CommentEditorTheme from '../../themes/CommentEditorTheme';
 import Button from '../../../ui/Button';

@@ -1,5 +1,5 @@
 import React from 'react'
-import { ValueProps } from "@sf-explorer/editors/ui/editor-context"
+import { ValueProps } from "../../elements/interfaces"
 import ExpandedZone from './ExpandedZone'
 
 export function StaticInputHOC(title: string) {

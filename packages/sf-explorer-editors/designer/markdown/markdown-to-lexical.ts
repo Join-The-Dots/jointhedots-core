@@ -2,7 +2,7 @@ import { Transformer, $convertFromMarkdownString, $convertToMarkdownString, Elem
 import { EditorState, $getRoot, ElementNode, LexicalNode } from 'lexical'
 import { stringify_node_jsx } from '@sf-explorer/core'
 import { ComponentNode } from '../nodes/Component/ComponentNode'
-import { LDXDocumentExpr, LDXElementExpr } from '@sf-explorer/core'
+import { LDXDocumentExpr, LDXDisplayExpr } from '@sf-explorer/core'
 
 export const MARKDOWN_TRANSFORMERS: Transformer[] = [
    CHECK_LIST,
@@ -18,8 +18,13 @@ export function registerMarkdownTransformer(transformer: TextMatchTransformer | 
 
 export function exportAstToMarkdown(node: LexicalNode) {
    if (node["exportAST"] instanceof Function) {
-      const ast = node["exportAST"]()
-      return stringify_node_jsx(ast)
+      try {
+         const ast = node["exportAST"]()
+         return stringify_node_jsx(ast)
+      }
+      catch (e) {
+         return `\`\`\`json\n// ! Invalid component:\n ${JSON.stringify(node.exportJSON(), null, 2)}\`\`\``
+      }
    }
 }
 
@@ -56,8 +61,8 @@ export function $updateEditorStateFromModel(layout: LDXDocumentExpr) {
       export: () => null,
       replace: (parentNode, chilren, match, isImport) => {
          const key = match[1]
-         const value = layout.embeds.get(key)
-         if (value instanceof LDXElementExpr) {
+         const value = layout.embeds[key]
+         if (value instanceof LDXDisplayExpr) {
             const node = new ComponentNode(layout, key)
             parentNode.replace(node)
          }

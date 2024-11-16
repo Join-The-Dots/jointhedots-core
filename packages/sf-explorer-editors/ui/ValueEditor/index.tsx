@@ -1,17 +1,16 @@
 import React from 'react'
-import { IEditorProvider, ValueProps } from '../editor-context'
+import { ValueProps } from '../../elements/interfaces'
 import "./index.scss"
 import { useAsyncState } from '@sf-explorer/editors/hooks/useAsyncState'
 import { NoInput } from '../ValueInput'
 import "./index.scss"
+import { ElementsEditors } from '@sf-explorer/editors/elements'
 
-export default function ValueEditor(props: ValueProps & {
-   provider: IEditorProvider
-}) {
-   const { provider, value, typing } = props
+export default function ValueEditor(props: ValueProps) {
+   const { value, typing } = props
 
    const resolved = useAsyncState(async () => {
-      const ctl = await provider.findControllerOf(value, typing)
+      const ctl = await ElementsEditors.findControllerOf(value, typing)
       if (ctl) return { ctl, value, typing }
       else return null
    }, [value, typing])

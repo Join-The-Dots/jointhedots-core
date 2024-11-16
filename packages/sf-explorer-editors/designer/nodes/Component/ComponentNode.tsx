@@ -1,17 +1,15 @@
-import { EmptyContext } from '@sf-explorer/core'
-import { DocumentModel, LDXElementExpr, SubTreeGenerator } from '@sf-explorer/core'
-import { InvokeView } from '@sf-explorer/core'
+import { EmptyContext, AST, InvokeView, LDXDocumentExpr, createLDXKey, ASTGenerator, ElementJSON } from '@sf-explorer/core'
+import { DocumentModel, LDXDisplayExpr } from '@sf-explorer/core'
 import { DisplayInfos, ElementBoundingBox, ElementController, InstrumentationLayout } from '@sf-explorer/core/ui/Instrumentation'
 import { InstrumentationZone } from '@sf-explorer/core/ui/Instrumentation'
 import type { EditorConfig, LexicalEditor, NodeKey, SerializedLexicalNode, Spread } from 'lexical'
 import { $getEditor, DecoratorNode } from 'lexical'
-import * as AST from "@sf-explorer/core"
-import React, { createRef, useEffect, useState } from 'react'
+import React, { createRef } from 'react'
 
 export type SerializedComponentNode = Spread<
     {
         document: string
-        descriptor: AST.Any
+        descriptor: ElementJSON
     },
     SerializedLexicalNode
 >
@@ -28,7 +26,7 @@ export class ComponentNode extends DecoratorNode<JSX.Element> implements Element
     }
 
     constructor(
-        public __layout: AST.LDXDocumentExpr,
+        public __layout: LDXDocumentExpr,
         public __embed: string,
         key?: NodeKey
     ) {
@@ -46,31 +44,34 @@ export class ComponentNode extends DecoratorNode<JSX.Element> implements Element
     }
 
     exportJSON(): SerializedComponentNode {
-        return {
-            type: 'component',
-            version: 1,
-            document: this.__layout.model.id,
-            descriptor: this.exportAST(),
+        const element = this.getElement()
+        if (element) {
+            return {
+                type: 'component',
+                version: 1,
+                document: this.__layout.model.id,
+                descriptor: element.serialize(),
+            }
         }
+        return null
     }
 
     static importJSON(serializedNode: SerializedComponentNode): ComponentNode {
         const { document, descriptor } = serializedNode
         const model = DocumentModel.models.get(document)
-        const layout = model.base.layout as AST.LDXDocumentExpr
+        const layout = model.base.layout as LDXDocumentExpr
 
-        const node = new ComponentNode(layout, AST.createLDXKey())
-        layout.embeds.set(node.__embed, null)
+        const node = new ComponentNode(layout, createLDXKey())
+        layout.embeds[node.__embed] = null
 
-        layout.update(async (self, T) => {
-            const embed = await self.NewFrom(descriptor)
-            if (embed instanceof LDXElementExpr) {
-                self.embeds.set(node.__embed, embed)
-                const dock = node.__dock.current
-                if (dock) dock.forceUpdate()
-            }
-            return self
-        })
+        async function update(layout) {
+            const data = layout.serialize()
+            data.embeds.inner[node.__embed] = descriptor
+            await layout.update(data)
+            const dock = node.__dock.current
+            if (dock) dock.forceUpdate()
+        }
+        update(layout)
 
         return null
     }
@@ -82,8 +83,8 @@ export class ComponentNode extends DecoratorNode<JSX.Element> implements Element
     exportAST() {
         const element = this.getElement()
         if (element) {
-            const ctx = new SubTreeGenerator()
-            return ctx.generateXpr(null, element)
+            const ctx = new ASTGenerator()
+            return ctx.generate(null, element)
         }
         return null
     }
@@ -102,7 +103,7 @@ export class ComponentNode extends DecoratorNode<JSX.Element> implements Element
         }
     }
     getElement() {
-        return this.__layout.embeds.get(this.__embed)
+        return this.__layout.embeds[this.__embed]
     }
     getLocation() {
         return null
@@ -122,7 +123,7 @@ class ComponentDock extends React.Component<{ node: ComponentNode }> {
     }
     render() {
         const { node } = this.props
-        const element = node.getElement() as LDXElementExpr
+        const element = node.getElement() as LDXDisplayExpr
         if (element) {
             const params = element.props.read(EmptyContext)
             return <InstrumentationZone controller={node}>
@@ -132,7 +133,7 @@ class ComponentDock extends React.Component<{ node: ComponentNode }> {
                 }} />
             </InstrumentationZone>
         }
-        else if (node.__layout.embeds.has(node.__embed)) {
+        else if (node.__layout.embeds[node.__embed] !== undefined) {
             return "loading..."
         }
         else {
