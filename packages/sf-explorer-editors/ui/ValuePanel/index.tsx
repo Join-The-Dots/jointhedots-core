@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
 import Icon from '@sf-explorer/core/ui/Icon'
 import { Tabs } from '@sf-explorer/editors/ui/Tabs'
@@ -54,6 +54,7 @@ export default function ValuePanel(props: ValueProps & {
    onClose?: () => void
 }) {
    const { value, typing, className, onChange, onClose } = props
+   //const { displayed, setDisplayed } = useState(null)
 
    const [selection, setSelection] = React.useState("main")
 
@@ -67,12 +68,8 @@ export default function ValuePanel(props: ValueProps & {
       }
    }, null)
 
-   const ctl_state = useAsyncState(async () => {
-      return ElementsEditors.findControllerOf(value, typing)
-   }, [value, typing])
-
-   const ctl = ctl_state.get()
-   if (ctl_state.isWaiting || !ctl || !ctl.editor) {
+   const ctl = ElementsEditors.findControllerOf(value)
+   if (!ctl || !ctl.editor) {
       const { fallback } = props
       if (fallback !== undefined) return fallback
       else return <div className={className}>No Editor</div>

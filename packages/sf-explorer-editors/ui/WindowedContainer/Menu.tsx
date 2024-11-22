@@ -2,10 +2,9 @@ import React, { Component } from "react"
 import openContextualMenu, { Menu } from "../openContextualMenu"
 import { FeaturesContext, ReactFeaturesContext } from "../FeaturesLayout"
 
-class FrameMenu extends Component {
+class FrameMenu extends Component<any> {
    static contextType = ReactFeaturesContext
-   context: FeaturesContext
-   props: any
+   declare context: FeaturesContext
    handleClick = (feature, panelName) => () => {
       feature.openWindow(panelName)
       this.props.close()

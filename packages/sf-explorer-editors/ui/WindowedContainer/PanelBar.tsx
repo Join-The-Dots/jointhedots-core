@@ -29,10 +29,9 @@ const CSS_panel_bar_vertical = {
    item_button_transform: "rotate(-90deg)",
 }
 
-export default class PanelBar extends Component {
+export default class PanelBar extends Component<PropsType> {
    static contextType = ReactFeaturesContext
-   context: FeaturesContext
-   props: PropsType
+   declare context: FeaturesContext
    shouldComponentUpdate(nextProps) {
       const curProps = this.props
       return curProps.panel !== nextProps.panel

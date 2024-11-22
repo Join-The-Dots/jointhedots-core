@@ -1,0 +1,16 @@
+{
+   "id": "mermaid",
+   "description": "Mermaid diagram displayer",
+   "icon": "bi:diagram-3-fill",
+   "view": {
+      "properties": {
+         "code": {
+            "type": "string",
+            "examples": "pie\n\"Dogs\" : 386\n\"Cats\" : 85.9\n\"Rats\" : 15"
+         }
+      }
+   },
+   "attachments": {
+      "view.react": "./Mermaid#MermaidComponent"
+   }
+}

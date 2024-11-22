@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom"
 import ReactDOMClient from 'react-dom/client'
-import ReactTools, { ReactFiberNode } from "../../common/react-tools"
+import { ReactTools, ReactFiberNode } from "../../common/react-tools"
 import { ElementTooling, ElementInstrumentation, ElementBoundingBox, InstrumentationKind } from "./instrumentation"
 
 export class ZoneSelection {
@@ -80,79 +80,61 @@ export class ZoneSelection {
    }
    static computeZoneSelection(zone: ElementInstrumentation, overlay: HTMLElement): ZoneSelection {
       const node = ReactTools.findNodeFromInstance(zone.getBase())
-      return ZoneSelection.computeNodeSelection(node, overlay)
-   }
-   static computeElementSelection(element: HTMLElement, overlay: HTMLElement): ZoneSelection {
-      const node = ReactTools.findNodeFromHTMLElement(element)
-      return ZoneSelection.computeNodeSelection(node, overlay)
-   }
-   static computeNodeSelection(node: ReactFiberNode, overlay: HTMLElement): ZoneSelection {
-      let firstselection: ZoneSelection = null
-      let lastSelection: ZoneSelection = null
-      node = node?.child || node
-      while (node) {
-         const { elementType } = node
-         const kind = (elementType instanceof Object) && elementType.$$instrumentation as InstrumentationKind
-         const zone = (kind === InstrumentationKind.Tooling) ? (node.stateNode as ElementTooling).getZone()
-            : (kind === InstrumentationKind.Zone) ? (node.stateNode as ElementInstrumentation) : null
-         if (zone !== null) {
-
-            if (zone !== node.stateNode) {
-               try {
-                  const element = ReactDOM.findDOMNode(zone.getBase())
-                  node = ReactTools.findNodeFromHTMLElement(element as HTMLElement)
-                  continue
-               }
-               catch (e) {
-                  console.error(e)
-                  return null
-               }
-            }
-
-            // Append selection layer for the instrumentation zone
-            if (zone.enabled === true) {
-               const sel = new ZoneSelection(overlay)
-               sel.node = node
-               sel.zone = zone
-               if (lastSelection) {
-                  sel.isLeaf = false
-                  lastSelection.parent = sel
-               }
-               else {
-                  sel.isLeaf = true
-                  firstselection = sel
-               }
-               lastSelection = sel
-            }
-         }
-         node = ReactTools.getNodeParent(node)
-      }
-      return firstselection
+      return computeNodeSelection(node, overlay)
    }
 }
 
-export function findIntrumentationFromDOM(element: HTMLElement): ElementInstrumentation {
-   let node = ReactTools.findNodeFromHTMLElement(element)
+function computeNodeSelection(node: ReactFiberNode, overlay: HTMLElement): ZoneSelection {
+   let firstselection: ZoneSelection = null
+   let lastSelection: ZoneSelection = null
+   node = node?.child || node
    while (node) {
       const { elementType } = node
       const kind = (elementType instanceof Object) && elementType.$$instrumentation as InstrumentationKind
       const zone = (kind === InstrumentationKind.Tooling) ? (node.stateNode as ElementTooling).getZone()
          : (kind === InstrumentationKind.Zone) ? (node.stateNode as ElementInstrumentation) : null
       if (zone !== null) {
-         return zone
+
+         if (zone !== node.stateNode) {
+            try {
+               const element = ReactDOM.findDOMNode(zone.getBase())
+               node = ReactTools.findNodeFromHTMLElement(element as HTMLElement)
+               continue
+            }
+            catch (e) {
+               console.error(e)
+               return null
+            }
+         }
+
+         // Append selection layer for the instrumentation zone
+         if (zone.enabled === true) {
+            const sel = new ZoneSelection(overlay)
+            sel.node = node
+            sel.zone = zone
+            if (lastSelection) {
+               sel.isLeaf = false
+               lastSelection.parent = sel
+            }
+            else {
+               sel.isLeaf = true
+               firstselection = sel
+            }
+            lastSelection = sel
+         }
       }
       node = ReactTools.getNodeParent(node)
    }
-   return null
+   return firstselection
 }
 
 function findDOMNode(instance: React.Component): HTMLElement | null {
-   let fiberNode = (instance as any)._reactInternals || (instance as any)._reactInternalFiber;
+   let fiberNode = (instance as any)._reactInternals || (instance as any)._reactInternalFiber
    while (fiberNode) {
       if (fiberNode.stateNode instanceof HTMLElement) {
-         return fiberNode.stateNode;
+         return fiberNode.stateNode
       }
-      fiberNode = fiberNode.child;
+      fiberNode = fiberNode.child
    }
-   return null;
+   return null
 }

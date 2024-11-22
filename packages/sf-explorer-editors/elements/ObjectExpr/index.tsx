@@ -5,7 +5,7 @@ import { JSONSchema } from '@sf-explorer/core'
 import { PropertyDecoration, PropertyRow, PropertyTable } from '@sf-explorer/editors/ui/TableProperties'
 import { ElementsEditors } from '..'
 import { ExpandableInputHOC } from '@sf-explorer/editors/ui/InputExpandable'
-import { ElementJSON, ObjectExpr, ObjectProperty } from '@sf-explorer/core/interpreter/elements'
+import { ElementJSON, ObjectExpr, ObjectProperty, serializeElement } from '@sf-explorer/core/interpreter/elements'
 
 export function ObjectPropertyRows(props: {
    heading?: React.ReactNode
@@ -62,7 +62,7 @@ export function ObjectEditor(props: ValueProps<ObjectExpr>) {
    const { value, typing, onChange } = props
    const env = useContext(EditionContext)
    const onPropertyChange = React.useCallback((p_name: string, p_value: ElementJSON) => {
-      const data = value.serialize()
+      const data = serializeElement(value)
       let found = false
       for (const prop of data.properties) {
          if (prop.key?.value === p_name) {

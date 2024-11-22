@@ -15,7 +15,7 @@ function ArrayEditor(props: ValueProps<ArrayExpr>) {
    return (<ArrayTable
       items={value.elements.map(x => x.value)}
       itemTyping={typing?.items as JSONSchema || CommonTypes.any}
-      onChange={(elements, cset) => {
+      onChange={(elements) => {
          /*    const node = getAST(value)
             node.elements = elements
             cset.updates[value.$key] = node

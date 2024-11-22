@@ -44,7 +44,7 @@ export async function create_esbuild_context(
       entryPoints: lib.entries,
       outdir,
       format: 'esm',
-      target: 'es2020',
+      target: 'es2022',
       platform: "browser",
       sourcemap: use_dev ? "linked" : false,
       minify: use_dev ? false : true,

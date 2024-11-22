@@ -13,7 +13,7 @@ export type PropsType = {
 
 export class JSXInput extends React.Component<PropsType> implements IEditionOperation {
    static contextType = EditionContext
-   context: React.ContextType<typeof EditionContext>
+   declare context: React.ContextType<typeof EditionContext>
    element: HTMLDivElement
    editor: monaco.editor.IStandaloneCodeEditor
    resizer: ResizeObserver

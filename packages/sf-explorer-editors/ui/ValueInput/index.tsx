@@ -19,7 +19,7 @@ export default function ValueInput(props: ValueProps & {
    const { value, typing, menu, onChange, onExpand } = props
 
    const resolved = useAsyncState(async () => {
-      const ctl = await ElementsEditors.findControllerOf(value, typing)
+      const ctl = await ElementsEditors.findControllerOf(value)
       if (ctl) return { ctl, value, typing }
       else return null
    }, [value, typing])

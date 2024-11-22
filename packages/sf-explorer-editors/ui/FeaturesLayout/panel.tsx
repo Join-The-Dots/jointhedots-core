@@ -256,10 +256,9 @@ export type PropsType = {
    style?: any,
 }
 
-export class PanelContainer extends React.Component {
+export class PanelContainer extends React.Component<PropsType> {
    static contextType = ReactFeaturesContext
-   context: FeaturesContext
-   props: PropsType
+   declare context: FeaturesContext
    instance: PanelInstance
    root: HTMLElement
 
@@ -336,7 +335,7 @@ export class PanelContainer extends React.Component {
    }
 }
 
-export class PanelComponent<TFeatureInstance extends FeatureInstance = FeatureInstance> extends Component {
+export class PanelComponent<TFeatureInstance extends FeatureInstance = FeatureInstance, P = {}, S = {}, SS = any> extends Component<P & { instance: PanelInstance }, S, SS> {
    static Descriptor: PanelDescriptor
    instance: PanelInstance
    feature: TFeatureInstance

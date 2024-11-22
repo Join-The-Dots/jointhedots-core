@@ -17,7 +17,7 @@ export type ReactClientRect = {
    height: number,
 }
 
-const ReactTools = {
+export const ReactTools = {
    findNodeFromInstance(instance: React.Component): ReactFiberNode {
       if (instance.hasOwnProperty("_reactInternals")) {
          return instance["_reactInternals"]
@@ -58,7 +58,7 @@ const ReactTools = {
       return nodes
    },
    getHTMLClientRect(node: ReactFiberNode, host?: HTMLElement): ReactClientRect {
-      const rect = computeClientRect(node)
+      const rect = computeReactClientRect(node)
       if (rect && host) {
          const origin = host.getBoundingClientRect()
          rect.left = rect.left - origin.left
@@ -70,35 +70,51 @@ const ReactTools = {
    }
 }
 
-export default ReactTools
-
-function computeClientRect(node: ReactFiberNode, rect?: ReactClientRect): ReactClientRect {
-   const { stateNode } = node
-   if (stateNode instanceof HTMLElement) {
-      const pos = stateNode.getBoundingClientRect()
-      if (!rect) {
-         return {
-            left: pos.left,
-            right: pos.right,
-            top: pos.top,
-            bottom: pos.bottom,
-            width: pos.right - pos.left,
-            height: pos.bottom - pos.top,
-         }
+export const HtmlTools = {
+   getHTMLClientRect(node: HTMLElement, host?: HTMLElement): ReactClientRect {
+      const rect = computeHtmlClientRect(node)
+      if (rect && host) {
+         const origin = host.getBoundingClientRect()
+         rect.left = rect.left - origin.left
+         rect.right = rect.left + rect.width
+         rect.top = rect.top - origin.top
+         rect.bottom = rect.top + rect.height
       }
-      else {
-         rect.left = Math.min(rect.left, pos.left)
-         rect.right = Math.max(rect.right, pos.right)
-         rect.top = Math.min(rect.top, pos.top)
-         rect.bottom = Math.max(rect.bottom, pos.bottom)
-         rect.width = rect.right - rect.left
-         rect.height = rect.bottom - rect.top
-         return rect
+      return rect
+   }
+}
+
+function computeHtmlClientRect(node: HTMLElement, rect?: ReactClientRect): ReactClientRect {
+   const pos = node.getBoundingClientRect()
+   if (!rect) {
+      return {
+         left: pos.left,
+         right: pos.right,
+         top: pos.top,
+         bottom: pos.bottom,
+         width: pos.right - pos.left,
+         height: pos.bottom - pos.top,
       }
    }
    else {
+      rect.left = Math.min(rect.left, pos.left)
+      rect.right = Math.max(rect.right, pos.right)
+      rect.top = Math.min(rect.top, pos.top)
+      rect.bottom = Math.max(rect.bottom, pos.bottom)
+      rect.width = rect.right - rect.left
+      rect.height = rect.bottom - rect.top
+      return rect
+   }
+}
+
+function computeReactClientRect(node: ReactFiberNode, rect?: ReactClientRect): ReactClientRect {
+   const { stateNode } = node
+   if (stateNode instanceof HTMLElement) {
+      return computeHtmlClientRect(stateNode, rect)
+   }
+   else {
       for (let child = node.child; child; child = child.sibling) {
-         rect = computeClientRect(child, rect)
+         rect = computeReactClientRect(child, rect)
       }
       return rect
    }

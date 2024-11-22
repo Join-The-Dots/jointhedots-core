@@ -57,6 +57,9 @@ export class InstrumentationZone extends React.Component<PropsType> implements E
          }
       }
    }
+   get isSelected(): boolean {
+      return Instrumentation.focused === this
+   }
 
    /***************************************************************
     * React interface

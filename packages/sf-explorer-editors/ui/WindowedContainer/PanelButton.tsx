@@ -26,10 +26,9 @@ type PropsType = {
    css: any,
 }
 
-export default class PanelButton extends Component {
+export default class PanelButton extends Component<PropsType> {
    static contextType = ReactFeaturesContext
-   context: FeaturesContext
-   props: PropsType
+   declare context: FeaturesContext
    constructor(props: PropsType) {
       super(props)
       props.item.addEventListener("update", this.handleEvent)

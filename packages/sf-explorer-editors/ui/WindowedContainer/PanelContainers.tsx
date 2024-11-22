@@ -5,8 +5,7 @@ export type CenterPropsType = {
    current: PanelInstance,
 }
 
-export class CenterPanelContainer extends React.Component {
-   props: CenterPropsType
+export class CenterPanelContainer extends React.Component<CenterPropsType> {
    shouldComponentUpdate(nextProps) {
       const curProps = this.props
       return curProps.current !== nextProps.current
@@ -31,8 +30,7 @@ export type SidePropsType = {
    vertical?: boolean,
 }
 
-export class SidePanelContainer extends React.Component {
-   props: SidePropsType
+export class SidePanelContainer extends React.Component<SidePropsType> {
    container: PanelContainer
    shouldComponentUpdate(nextProps) {
       const curProps = this.props
@@ -74,8 +72,7 @@ export type ToolbarPropsType = {
    size: number,
 }
 
-export class ToolbarPanelContainer extends React.Component {
-   props: ToolbarPropsType
+export class ToolbarPanelContainer extends React.Component<ToolbarPropsType> {
    container: PanelContainer
    shouldComponentUpdate(nextProps) {
       const curProps = this.props

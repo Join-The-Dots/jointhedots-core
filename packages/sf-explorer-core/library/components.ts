@@ -83,6 +83,13 @@ export class ComponentEntry {
       }
       return null
    }
+   hasResource(identifier: string): boolean {
+      const { manifest } = this
+      if (manifest?.attachments?.[identifier]) {
+         return true
+      }
+      return null
+   }
    async getResourceAsync(identifier: string): Promise<ComponentResource> {
       if (this.manifest === undefined) await this.fetch()
       return this.getResource(identifier)

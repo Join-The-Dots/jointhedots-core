@@ -54,7 +54,6 @@ export type EditionDriver<T extends Element = Element> = {
 
    // Handlers
    matchType?: (schema: JSONSchema) => EditorValueMatch
-   matchValue?: (value: T, handler?: ComponentResource) => EditorValueMatch
    createValue?: (schema: JSONSchema, prevValue?: T) => ElementJSON
 }
 

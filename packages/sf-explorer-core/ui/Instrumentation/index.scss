@@ -9,6 +9,12 @@
    bottom: 0;
 }
 
+.LDX-Instrumentation-Tracker {
+   all: unset;
+   position: absolute;
+   z-index: 1000000;
+}
+
 .LDX-Instrumentation-Content {
    z-index: 0;
 }

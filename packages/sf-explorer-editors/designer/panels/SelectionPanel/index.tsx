@@ -6,7 +6,10 @@ import { PanelComponent, PanelDescriptor } from '@sf-explorer/editors/ui/Feature
 import { ElementEditionSelection, ModelEditionSession } from '../../EditionSession'
 import { Element, ElementJSON } from '@sf-explorer/core'
 
-export class SelectionPanel extends PanelComponent<ViewEditor> {
+export class SelectionPanel extends PanelComponent<ViewEditor, {
+   session: ModelEditionSession
+   selection: ElementEditionSelection
+}> {
    static descriptor: PanelDescriptor = {
       layouting: "fitted",
       defaultTitle: "Selection",
@@ -16,10 +19,6 @@ export class SelectionPanel extends PanelComponent<ViewEditor> {
          session: true,
          selection: true,
       }
-   }
-   props: {
-      session: ModelEditionSession
-      selection: ElementEditionSelection
    }
    get model() {
       return this.props.session.model
@@ -45,7 +44,9 @@ export class SelectionPanel extends PanelComponent<ViewEditor> {
          </EditionContext.Provider>)
       }
       else {
-         return "Select something"
+         return <div>
+            <div className="CommentPlugin_CommentsPanel_Empty">No Selection</div>
+         </div>
       }
    }
 }

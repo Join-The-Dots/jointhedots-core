@@ -15,10 +15,6 @@ ElementsEditors.registerController({
    matchType(schema: JSONSchema): EditorValueMatch {
       return EditorValueMatch.Valid
    },
-   matchValue(value: any): EditorValueMatch {
-      if (value === undefined) return EditorValueMatch.Valid
-      return EditorValueMatch.None
-   },
    createValue(schema: JSONSchema, prevValue: any): any {
       return undefined
    }

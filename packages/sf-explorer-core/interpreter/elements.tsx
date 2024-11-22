@@ -7,7 +7,7 @@ import { ASTGenerator } from "./generator"
 import { Builder } from "./builder"
 import { CommonTypes } from "../ast/schema/helpers"
 import { JSONSchema } from "../ast/schema/schema"
-import { ComponentEntry } from "../library/components"
+import { ComponentEntry, ComponentsRegistry } from "../library/components"
 import { copyData } from "../ast/updater"
 
 export type ElementClass<T extends Element = Element> = new (model: DocumentModel) => T
@@ -29,6 +29,8 @@ export interface IElementSerializer {
 export interface IDeserializerContext {
    readonly model: DocumentModel
    resolveReference($ref: string): Element
+   New<T extends Element>(Cls: ElementClass<T>, owner: Element, typing: JSONSchema): T
+   revise(target: Element)
 }
 
 export type ObjectClass = new (...args) => any
@@ -63,34 +65,18 @@ function RegisterObject() {
    })
 }
 
-function serialize_element(object: Object, data: ElementJSON): ElementJSON {
-   for (const key in object) {
-      if (["model", "$key", "owner", "typing"].includes(key) === false) {
-         const value = serializeValue(object[key])
-         if (value !== undefined) data[key] = value
-      }
-   }
-   return data
-}
-
-async function deserialize_element(object: Object, data: ElementJSON, owner: Element, context: IDeserializerContext) {
-   for (const key in data) {
-      if (key[0] !== "$") {
-         object[key] = await deserializeValue(data[key], owner, context)
-      }
-   }
-   return object
-}
-
 function ElementClass() {
    return function (constructor: ElementClass<Element>) {
       const $type = constructor.name
       ElementTypenames.set(constructor, $type)
       ElementClasses.set($type, constructor)
-      ElementSerializers.set($type, serialize_element)
+      ElementSerializers.set($type, (object: Element, data: ElementJSON) => {
+         return object.serialize(data)
+      })
       ElementDeserializers.set($type, (object: Element, data: ElementJSON, owner: Element, context: IDeserializerContext) => {
+         context.revise(object)
          object.owner = owner
-         return deserialize_element(object, data, object, context)
+         return object.deserialize(data, context)
       })
       ElementInstanciers.set($type, (context: IDeserializerContext) => {
          return new constructor(context.model)
@@ -103,14 +89,31 @@ function SerializableClass() {
       const $type = constructor.name
       ElementTypenames.set(constructor, $type)
       ElementClasses.set($type, constructor)
-      ElementSerializers.set($type, serialize_element)
+      ElementSerializers.set($type, serialize_element_properties)
+      ElementDeserializers.set($type, deserialize_element_properties)
       ElementInstanciers.set($type, (context: IDeserializerContext) => {
          return new constructor()
       })
-      ElementDeserializers.set($type, (object: Object, data: ElementJSON, owner: Element, context: IDeserializerContext) => {
-         return deserialize_element(object, data, owner, context)
-      })
    }
+}
+
+function serialize_element_properties(object: Element, data: ElementJSON): ElementJSON {
+   for (const key in object) {
+      if (["model", "$key", "owner", "typing"].includes(key) === false) {
+         const value = serializeValue(object[key])
+         if (value !== undefined) data[key] = value
+      }
+   }
+   return data
+}
+
+async function deserialize_element_properties(object: Element, data: ElementJSON, owner: Element, context: IDeserializerContext) {
+   for (const key in data) {
+      if (key[0] !== "$") {
+         object[key] = await deserializeValue(data[key], owner, context)
+      }
+   }
+   return object
 }
 
 function serializeValue(value: any): any {
@@ -129,6 +132,10 @@ function serializeValue(value: any): any {
       return undefined
    }
    return value
+}
+
+export function serializeElement(object: Element): ElementJSON {
+   return object.serialize({ $type: object.constructor.name })
 }
 
 async function deserializeValue(data: any, owner: Element, context: IDeserializerContext): Promise<any> {
@@ -181,15 +188,16 @@ export abstract class Element {
       const { model } = this
       const cset = this.model.createChangeset()
       if (data instanceof Element) {
-         data = data.serialize()
+         data = serializeElement(data)
       }
       cset.updates[this.$key] = data
       return model.commit(cset)
    }
-   serialize(): ElementJSON {
-      return serialize_element(this, {
-         $type: this.constructor.name,
-      })
+   serialize(data: ElementJSON): ElementJSON {
+      return serialize_element_properties(this, data)
+   }
+   deserialize(data: ElementJSON, context: IDeserializerContext): Promise<Element> {
+      return deserialize_element_properties(this, data, this, context)
    }
    toTitle() {
       return this.constructor.name
@@ -245,8 +253,8 @@ export class MemberExpr extends Element {
    object: Element
    property: Element
    override consolidate(builer: Builder) {
-      this.object = builer.consolidate(this.object)
-      this.property = builer.consolidate(this.property)
+      this.object = builer.consolidate(this.object, CommonTypes.any)
+      this.property = builer.consolidate(this.property, CommonTypes.string)
    }
    override read(ctx: IContext): any {
       const base = this.object.read(ctx)
@@ -273,8 +281,8 @@ export class BinaryExpr extends Element {
    right: Element
    operator: AST.BinaryOperator
    override consolidate(builer: Builder) {
-      this.left = builer.consolidate(this.left)
-      this.right = builer.consolidate(this.right)
+      this.left = builer.consolidate(this.left, CommonTypes.any)
+      this.right = builer.consolidate(this.right, CommonTypes.any)
    }
    override read(ctx: IContext): any {
       const { left, right, operator } = this
@@ -312,9 +320,9 @@ export class ConditionalExpr extends Element {
    consequent: Element
    alternate: Element
    override consolidate(builer: Builder) {
-      this.test = builer.consolidate(this.test)
-      this.consequent = builer.consolidate(this.consequent)
-      this.alternate = builer.consolidate(this.alternate)
+      this.test = builer.consolidate(this.test, CommonTypes.boolean)
+      this.consequent = builer.consolidate(this.consequent, CommonTypes.any)
+      this.alternate = builer.consolidate(this.alternate, CommonTypes.any)
    }
    override read(ctx: IContext): any {
       const { test, consequent, alternate } = this
@@ -336,8 +344,8 @@ export class LogicalExpr extends Element {
    right: Element
    operator: AST.LogicalOperator
    override consolidate(builer: Builder) {
-      this.left = builer.consolidate(this.left)
-      this.right = builer.consolidate(this.right)
+      this.left = builer.consolidate(this.left, CommonTypes.any)
+      this.right = builer.consolidate(this.right, CommonTypes.any)
    }
    override read(ctx: IContext): any {
       const { left, right, operator } = this
@@ -364,7 +372,7 @@ export class UnaryExpr extends Element {
    argument: Element
    operator: AST.UnaryOperator
    override consolidate(builer: Builder) {
-      this.argument = builer.consolidate(this.argument)
+      this.argument = builer.consolidate(this.argument, CommonTypes.any)
    }
    override read(ctx: IContext): any {
       const { argument, operator } = this
@@ -394,8 +402,8 @@ export class DeleteMemberExpr extends Element {
    object: Element
    property: Element
    override consolidate(builer: Builder) {
-      this.object = builer.consolidate(this.object)
-      this.property = builer.consolidate(this.property)
+      this.object = builer.consolidate(this.object, CommonTypes.any)
+      this.property = builer.consolidate(this.property, CommonTypes.string)
    }
    override read(ctx: IContext): any {
       const object = this.object.read(ctx)
@@ -419,7 +427,7 @@ export class DeleteMemberExpr extends Element {
 export class ArrayAppendElement {
    value: Element
    consolidate(builer: Builder) {
-      this.value = builer.consolidate(this.value)
+      this.value = builer.consolidate(this.value, CommonTypes.any)
       return this
    }
    assign(object: any[], ctx: IContext) {
@@ -435,7 +443,7 @@ export class ArrayAppendElement {
 export class ArraySpreadElement {
    value: Element
    consolidate(builer: Builder) {
-      this.value = builer.consolidate(this.value)
+      this.value = builer.consolidate(this.value, CommonTypes.any)
       return this
    }
    assign(object: any[], ctx: IContext) {
@@ -477,7 +485,7 @@ export abstract class ObjectProperty<K extends any = any> {
    abstract assign(object: MapLike<any>, ctx: IContext)
    abstract exportAST(gen: ASTGenerator, from: Element)
    consolidate(builer: Builder) {
-      this.value = builer.consolidate(this.value)
+      this.value = builer.consolidate(this.value, CommonTypes.any)
       return this
    }
 }
@@ -485,8 +493,8 @@ export abstract class ObjectProperty<K extends any = any> {
 @SerializableClass()
 export class ObjectDynamicProperty extends ObjectProperty<Element> {
    override consolidate(builer: Builder) {
-      this.key = builer.consolidate(this.key)
-      this.value = builer.consolidate(this.value)
+      this.key = builer.consolidate(this.key, CommonTypes.string)
+      this.value = builer.consolidate(this.value, CommonTypes.any)
       return this
    }
    assign(object: MapLike<any>, ctx: IContext) {
@@ -563,8 +571,8 @@ export class CallExpr extends Element {
    callee: Element
    arguments: ArrayExpr
    override consolidate(builer: Builder) {
-      this.callee = builer.consolidate(this.callee)
-      this.arguments = builer.consolidate(this.arguments)
+      this.callee = builer.consolidate(this.callee, CommonTypes.any)
+      this.arguments = builer.consolidate(this.arguments, CommonTypes.any)
    }
    override read(ctx: IContext): any {
       const callee = this.callee.read(ctx)
@@ -614,7 +622,7 @@ export class UpdateExpr extends Element {
    operator: AST.UpdateOperator
    prefix: boolean
    override consolidate(builer: Builder) {
-      this.argument = builer.consolidate(this.argument)
+      this.argument = builer.consolidate(this.argument, CommonTypes.any)
    }
    override read(ctx: IContext): any {
       const { argument, operator, prefix } = this
@@ -646,8 +654,8 @@ export class AssignmentExpr extends Element {
    right: Element
    operator: AST.AssignmentOperator
    override consolidate(builer: Builder) {
-      this.left = builer.consolidate(this.left)
-      this.right = builer.consolidate(this.right)
+      this.left = builer.consolidate(this.left, CommonTypes.any)
+      this.right = builer.consolidate(this.right, CommonTypes.any)
    }
    override read(ctx: IContext): any {
       const { left, right, operator } = this
@@ -679,20 +687,48 @@ export class AssignmentExpr extends Element {
 export abstract class LDXElementExpr extends Element {
 }
 
+export enum DisplayType {
+   React,
+   WebComponent,
+}
+
 @ElementClass()
 export class LDXDisplayExpr extends LDXElementExpr {
    tag: string
+   type: DisplayType
    entry: ComponentEntry
+   component: React.ComponentType | HTMLElement
    props: ObjectExpr
    dock: ObjectExpr
+   override async deserialize(data: ElementJSON, context: IDeserializerContext): Promise<LDXDisplayExpr> {
+      await this.loadComponent(data.tag)
+      if (data.props) this.props = await deserializeValue(data.props, this, context)
+      else this.props = context.New(ObjectExpr, this, CommonTypes.any)
+      return this
+   }
    override consolidate(builer: Builder) {
-      this.props = builer.consolidate(this.props)
-      this.dock = builer.consolidate(this.dock)
+      const propsTyping = this.entry.manifest["view"]
+      this.props = builer.consolidate(this.props, propsTyping)
+      this.dock = builer.consolidate(this.dock, CommonTypes.any)
    }
    override read(ctx: IContext): any {
    }
    override toTitle(): string {
       return this.tag
+   }
+   async loadComponent(tag: string) {
+      const entry = ComponentsRegistry.acquireComponent(tag)
+      const manifest = await entry.fetch()
+      this.tag = tag
+      this.entry = entry
+      if (manifest.attachments["view.react"]) {
+         this.type = DisplayType.React
+         this.component = await entry.fetchResource("view.react")
+      }
+      else if (manifest.attachments["view.web"]) {
+         this.type = DisplayType.WebComponent
+         this.component = await entry.fetchResource("view.web")
+      }
    }
    override exportAST(gen: ASTGenerator) {
       const attributes: AST.JSXAttribute[] = []
@@ -754,7 +790,7 @@ export class LDXDocumentExpr extends Element {
    state: EditorState
    override consolidate(builer: Builder) {
       for (const key in this.embeds) {
-         this.embeds[key] = builer.consolidate(this.embeds[key])
+         this.embeds[key] = builer.consolidate(this.embeds[key], CommonTypes.display)
       }
    }
    override read(ctx: IContext): any {
@@ -779,7 +815,7 @@ function LDXDocumentEditor(props: {
 export class DocumentLayer extends Element {
    layout: Element
    override consolidate(builer: Builder) {
-      this.layout = builer.consolidate(this.layout)
+      this.layout = builer.consolidate(this.layout, CommonTypes.display)
    }
    override read(ctx: IContext): any {
       return this.layout.read(ctx)
@@ -817,7 +853,7 @@ export class DocumentChangeLog {
 
    constructor(readonly model: DocumentModel) {
       for (const element of model.nodes.values()) {
-         this.nodes[element.$key] = element.serialize()
+         this.nodes[element.$key] = serializeElement(element)
       }
       createDocumentDraft(this)
    }

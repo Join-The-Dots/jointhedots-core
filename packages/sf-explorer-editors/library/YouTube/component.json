@@ -1,0 +1,16 @@
+{
+   "id": "youtube",
+   "description": "Embed youtube video",
+   "icon": "bi:youtube",
+   "view": {
+      "properties": {
+         "videoID": {
+            "type": "string",
+            "examples": "JxS5E-kZc2s"
+         }
+      }
+   },
+   "attachments": {
+      "view.react": "./YouTube#YouTubeComponent"
+   }
+}

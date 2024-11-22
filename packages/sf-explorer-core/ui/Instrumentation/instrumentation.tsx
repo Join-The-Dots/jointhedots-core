@@ -1,4 +1,4 @@
-import { findIntrumentationFromDOM, ZoneSelection } from "./selection"
+import { ZoneSelection } from "./selection"
 import ReactDOMClient from 'react-dom/client'
 import EventEmitter from "events"
 import dragImageUrl from './drag_icon.svg'
@@ -6,6 +6,7 @@ import React, { useContext } from "react"
 import "./index.scss"
 import { Element } from "../../interpreter/elements"
 import { HandlersManifold } from "../../common/handlers"
+import { ReactTools, HtmlTools } from "@sf-explorer/core/common/react-tools"
 
 export type ASTLocation = any
 
@@ -42,8 +43,6 @@ export interface ElementController {
    readonly stretch: ElementBoundingBox
    getDisplayInfos(): DisplayInfos
    getElement(): Element
-   getLocation(): ASTLocation
-   /* getProgram(): Program */
 }
 
 export interface ElementTooling {
@@ -52,6 +51,7 @@ export interface ElementTooling {
 
 export interface ElementInstrumentation {
    readonly enabled: boolean
+   readonly isSelected: boolean
    selection: ZoneSelection
    getBase(): React.Component
    getController(): ElementController
@@ -77,10 +77,12 @@ export class InstrumentationState {
    focused: ElementInstrumentation = null
    hovered: ZoneSelection = null
    overlay: HTMLElement = null
+   tracker: HTMLEventTracker = null
 
    constructor() {
       this.overlay = document.createElement("div")
       this.overlay.className = "LDX-Instrumentation-Overlay"
+      this.tracker = new HTMLEventTracker()
    }
    update() {
       for (const target of this.selections) {
@@ -91,6 +93,7 @@ export class InstrumentationState {
          }
       }
       this.hovered = this.hovered?.updateOverlay()
+      this.tracker.update()
    }
    select(target: ElementInstrumentation | Element, multiple: boolean, focused?: ElementInstrumentation) {
       if (target instanceof Element) {
@@ -222,9 +225,56 @@ export class InstrumentationState {
          }
       }
    }
+   shallUpdate() {
+      return this.tracker.tracked && this.selections.size > 0 || this.hovered
+   }
 }
 
-export const Instrumentation = new InstrumentationState()
+class HTMLEventTracker {
+   capturer: HTMLElement = null
+   tracked: HTMLElement = null
+   constructor() {
+      const capturer = this.capturer = document.createElement("div")
+      capturer.className = "LDX-Instrumentation-Tracker"
+      capturer.draggable = true
+    /*   capturer.addEventListener("mousedown", EventHandlers.onZoneSelect, { capture: true })
+      capturer.addEventListener("mouseenter", EventHandlers.onZoneHover, { capture: true })
+      capturer.addEventListener("mousemove", EventHandlers.onZoneHover, { capture: true })
+      capturer.addEventListener("mouseleave", EventHandlers.onZoneHover, { capture: true })*/
+      capturer.addEventListener("dragstart", EventHandlers.onZoneDragStart, { capture: true })
+      capturer.addEventListener("dragover", EventHandlers.onZoneDragOver, { capture: true })
+      capturer.addEventListener("dragleave", EventHandlers.onZoneDragLeave, { capture: true }) 
+   }
+   track(element: HTMLElement) {
+      if (!element) {
+         this.untrack()
+      }
+      else if (this.tracked !== element) {
+         console.log("> track", element)
+         this.tracked = element
+         this.update()
+         this.capturer.style.display = 'block'
+         this.capturer.focus()
+         zoneRunRefresh()
+      }
+   }
+   update() {
+      if (this.tracked) {
+         const rect = HtmlTools.getHTMLClientRect(this.tracked, this.capturer.parentElement)
+         this.capturer.style.left = `${rect.left}px`
+         this.capturer.style.top = `${rect.top}px`
+         this.capturer.style.width = `${rect.width}px`
+         this.capturer.style.height = `${rect.height}px`
+      }
+   }
+   untrack() {
+      if (this.tracked) {
+         console.log("> untrack", this.tracked)
+         this.capturer.style.display = 'none'
+         this.tracked = null
+      }
+   }
+}
 
 export const InstrumentationEndpoints = {
    "Transfer": new HandlersManifold<{
@@ -260,8 +310,10 @@ drag_img.src = dragImageUrl.toString()
 
 function zoneRunRefresh() {
    timer = setInterval(() => {
-      if (Instrumentation.selections.size > 0 || Instrumentation.hovered) {
-         requestAnimationFrame(() => Instrumentation.update())
+      if (Instrumentation.shallUpdate()) {
+         requestAnimationFrame(() => {
+            Instrumentation?.update()
+         })
       }
    }, 25)
 }
@@ -301,6 +353,33 @@ export function isInstrumentationCompacted(): boolean {
    return compactedDisplay
 }
 
+
+export function findIntrumentationFromDOM(element: HTMLElement): ElementInstrumentation {
+   const { tracker } = Instrumentation
+   if (element === tracker.capturer) {
+      element = tracker.tracked
+   }
+   else if (element instanceof HTMLIFrameElement) {
+      tracker.track(element)
+   }
+   else {
+      tracker.untrack()
+   }
+
+   let node = ReactTools.findNodeFromHTMLElement(element)
+   while (node) {
+      const { elementType } = node
+      const kind = (elementType instanceof Object) && elementType.$$instrumentation as InstrumentationKind
+      const zone = (kind === InstrumentationKind.Tooling) ? (node.stateNode as ElementTooling).getZone()
+         : (kind === InstrumentationKind.Zone) ? (node.stateNode as ElementInstrumentation) : null
+      if (zone !== null) {
+         return zone
+      }
+      node = ReactTools.getNodeParent(node)
+   }
+   return null
+}
+
 export const EventHandlers = {
    onZoneKeyDown(e: KeyboardEvent) {
       const { instrumenteds } = Instrumentation
@@ -330,12 +409,14 @@ export const EventHandlers = {
       }
    },
    onZoneDragStart(e: DragEvent): boolean {
+      console.log("onZoneDragStart", e)
       try {
          const { selections, instrumenteds } = Instrumentation
          if (selections.size === 1) {
             for (const target of selections) {
                const zones = instrumenteds.get(target)
                if (zones && zones.length > 0) {
+                  e.dataTransfer.setDragImage(drag_img, 0, 0)
                   InstrumentationEndpoints.Transfer.apply({
                      zone: zones[0],
                      controller: zones[0].getController(),
@@ -356,8 +437,9 @@ export const EventHandlers = {
       return false
    },
    onZoneDragOver(e: DragEvent) {
-      const hovered = ZoneSelection.computeElementSelection(e.target as HTMLElement, Instrumentation.overlay)
-      if (hovered) {
+      const zone = findIntrumentationFromDOM(e.target as HTMLElement)
+      if (zone) {
+         const hovered = ZoneSelection.computeZoneSelection(zone, Instrumentation.overlay)
          Instrumentation.highligth(hovered, zoneDragOverRenderer)
          e.preventDefault()
          e.stopPropagation()
@@ -392,9 +474,8 @@ export const EventHandlers = {
       }
    },
    onZoneSelect(e: MouseEvent): boolean {
-      const target = e.target as HTMLElement
       try {
-         const zone = findIntrumentationFromDOM(target)
+         const zone = findIntrumentationFromDOM(e.target as HTMLElement)
          if (zone) {
             if (e.ctrlKey) {
                e.stopPropagation()
@@ -411,15 +492,16 @@ export const EventHandlers = {
       return false
    },
    onZoneHover(e: MouseEvent) {
-      const hovered = ZoneSelection.computeElementSelection(e.target as HTMLElement, Instrumentation.overlay)
-      if (hovered && !hovered.zone.selection) {
+      const zone = findIntrumentationFromDOM(e.target as HTMLElement)
+      if (zone && !zone.selection) {
+         const hovered = ZoneSelection.computeZoneSelection(zone, Instrumentation.overlay)
          Instrumentation.highligth(hovered, zoneHoverRenderer)
       }
       else {
          Instrumentation.unhighligth()
       }
    },
-   onZoneUnhover() {
+   onZoneUnhover(e: MouseEvent) {
       if (Instrumentation.hovered?.isExiting) {
          Instrumentation.unhighligth()
       }
@@ -432,11 +514,12 @@ export const EventHandlers = {
    },
 }
 
+export const Instrumentation = new InstrumentationState()
+
 function objectToDataTransfert(data: { [key: string]: any }, dataTransfer: DataTransfer) {
    const content = JSON.stringify(data, null, 2)
    dataTransfer.setData("text/plain", content)
    dataTransfer.setData("application/json", content)
-   dataTransfer.setDragImage(drag_img, 0, 0)
 }
 
 function dataTransfertToObject(dataTransfer: DataTransfer): any {
@@ -457,7 +540,6 @@ InstrumentationEndpoints.Transfer.register((payload) => {
       action: "displace",
       doc: xpr.model.id,
       expr: xpr.$key,
-      origin: controller.getLocation(),
    }
    objectToDataTransfert(data, payload.dataTransfer)
 })

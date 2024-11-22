@@ -1,0 +1,16 @@
+{
+   "id": "excalidraw",
+   "description": "Display excalidraw diagram",
+   "icon": "bi:easel2",
+   "view": {
+      "properties": {
+         "data": {
+            "type": "string",
+            "default": "[]"
+         }
+      }
+   },
+   "attachments": {
+      "view.react": "./ExcalidrawComponent#ExcalidrawComponent"
+   }
+}

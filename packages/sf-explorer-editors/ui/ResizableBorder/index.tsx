@@ -9,8 +9,7 @@ type PropsType = {
    onRelease?: Function,
 }
 
-export class ResizableBorder extends React.Component {
-   props: PropsType
+export class ResizableBorder extends React.Component<PropsType> {
    element: HTMLDivElement = null
    handleMouseDown = (e) => {
       const { vertical } = this.props

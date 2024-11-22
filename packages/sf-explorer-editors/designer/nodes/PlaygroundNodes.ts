@@ -22,20 +22,13 @@ import { CollapsibleContentNode } from './Collapsible/CollapsibleContentNode'
 import { CollapsibleTitleNode } from './Collapsible/CollapsibleTitleNode'
 import { AutocompleteNode } from './Autocomplete/AutocompleteNode'
 import { EmojiNode } from './Emojis/EmojiNode'
-import { EquationNode } from './Equations/EquationNode'
-import { ExcalidrawNode } from './Excalidraw/ExcalidrawNode'
-import { FigmaNode } from './Figma/FigmaNode'
 import { ImageNode } from './Images/ImageNode'
 import { InlineImageNode } from './InlineImage/InlineImageNode'
 import { KeywordNode } from './Keywords/KeywordNode'
 import { LayoutContainerNode } from './ColumnsLayout/LayoutContainerNode'
 import { LayoutItemNode } from './ColumnsLayout/LayoutItemNode'
 import { MentionNode } from './Mentions/MentionNode'
-import { PageBreakNode } from './PageBreak/PageBreakNode'
-import { PollNode } from './Poll/PollNode'
 import { StickyNode } from './Sticky/StickyNode'
-import { TweetNode } from './Twitter/TweetNode'
-import { YouTubeNode } from './YouTube/YouTubeNode'
 import { ComponentNode } from './Component/ComponentNode'
 import { HorizontalRuleNode } from './HorizontalRule/HorizontalRuleNode'
 
@@ -53,25 +46,18 @@ const PlaygroundNodes: Array<Klass<LexicalNode>> = [
   AutoLinkNode,
   LinkNode,
   OverflowNode,
-  PollNode,
   StickyNode,
   ImageNode,
   InlineImageNode,
   MentionNode,
   EmojiNode,
-  ExcalidrawNode,
-  EquationNode,
   AutocompleteNode,
   KeywordNode,
   HorizontalRuleNode,
-  TweetNode,
-  YouTubeNode,
-  FigmaNode,
   MarkNode,
   CollapsibleContainerNode,
   CollapsibleContentNode,
   CollapsibleTitleNode,
-  PageBreakNode,
   LayoutContainerNode,
   LayoutItemNode,
   ComponentNode,

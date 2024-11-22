@@ -23,9 +23,6 @@ import * as ReactDOM from 'react-dom';
 import useModal from '../../hooks/useModal';
 import Button from '../../../ui/Button';
 import {DialogActions} from '../../ui/Dialog';
-import {INSERT_FIGMA_COMMAND} from '../../nodes/Figma/FigmaPlugin';
-import {INSERT_TWEET_COMMAND} from '../../nodes/Twitter/TweetPlugin';
-import {INSERT_YOUTUBE_COMMAND} from '../../nodes/YouTube/YouTubePlugin';
 
 interface PlaygroundEmbedConfig extends EmbedConfig {
   // Human readable name of the embeded content e.g. Tweet or Google Map.
@@ -53,7 +50,7 @@ export const YoutubeEmbedConfig: PlaygroundEmbedConfig = {
   icon: <i className="icon youtube" />,
 
   insertNode: (editor: LexicalEditor, result: EmbedMatchResult) => {
-    editor.dispatchCommand(INSERT_YOUTUBE_COMMAND, result.id);
+    //editor.dispatchCommand(INSERT_YOUTUBE_COMMAND, result.id);
   },
 
   keywords: ['youtube', 'video'],
@@ -89,7 +86,7 @@ export const TwitterEmbedConfig: PlaygroundEmbedConfig = {
 
   // Create the Lexical embed node from the url data.
   insertNode: (editor: LexicalEditor, result: EmbedMatchResult) => {
-    editor.dispatchCommand(INSERT_TWEET_COMMAND, result.id);
+    //editor.dispatchCommand(INSERT_TWEET_COMMAND, result.id);
   },
 
   // For extra searching.
@@ -123,7 +120,7 @@ export const FigmaEmbedConfig: PlaygroundEmbedConfig = {
   icon: <i className="icon figma" />,
 
   insertNode: (editor: LexicalEditor, result: EmbedMatchResult) => {
-    editor.dispatchCommand(INSERT_FIGMA_COMMAND, result.id);
+    //editor.dispatchCommand(INSERT_FIGMA_COMMAND, result.id);
   },
 
   keywords: ['figma', 'figma.com', 'mock-up'],

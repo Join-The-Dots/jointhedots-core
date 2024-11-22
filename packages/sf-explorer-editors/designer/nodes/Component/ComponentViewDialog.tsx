@@ -1,33 +1,23 @@
 import { Klass, LexicalEditor, LexicalNode } from 'lexical'
 import { useCallback } from 'react'
-import { ComponentEntry, ComponentsRegistry, evaluateExpression, AST, EmptyScope, ElementJSON, LDXDisplayExpr, ObjectExpr } from '@sf-explorer/core'
+import { ComponentEntry, ComponentsRegistry, createValueFromTyping, ElementJSON, LDXDisplayExpr, MapLike, ObjectExpr } from '@sf-explorer/core'
 import { $insertNodeToNearestRoot } from '@lexical/utils'
 import { PanelNodeCreation } from '@sf-explorer/editors/ui/PanelNodeCreation'
-import { emitJSXElementFromData } from '@sf-explorer/core'
 import { LDXDocumentExpr } from '@sf-explorer/core'
 import { INSERT_COMPONENT_COMMAND } from './ComponentPluginDragDrop'
 import "@sf-explorer/editors/elements/register"
 
-export async function insertComponentDialog(activeEditor: LexicalEditor, component_id: string, data: ElementJSON) {
+export async function insertComponentDialog(activeEditor: LexicalEditor, component_id: string, props?: MapLike<any>) {
   const component = await ComponentsRegistry.acquireComponent(component_id)
-  const lexicalNode = await component.fetchResource<Klass<LexicalNode>>("view.lexical")
-  if (lexicalNode) {
-    /* const params = data && evaluateExpression(data, EmptyScope)
-    activeEditor.update(() => {
-      const node = lexicalNode.importJSON({
-        type: component.id,
-        version: 0,
-        ...params,
-      })
-      $insertNodeToNearestRoot(node)
-    }) */
+  const manifest = await component.fetch()
+  if (!props) {
+    props = createValueFromTyping(manifest["view"])
   }
-  else {
-    const root = new LDXDisplayExpr(null)
-    root.tag = component_id
-    root.props = new ObjectExpr(null)
-    root.props.owner = root
-    activeEditor.dispatchCommand(INSERT_COMPONENT_COMMAND, root.serialize())
+  if (component.hasResource("view.react") || component.hasResource("view.web")) {
+    activeEditor.dispatchCommand(INSERT_COMPONENT_COMMAND, {
+      $type: "LDXDisplayExpr",
+      tag: component_id,
+    })
   }
 }
 
@@ -42,7 +32,7 @@ export function ComponentViewDialog({
 }): JSX.Element {
 
   const complete = useCallback(async (component: ComponentEntry, data: ElementJSON) => {
-    await insertComponentDialog(activeEditor, component.id, data)
+    await insertComponentDialog(activeEditor, component.id)
     onClose()
   }, null)
 

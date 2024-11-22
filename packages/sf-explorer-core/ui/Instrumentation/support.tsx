@@ -46,9 +46,11 @@ export class InstrumentationSupport extends React.Component<{
    useSupport = (element: HTMLElement) => {
       if (element) {
          element.appendChild(Instrumentation.overlay)
+         element.appendChild(Instrumentation.tracker.capturer)
       }
       else if (Instrumentation.overlay.parentElement === this.support) {
          this.support.removeChild(Instrumentation.overlay)
+         this.support.removeChild(Instrumentation.tracker.capturer)
       }
       this.support = element
    }

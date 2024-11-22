@@ -33,9 +33,6 @@ import DragDropPaste from '../../plugins/DragDropPastePlugin'
 import DraggableBlockPlugin from '../../plugins/DraggableBlockPlugin'
 import EmojiPickerPlugin from '../../nodes/Emojis/EmojiPickerPlugin'
 import EmojisPlugin from '../../nodes/Emojis/EmojisPlugin'
-import EquationsPlugin from '../../nodes/Equations/EquationsPlugin'
-import ExcalidrawPlugin from '../../nodes/Excalidraw/ExcalidrawPlugin'
-import FigmaPlugin from '../../nodes/Figma/FigmaPlugin'
 import FloatingLinkEditorPlugin from '../../plugins/FloatingLinkEditorPlugin'
 import FloatingTextFormatToolbarPlugin from '../../plugins/FloatingTextFormatToolbarPlugin'
 import ImagesPlugin from '../../nodes/Images/ImagesPlugin'
@@ -46,17 +43,12 @@ import LinkPlugin from '../../plugins/LinkPlugin'
 import ListMaxIndentLevelPlugin from '../../plugins/ListMaxIndentLevelPlugin'
 import { MaxLengthPlugin } from '../../plugins/MaxLengthPlugin'
 import MentionsPlugin from '../../nodes/Mentions/MentionsPlugin'
-import PageBreakPlugin from '../../nodes/PageBreak/PageBreakPlugin'
-import PollPlugin from '../../nodes/Poll/PollPlugin'
 import SpeechToTextPlugin from '../../plugins/SpeechToTextPlugin'
 import TabFocusPlugin from '../../plugins/TabFocusPlugin'
 import TableCellActionMenuPlugin from '../../nodes/Table/TableActionMenuPlugin'
 import TableCellResizer from '../../nodes/Table/TableCellResizer'
 import TableHoverActionsPlugin from '../../nodes/Table/TableHoverActionsPlugin'
 import TableOfContentsPlugin from '../../nodes/Table/TableOfContentsPlugin'
-import ToolbarPlugin from '../ToolbarPanel'
-import TwitterPlugin from '../../nodes/Twitter/TweetPlugin'
-import YouTubePlugin from '../../nodes/YouTube/YouTubePlugin'
 import ContentEditable from '../../ui/ContentEditable'
 import { MARKDOWN_TRANSFORMERS } from '@sf-explorer/editors/designer/markdown/markdown-to-lexical'
 import { InstrumentationSupport } from '@sf-explorer/core/ui/Instrumentation'
@@ -151,18 +143,11 @@ function Editor(): JSX.Element {
         <ImagesPlugin />
         <InlineImagePlugin />
         <LinkPlugin />
-        <PollPlugin />
-        <TwitterPlugin />
-        <YouTubePlugin />
-        <FigmaPlugin />
         <ClickableLinkPlugin disabled={isEditable} />
         <HorizontalRulePlugin />
-        <EquationsPlugin />
-        <ExcalidrawPlugin />
         <TabFocusPlugin />
         <TabIndentationPlugin />
         <CollapsiblePlugin />
-        <PageBreakPlugin />
         <LayoutPlugin />
         {floatingAnchorElem && !isSmallWidthViewport && (
           <>

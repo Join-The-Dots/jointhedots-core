@@ -1,4 +1,4 @@
-import { AST, LDXDisplayExpr } from "@sf-explorer/core"
+import { AST, LDXDisplayExpr, serializeElement } from "@sf-explorer/core"
 import { useInstrumentation } from "@sf-explorer/core/ui/Instrumentation"
 import Button from "@sf-explorer/editors/ui/Button"
 
@@ -7,7 +7,7 @@ export default function (props) {
 
     const onClick = () => {
         const element = instr.getElement() as LDXDisplayExpr
-        const xprops = element.props.serialize()
+        const xprops = serializeElement(element.props)
         xprops.properties[0].value = {
             $type: "LiteralExpr",
             value: "oo",

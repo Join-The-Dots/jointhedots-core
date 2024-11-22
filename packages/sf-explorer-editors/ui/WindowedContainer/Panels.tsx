@@ -14,8 +14,7 @@ type PropsType = {
    children: any,
 }
 
-class SidePanel extends Component {
-   props: PropsType
+class SidePanel extends Component<PropsType> {
    container: SidePanelContainer
    shouldComponentUpdate(nextProps) {
       const curProps = this.props
@@ -37,8 +36,7 @@ class SidePanel extends Component {
    }
 }
 
-export class ToolbarPanel extends Component {
-   props: PropsType
+export class ToolbarPanel extends Component<PropsType> {
    container: ToolbarPanelContainer
    shouldComponentUpdate(nextProps) {
       const curProps = this.props

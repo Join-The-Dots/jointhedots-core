@@ -14,6 +14,7 @@ import {
    IDeserializerContext,
    ElementDeserializers,
    ElementClasses,
+   DisplayType,
 } from "./elements"
 import { ComponentsRegistry } from "../library/components"
 import { JSONSchema } from "../ast/schema/schema"
@@ -26,6 +27,7 @@ export function createDocumentID(): string {
 }
 
 export class Builder implements IDeserializerContext {
+   unconsolidatedElements = new Set<Element>()
    constructor(public model: DocumentModel) {
    }
    New<T extends Element>(Cls: ElementClass<T>, owner: Element, typing: JSONSchema): T {
@@ -34,18 +36,29 @@ export class Builder implements IDeserializerContext {
       xpr.owner = owner
       xpr.typing = typing
       this.model.nodes.set(xpr.$key, xpr)
+      this.revise(xpr)
       return xpr
    }
    NewFrom(owner: Element, node: AST.Any, typing: JSONSchema = CommonTypes.any): Promise<Element> {
       return buildExpression(this, node, owner, typing)
    }
-   consolidate<T extends Element>(target: T, typing?: JSONSchema): T {
-      if (target.$key) {
-         target = this.model.nodes.get(target.$key) as T
-      }
-      else {
-         target.$key = createLDXKey()
-         this.model.nodes.set(target.$key, target)
+   revise(target: Element) {
+      this.unconsolidatedElements.add(target)
+   }
+   consolidate<T extends Element>(target: T, typing: JSONSchema): T {
+      if (target) {
+         target.typing = typing
+         if (target.$key) {
+            target = this.model.nodes.get(target.$key) as T
+         }
+         else {
+            target.$key = createLDXKey()
+            this.model.nodes.set(target.$key, target)
+         }
+         if (this.unconsolidatedElements.has(target)) {
+            this.unconsolidatedElements.add(target)
+            target.consolidate(this)
+         }
       }
       return target
    }
@@ -276,16 +289,12 @@ export function createLDXKey(): string {
 
 export async function buildLDXElement(builder: Builder, node: AST.JSXElement, owner: Element, typing: JSONSchema): Promise<LDXDisplayExpr> {
    const { name, attributes } = node.openingElement
-   const component_id = getSymbolFromNode(name)
-   const entry = ComponentsRegistry.acquireComponent(component_id)
-   const manifest = await entry.fetch()
-
    const xpr = owner.New(LDXDisplayExpr, typing)
+
+   await xpr.loadComponent(getSymbolFromNode(name))
    xpr.typing = typing
-   xpr.tag = component_id
-   xpr.props = xpr.New(ObjectExpr, manifest["view"])
+   xpr.props = xpr.New(ObjectExpr, xpr.entry.manifest["view"])
    xpr.dock = xpr.New(ObjectExpr)
-   xpr.entry = entry
 
    for (const attr of attributes) {
       if (attr.type === "JSXAttribute") {

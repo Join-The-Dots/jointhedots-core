@@ -28,7 +28,7 @@ import {
 import { useCallback, useEffect } from "react"
 import { ComponentNode } from "./ComponentNode"
 import { useDocumentContext } from '../../context/DocumentContext'
-import { LDXDisplayExpr, AST, createLDXKey, ElementJSON } from '@sf-explorer/core'
+import { createLDXKey, ElementJSON, LDXDocumentExpr, serializeElement } from '@sf-explorer/core'
 import { EventHandlers, Instrumentation, InstrumentationEndpoints, InstrumentationEvents } from '@sf-explorer/core/ui/Instrumentation'
 import { useFeature } from '@sf-explorer/editors/ui/FeaturesLayout'
 import { ViewEditor } from '@sf-explorer/editors/designer/editor'
@@ -44,6 +44,20 @@ export const INSERT_COMPONENT_COMMAND: LexicalCommand<ElementJSON> =
 
 export function getDOMSelection(targetWindow: Window | null): Selection | null {
    return CAN_USE_DOM ? (targetWindow || window).getSelection() : null
+}
+
+export async function insertComponentInto(editor: LexicalEditor, layout: LDXDocumentExpr, payload: ElementJSON) {
+   const key = createLDXKey()
+   const data = serializeElement(layout)
+   data.embeds.inner[key] = payload
+   await layout.update(data)
+   editor.update(() => {
+      const node = new ComponentNode(layout, key)
+      $insertNodes([node])
+      if ($isRootOrShadowRoot(node.getParentOrThrow())) {
+         $wrapNodeInElement(node, $createParagraphNode).selectEnd()
+      }
+   })
 }
 
 export default function ComponentPluginDragDrop(): JSX.Element | null {
@@ -93,21 +107,7 @@ export default function ComponentPluginDragDrop(): JSX.Element | null {
          editor.registerCommand<ElementJSON>(
             INSERT_COMPONENT_COMMAND,
             (payload) => {
-               const node = new ComponentNode(layout, createLDXKey())
-               layout.embeds[node.__embed] = null
-               $insertNodes([node])
-               if ($isRootOrShadowRoot(node.getParentOrThrow())) {
-                  $wrapNodeInElement(node, $createParagraphNode).selectEnd()
-               }
-
-               async function update(layout) {
-                  const data = layout.serialize()
-                  data.embeds.inner[node.__embed] = payload
-                  await layout.update(data)
-                  const dock = node.__dock.current
-                  if (dock) dock.forceUpdate()
-               }
-               update(layout)
+               insertComponentInto(editor, layout, payload)
                return true
             },
             COMMAND_PRIORITY_EDITOR,

@@ -6,7 +6,8 @@
    "view": {
       "properties": {
          "templateColumns": {
-            "type": "string"
+            "type": "string",
+            "default": "1fr 1fr"
          }
       }
    },

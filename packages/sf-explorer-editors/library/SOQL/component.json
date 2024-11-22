@@ -1,0 +1,15 @@
+{
+   "id": "soql",
+   "description": "SOQL query displayer",
+   "icon": "bi:query",
+   "view": {
+      "properties": {
+         "code": {
+            "type": "string"
+         }
+      }
+   },
+   "attachments": {
+      "view.react": "./SOQL#SOQLComponent"
+   }
+}
