@@ -34,6 +34,7 @@
       "acorn-loose": "^8.4.0",
       "astring": "^1.9.0",
       "bootstrap-icons": "^1.11.3",
+      "dompurify": "^3.2.1",
       "font-awesome": "~4.7.0",
       "katex": "^0.16.10",
       "lexical": "0.18.0",

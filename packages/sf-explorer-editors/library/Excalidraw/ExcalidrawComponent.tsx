@@ -27,7 +27,7 @@ import ImageResizer from '../../designer/nodes/Images/ImageResizer'
 import ExcalidrawImage from './ExcalidrawImage'
 import ExcalidrawModal from './ExcalidrawModal'
 import { useInstrumentation } from '@sf-explorer/core/ui/Instrumentation'
-import { LDXDisplayExpr, serializeElement } from '@sf-explorer/core/index'
+import { LDXDisplayExpr, serializeElement } from '@sf-explorer/core'
 import { ComponentNode } from '@sf-explorer/editors/designer/nodes/Component/ComponentNode'
 
 export function ExcalidrawComponent({

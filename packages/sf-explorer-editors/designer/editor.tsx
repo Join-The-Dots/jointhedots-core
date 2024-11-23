@@ -2,7 +2,7 @@ import { FeatureDescriptor, FeatureInstance } from '../ui/FeaturesLayout'
 import { SelectionPanel } from './panels/SelectionPanel'
 import { toast } from 'react-toastify'
 import { ElementEditionSelection, ModelEditionSession } from './EditionSession'
-import { DocumentModel } from '@sf-explorer/core/index'
+import { DocumentModel } from '@sf-explorer/core'
 import "../elements/register"
 import { ToolbarPanel } from './panels/ToolbarPanel'
 import { MarkdownViewPanel } from './panels/MarkdownViewPanel'

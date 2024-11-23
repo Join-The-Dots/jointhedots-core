@@ -1,4 +1,4 @@
-import { CommonTypes, DocumentLayer, DocumentModel, Element } from "@sf-explorer/core/index"
+import { CommonTypes, DocumentLayer, DocumentModel, Element } from "@sf-explorer/core"
 import { EditionEnvironment } from "../elements/interfaces"
 
 export interface IModelEditionContext {

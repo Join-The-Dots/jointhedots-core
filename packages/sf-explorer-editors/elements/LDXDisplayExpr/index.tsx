@@ -1,10 +1,8 @@
 import { EditorDescriptor, EditorValueMatch, ValueProps } from "../interfaces"
-import { Schema } from '@sf-explorer/core'
-import { JSONSchema } from '@sf-explorer/core'
+import { Schema, JSONSchema, LDXDisplayExpr } from '@sf-explorer/core'
 import { PropertyTable } from '@sf-explorer/editors/ui/TableProperties'
 import { ElementsEditors } from '..'
 import { ExpandableInputHOC } from '@sf-explorer/editors/ui/InputExpandable'
-import { LDXDisplayExpr } from '@sf-explorer/core/interpreter/elements'
 import { ObjectEditor } from '../ObjectExpr'
 
 function LDXDisplayEditor(props: ValueProps<LDXDisplayExpr>) {

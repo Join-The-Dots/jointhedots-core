@@ -127,7 +127,7 @@ const getLength = token => {
 }
 
 // different token types, styles found on Prismjs website
-const Leaf = false
+const Leaf = true
   // Light mode
   ? ({ attributes, children, leaf }) => {
     return (

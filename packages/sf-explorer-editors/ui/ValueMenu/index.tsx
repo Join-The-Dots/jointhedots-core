@@ -1,8 +1,7 @@
 import React from 'react'
 import { Menu } from '@sf-explorer/editors/ui/openContextualMenu'
 import { EditionDriver, EditorMenu, EditorMenuItem, EditionEnvironment, ValueProps } from '../../elements/interfaces'
-import { stringifyDescriptor } from '@sf-explorer/core'
-import { convertTextToAST } from '@sf-explorer/core'
+import { stringifyDescriptor, convertTextToAST } from '@sf-explorer/core'
 
 export function ValueMenu(props: ValueProps & { menu?: EditorMenu, context: EditionEnvironment, ctl: EditionDriver, onClose: () => void }) {
    const { ctl, context, menu, value, typing, onChange, onClose } = props

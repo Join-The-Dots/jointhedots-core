@@ -1,11 +1,11 @@
 import React, { useContext } from 'react'
 import TextInput from "@sf-explorer/editors/ui/InputText"
 import { ValueProps, EditorDescriptor, EditorValueMatch } from "../interfaces"
-import { emitASTFromValue, Schema } from '@sf-explorer/core'
-import { JSONSchema } from '@sf-explorer/core'
 import { ElementsEditors } from '..'
-import { convertTextToAST } from '@sf-explorer/core'
-import { LiteralExpr } from '@sf-explorer/core/interpreter/elements'
+import { LiteralExpr, Schema, JSONSchema } from '@sf-explorer/core'
+import { MonacoEditorHOC, StandardLanguageProvider } from '@sf-explorer/editors/ui/MonacoEditorHOC'
+
+export const EditorSOQL = MonacoEditorHOC(new StandardLanguageProvider<void>("apex"))
 
 export function LiteralInputHOC(defaultPlaceholder?: string) {
    return function LiteralInput(props: ValueProps<LiteralExpr>) {

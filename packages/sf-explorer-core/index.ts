@@ -1,5 +1,10 @@
 export * from "./common/types"
 
+export * from "./observable/attributes"
+export * from "./observable/observable"
+export * from "./observable/listenable"
+export * from "./observable/RestResource"
+
 export * from "./ast/schema/document"
 export * from "./ast/schema/helpers"
 export * from "./ast/schema/schema"

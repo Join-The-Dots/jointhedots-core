@@ -1,5 +1,4 @@
-import { MapLike } from "@sf-explorer/core"
-import { ComponentPublication } from "@sf-explorer/core"
+import { MapLike, ComponentPublication } from "@sf-explorer/core"
 
 export function getComponentGroupName(id: string) {
    const pos = id.lastIndexOf(":")

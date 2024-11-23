@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 import { PanelClass, PanelComponentType, PanelDescriptor } from "./panel"
 import { FeaturesContext } from "./context"
-import Listenable from "@sf-explorer/core/observable/listenable"
+import { Listenable } from "@sf-explorer/core"
 
 export type FeatureComponent = new (featureClass: FeatureClass) => FeatureInstance
 

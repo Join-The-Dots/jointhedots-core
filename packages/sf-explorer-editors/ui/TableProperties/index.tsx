@@ -1,8 +1,6 @@
 import React from 'react'
-import { CommonTypes, Schema } from '@sf-explorer/core'
-import { MapLike } from '@sf-explorer/core'
+import { CommonTypes, Schema, MapLike, DocumentationSchema, JSONSchema } from '@sf-explorer/core'
 import { EditorMenu } from '../../elements/interfaces'
-import { DocumentationSchema, JSONSchema } from '@sf-explorer/core'
 import ValueInput from '@sf-explorer/editors/ui/ValueInput'
 import "./index.scss"
 

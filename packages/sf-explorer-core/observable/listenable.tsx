@@ -8,7 +8,7 @@ export type ListenableContexts = {
 
 export type ListenableResult = Promise<Listenable> | Listenable | null
 
-export default class Listenable<S = any> {
+export class Listenable<S = any> {
    ".events": any[] // Events ready to be dispatched
    ".listeners": ListenersArray
 

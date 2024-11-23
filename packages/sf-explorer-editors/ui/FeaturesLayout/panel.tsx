@@ -1,12 +1,10 @@
 /* eslint-disable no-use-before-define */
 import React, { Component, createRef, useContext, useEffect } from "react"
-import ReactDOMClient from "react-dom/client"
 import { FeatureClass, FeatureInstance } from "./feature"
 import { FeaturesContext, ReactFeaturesContext } from "./context"
-import Listenable from "@sf-explorer/core/observable/listenable"
+import { Listenable, MapLike } from "@sf-explorer/core"
 import { ErrorBoundary } from "@sf-explorer/core/ui/ErrorBoundary"
 import Icon from "@sf-explorer/core/ui/Icon"
-import { MapLike } from "@sf-explorer/core/index"
 
 export type PanelDescriptor = {
    layouting?: LayoutingType

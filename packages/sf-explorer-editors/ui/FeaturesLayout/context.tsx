@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react"
 import { createPortal } from 'react-dom'
 import { FeatureInstance, FeatureClass, FeatureDescriptor, FeatureComponent } from "./feature"
 import { PanelInstance, PanelClass, PanelOptions, PanelEmbed } from "./panel"
-import { MapLike } from "@sf-explorer/core/index"
+import { MapLike } from "@sf-explorer/core"
 
 const panelsDocks_Key = "[react-application-frame]#panels-docks"
 

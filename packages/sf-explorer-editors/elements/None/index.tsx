@@ -1,4 +1,4 @@
-import { JSONSchema } from '@sf-explorer/core/index'
+import { JSONSchema } from '@sf-explorer/core'
 import { ElementsEditors } from '..'
 import { EditionDriver, EditorDescriptor, EditorValueMatch } from '../interfaces'
 import { LiteralInputHOC } from '../LiteralExpr'

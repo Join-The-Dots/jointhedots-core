@@ -1,10 +1,9 @@
-import { AST, CommonTypes, ElementJSON, JSONSchema, TemplateSchema } from "@sf-explorer/core"
-import { PropertyRows, PropertyTable } from "../TableProperties"
+import {
+   AST, CommonTypes, ElementJSON, JSONSchema, TemplateSchema,
+   ComponentPublication, ComponentEntry, ComponentManifest, ComponentsRegistry
+} from "@sf-explorer/core"
 import { useCallback, useEffect, useState } from "react"
-import { ComponentPublication } from "@sf-explorer/core"
-import { ComponentEntry, ComponentManifest, ComponentsRegistry } from "@sf-explorer/core"
 import { ComponentBrowser } from "../PanelBrowser"
-import { createValueFromTyping } from "@sf-explorer/core"
 import Stack from "@sf-explorer/editors/ui/Stack"
 import Icon from "@sf-explorer/core/ui/Icon"
 import Button from "@sf-explorer/editors/ui/Button"

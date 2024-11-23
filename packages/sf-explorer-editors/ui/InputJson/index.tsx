@@ -4,8 +4,7 @@ import Button from '@sf-explorer/editors/ui/ButtonIcon'
 import "./style.scss"
 import { toast } from 'react-toastify'
 import { EditionContext, IEditionOperation } from '../../elements/interfaces'
-import { stringifyDescriptor } from '@sf-explorer/core'
-import { JSONSchema } from '@sf-explorer/core'
+import { stringifyDescriptor, JSONSchema } from '@sf-explorer/core'
 
 export type PropsType = {
    typing: JSONSchema

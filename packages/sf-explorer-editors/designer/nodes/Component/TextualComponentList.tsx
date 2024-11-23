@@ -4,10 +4,7 @@ import { INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/react/LexicalHorizontal
 import { $createHeadingNode, $createQuoteNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { $createParagraphNode, $getSelection, $isRangeSelection, FORMAT_ELEMENT_COMMAND } from 'lexical';
-import { ComponentPublication, IComponentProvider } from '@sf-explorer/core';
-import { MapLike } from '@sf-explorer/core';
-import { ComponentsRegistry } from '@sf-explorer/core';
-import { CombinedComponentProvider, MemoryComponentProvider } from '@sf-explorer/core';
+import { ComponentPublication, IComponentProvider, MapLike, ComponentsRegistry, CombinedComponentProvider, MemoryComponentProvider } from '@sf-explorer/core';
 
 type TextualComponentEntry = Partial<ComponentPublication> & {
    onSelect: (editor) => void

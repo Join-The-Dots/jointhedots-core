@@ -1,12 +1,9 @@
 import React, { useContext } from 'react'
 import { ValueProps, EditorDescriptor, EditorValueMatch, EditionContext } from "../interfaces"
-import { AST, Schema, CommonTypes } from '@sf-explorer/core'
+import { Schema, CommonTypes, JSONSchema, ArrayExpr, createValueFromTyping } from '@sf-explorer/core'
 import { ArrayTable } from '@sf-explorer/editors/ui/TableArray'
 import { ElementsEditors } from '..'
 import { ExpandableInputHOC } from '@sf-explorer/editors/ui/InputExpandable'
-import { createValueFromTyping } from '@sf-explorer/core'
-import { JSONSchema } from '@sf-explorer/core'
-import { ArrayExpr } from '@sf-explorer/core/interpreter/elements'
 
 function ArrayEditor(props: ValueProps<ArrayExpr>) {
    const { value, typing } = props

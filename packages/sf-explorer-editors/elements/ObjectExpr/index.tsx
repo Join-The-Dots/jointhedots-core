@@ -1,11 +1,12 @@
 import React, { useContext } from 'react'
 import { EditionContext, EditorDescriptor, EditorValueMatch, ValueProps } from "../interfaces"
-import { AST, CommonTypes, convertValueToLiteral, DocumentationSchema, MapLike, Schema } from '@sf-explorer/core'
-import { JSONSchema } from '@sf-explorer/core'
 import { PropertyDecoration, PropertyRow, PropertyTable } from '@sf-explorer/editors/ui/TableProperties'
 import { ElementsEditors } from '..'
 import { ExpandableInputHOC } from '@sf-explorer/editors/ui/InputExpandable'
-import { ElementJSON, ObjectExpr, ObjectProperty, serializeElement } from '@sf-explorer/core/interpreter/elements'
+import {
+   CommonTypes, DocumentationSchema, MapLike, Schema, JSONSchema,
+   ElementJSON, ObjectExpr, ObjectProperty, serializeElement
+} from '@sf-explorer/core'
 
 export function ObjectPropertyRows(props: {
    heading?: React.ReactNode
