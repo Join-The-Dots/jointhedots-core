@@ -122,12 +122,14 @@ export class Library {
    manifests: { [url: string]: any } = {}
    assets: AssetsEntry[] = []
    externals: MapLike<string> = {}
+   search_directories: string[] = null
    constructor(
       readonly name: string,
       readonly path: string,
       readonly descriptor: PackageDescriptor,
       readonly workspace: Workspace,
    ) {
+      this.search_directories = workspace.search_directories.slice()
       Object.assign(this.externals, descriptor.peerDependencies, descriptor.dependencies)
    }
    is_enabled_for(features?: FeatureID[]) {
@@ -139,6 +141,7 @@ export class Workspace {
    libraries: Library[] = []
    constants: { [key: string]: string | number } = {}
    features: FeatureID[] = []
+   search_directories: string[] = []
    constructor(
       readonly name: string,
       readonly version: string,
@@ -238,17 +241,30 @@ async function discover_library(ws: Workspace, location: string) {
       if (lib_desc?.componentsContainer) {
          const lib = new Library(lib_desc.name, lib_path, lib_desc, ws)
          ws.libraries.push(lib)
+
+         const lib_search_path = lib_path + "/node_modules"
+         if (Fs.existsSync(lib_search_path)) {
+            lib.search_directories.push(lib_search_path)
+         }
+
          await discover_library_components(lib, Path.resolve(lib_path))
       }
+
    }
 }
 
-function resolve_entry_path(entryId: string, baseDir: string): string {
+function resolve_entry_path(lib: Library, entryId: string, baseDir: string): string {
    if (entryId.startsWith(".")) {
       return make_relative_path(Process.cwd(), Path.resolve(baseDir, entryId))
    }
    else {
-      return make_relative_path(Process.cwd(), Path.resolve("node_modules/" + entryId))
+      const parts = entryId.split("/")
+      for (const search_path of lib.search_directories) {
+         if (Fs.existsSync(search_path + "/" + parts[0])) {
+            return make_relative_path(Process.cwd(), search_path + "/" + entryId)
+         }
+      }
+      return null
    }
 }
 
@@ -481,7 +497,7 @@ async function prepare_library(lib: Library) {
    // Prepare library package exports
    for (const exp_id in descriptor.exports) {
       const exported = descriptor.exports[exp_id]
-      const entry = resolve_entry_path(typeof exported === "string" ? exported : exported?.import, lib.path)
+      const entry = resolve_entry_path(lib, typeof exported === "string" ? exported : exported?.import, lib.path)
       const name = make_filename("export_" + compute_hashID(entry))
       if (!delivered.exports) {
          delivered.exports = {}
@@ -502,8 +518,8 @@ async function prepare_library(lib: Library) {
          const { entry, favicon } = desc.application
          const app = {
             ...desc.application,
-            entry: resolve_entry_path(entry, baseDir),
-            favicon: favicon ? resolve_entry_path(favicon, baseDir) : null,
+            entry: resolve_entry_path(lib, entry, baseDir),
+            favicon: favicon ? resolve_entry_path(lib, favicon, baseDir) : null,
          }
          lib.entries[app.name] = app.entry
          lib.applications.push(app)
@@ -515,7 +531,7 @@ async function prepare_library(lib: Library) {
          for (const entry of desc.assets) {
             if (typeof entry === "string") {
                const assets = {
-                  from: resolve_entry_path(entry, baseDir),
+                  from: resolve_entry_path(lib, entry, baseDir),
                   to: entry,
                }
                lib.assets.push(assets)
@@ -523,7 +539,7 @@ async function prepare_library(lib: Library) {
             }
             else {
                const assets = {
-                  from: resolve_entry_path(entry.from, baseDir),
+                  from: resolve_entry_path(lib, entry.from, baseDir),
                   to: entry.to,
                }
                lib.assets.push(assets)
@@ -556,7 +572,7 @@ async function prepare_library(lib: Library) {
          manifest.attachments = {}
          for (const name in desc.attachments) {
             const parts = desc.attachments[name].split("#")
-            const file = resolve_entry_path(parts[0], baseDir)
+            const file = resolve_entry_path(lib, parts[0], baseDir)
             let ref = entryfiles[name]
             if (!ref) {
                ref = make_filename("addon_" + compute_hashID(file))
@@ -584,7 +600,24 @@ export async function open_workspace(workspace_path: string, workspace_features?
    const ws = new Workspace(package_json.name, package_json.version, workspace_path, workspace_features)
    ws.constants = package_json.constants || {}
 
-   const package_lock = await readJsonFile(ws.path + "/package-lock.json")
+   let package_lock: any = null
+   for (let path = Path.resolve(ws.path); ;) {
+      const search_path = path + "/node_modules"
+      if (Fs.existsSync(search_path) && Fs.existsSync(path + "/package.json")) {
+         ws.search_directories.push(search_path)
+      }
+      const package_lock_path = path + "/package-lock.json"
+      if (!package_lock && Fs.existsSync(package_lock_path)) {
+         package_lock = await readJsonFile(package_lock_path)
+      }
+      const next_path = Path.dirname(path)
+      if (next_path === path) break
+      path = next_path
+   }
+   if (!package_lock) {
+      throw new Error(`Package lock not found for '${ws.name}'`)
+   }
+
    for (const location in package_lock.packages) {
       await discover_library(ws, location)
    }
