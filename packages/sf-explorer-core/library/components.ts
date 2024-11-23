@@ -67,7 +67,7 @@ export class ComponentEntry {
       ComponentsRegistry.loadings.set(this, loading)
       return loading
    }
-   acquireResource(object: ComponentEntry | string, identifier: string): ComponentResource {
+   acquireResource(identifier: string): ComponentResource {
       const ref = `${this.id}#${identifier}`
       let rc = ComponentsRegistry.resources.get(ref)
       if (!rc) {
@@ -79,7 +79,7 @@ export class ComponentEntry {
    getResource(identifier: string): ComponentResource {
       const { manifest } = this
       if (manifest?.attachments?.[identifier]) {
-         return this.acquireResource(this, identifier)
+         return this.acquireResource(identifier)
       }
       return null
    }
@@ -204,6 +204,14 @@ export class ComponentsManifold {
          this.components.set(id, obj)
       }
       return obj
+   }
+   acquireResource(ref: string): ComponentResource {
+      const parts = ref.split("#")
+      if (parts.length === 2) {
+         const entry = this.acquireComponent(parts[0])
+         return entry?.acquireResource(parts[1])
+      }
+      return null
    }
    resolveRelativeComponent(ref: string, from: ComponentEntry): ComponentEntry {
       if (from && ref.startsWith("/")) {

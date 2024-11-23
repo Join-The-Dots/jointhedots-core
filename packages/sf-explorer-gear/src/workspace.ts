@@ -450,7 +450,7 @@ export async function emit_library_assets(lib: Library, storage: IStorageStream,
       manifest.catalogs[name] = await storage.commitContent(catalog, MIME.getType(".json"))
    }
 
-   await storage.commitFile(`manifest.json`, JSON.stringify(manifest, null, 2))
+   await storage.commitFile(`components.manifest.json`, JSON.stringify(manifest, null, 2))
 
    // Emit static assets
    for (const asset of lib.assets) {

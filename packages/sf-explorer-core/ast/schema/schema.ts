@@ -131,6 +131,8 @@ export type JSONSchemaCustom = {
    args?: JSONSchema[]
    placeholder?: boolean // require a placeholder structure when empty
    attachments?: MapLike<ResourceLink>
+   security?: SecuritySchema
+   "allow-origin"?: string
 
    // Component related schema
    docking?: DockingSchema
@@ -139,7 +141,19 @@ export type JSONSchemaCustom = {
    aliases?: MapLike<string>
 }
 
-export type ResourceLink = string
+export type ResourceLink<ResourceInterface = any> = string
+
+export type SecuritySchema =
+   "safe" |
+   ResourceLink<SecurityRule> |
+   {
+      rule: ResourceLink<SecurityRule>
+      [param: string]: any
+   }
+
+export interface SecurityRule {
+   check(data: any, params?: MapLike<any>): Error
+}
 
 export type BindingSchema = {
    source: string

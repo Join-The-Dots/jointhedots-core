@@ -41,7 +41,7 @@ export class StaticComponentProvider implements IComponentProvider {
    }
    async get_provider_library(): Promise<StaticManifest> {
       if (!this.library) {
-         this.library = await (await fetch("./manifest.json")).json()
+         this.library = await (await fetch("./components.manifest.json")).json()
       }
       return this.library
    }

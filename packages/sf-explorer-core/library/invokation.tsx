@@ -5,7 +5,7 @@ import { MapLike } from "typescript"
 import { useLocation } from "react-router-dom"
 import { ErrorDisplayer } from "../ui/ErrorBoundary"
 import qs from 'query-string';
-import { JSONSchema } from "../ast/schema/schema"
+import { JSONSchema, SecurityRule, SecuritySchema } from "../ast/schema/schema"
 import { ComponentManifest } from "./interfaces"
 
 export type ViewDescriptor = {
@@ -39,8 +39,36 @@ export function getViewDescriptorFromHash(hash: string, content?: string): ViewD
    return { name, params, content }
 }
 
-function parseValue(schema: JSONSchema, data: any): any {
+function checkValue(security: SecuritySchema, data: any): Error {
+   if (security === "safe") {
+      return null
+   }
+   else if (!security) {
+      return new Error(`Data cannot be securised`)
+   }
+   else {
+      const rule_id = (typeof security === "string") ? security : security?.rule
+      const guard = ComponentsRegistry.acquireResource(rule_id).get<SecurityRule>()
+      if (guard) {
+         try {
+            return guard.check(data, (security instanceof Object) ? security : null)
+         }
+         catch (e) {
+            return e
+         }
+      }
+      else {
+         return new Error(`Data security guard not found`)
+      }
+   }
+}
+
+function parseValue(schema: JSONSchema, data: any, safe: boolean): any {
    if (data !== undefined) {
+      if (safe !== true) {
+         const err = checkValue(schema?.security, data)
+         if (err) throw err
+      }
       return data
    }
    else {
@@ -48,9 +76,18 @@ function parseValue(schema: JSONSchema, data: any): any {
    }
 }
 
-function parseViewProps(manifest: ComponentManifest, descriptor: ViewDescriptor): MapLike<any> {
+function parseViewProps(manifest: ComponentManifest, descriptor: ViewDescriptor, origin: string): MapLike<any> {
    const props = {} as MapLike<any>
    const schema = manifest["view"] as JSONSchema
+
+   const safe = origin === "safe"
+   /* if (safe !== true) {
+      const allow = schema?.["allow-origin"]
+      if (allow !== "*" && allow?.split(";")?.includes(origin) !== true) {
+         throw new Error(`Data not allowed from '${origin}'`)
+      }
+   } */
+
    const properties = schema?.properties
    if (properties instanceof Object) {
       const { content } = descriptor
@@ -68,11 +105,15 @@ function parseViewProps(manifest: ComponentManifest, descriptor: ViewDescriptor)
 
       for (const propName in properties) {
          const propShema = properties[propName]
+         let propData = params[propName]
          if (content !== undefined && propShema?.binding?.source === "content") {
-            props[propName] = parseValue(propShema, content)
+            propData = content
          }
-         else {
-            props[propName] = parseValue(propShema, params[propName])
+         try {
+            props[propName] = parseValue(propShema, propData, safe)
+         }
+         catch (e) {
+            throw new Error(`Invalid param '${propName}' : ${e.message}`)
          }
       }
    }
@@ -86,7 +127,7 @@ const mapping = {
    soql: "query.soql",
 }
 
-async function renderViewDescriptor(descriptor: ViewDescriptor, fallback?: ReactElement): Promise<ReactElement> {
+async function renderViewDescriptor(descriptor: ViewDescriptor, origin?: string, fallback?: ReactElement): Promise<ReactElement> {
    if (descriptor) {
       let name = descriptor.name
       // smoother transition from previously deployed components
@@ -96,9 +137,14 @@ async function renderViewDescriptor(descriptor: ViewDescriptor, fallback?: React
 
       const comp = ComponentsRegistry.acquireComponent(name)
       if (comp) {
-         const view = await comp.fetchResource("view.react")
-         const props = parseViewProps(comp.manifest, descriptor)
-         return React.createElement(view, props)
+         try {
+            const view = await comp.fetchResource("view.react")
+            const props = parseViewProps(comp.manifest, descriptor, origin || "unknown")
+            return React.createElement(view, props)
+         }
+         catch (e) {
+            return <ErrorDisplayer error={e} />
+         }
       }
       else {
          if (fallback) return fallback
@@ -108,11 +154,11 @@ async function renderViewDescriptor(descriptor: ViewDescriptor, fallback?: React
    return null
 }
 
-export function InvokeView(props: { descriptor: ViewDescriptor, fallback?: ReactElement }) {
-   const { descriptor, fallback } = props
+export function InvokeView(props: { descriptor: ViewDescriptor, origin?: string, fallback?: ReactElement }) {
+   const { descriptor, origin, fallback } = props
    const [displayed, setDisplayed] = useState<ReactElement>(null)
    useEffect(() => {
-      renderViewDescriptor(descriptor, fallback).then(setDisplayed)
+      renderViewDescriptor(descriptor, origin, fallback).then(setDisplayed)
    }, [descriptor])
    if (displayed) return displayed
    else return null
@@ -123,7 +169,7 @@ export function InvokeUrlHashView(props: { hash: string, fallback?: ReactElement
    const [displayed, setDisplayed] = useState<ReactElement>(null)
    useEffect(() => {
       const desc = getViewDescriptorFromHash(hash)
-      renderViewDescriptor(desc, fallback).then(setDisplayed)
+      renderViewDescriptor(desc, "url", fallback).then(setDisplayed)
    }, [hash])
    if (displayed) return displayed
    else return null
