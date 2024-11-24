@@ -2,6 +2,7 @@
 export type ReactFiberNode = {
    child: ReactFiberNode,
    sibling: ReactFiberNode,
+   alternate: ReactFiberNode,
    return: ReactFiberNode,
    memoizedProps: any,
    stateNode: any,
@@ -26,7 +27,10 @@ export const ReactTools = {
          throw new Error("Invalid react component")
       }
    },
-   findNodeFromHTMLElement(element: HTMLElement): ReactFiberNode {
+   findNodeFromHTMLElement(element: Element): ReactFiberNode {
+      while (element && !(element instanceof HTMLElement)) {
+         element = element.parentElement
+      }
       for (let key in element) {
          if (element.hasOwnProperty(key) && key.indexOf('__reactFiber') !== -1) {
             return element[key]
@@ -115,6 +119,9 @@ function computeReactClientRect(node: ReactFiberNode, rect?: ReactClientRect): R
    else {
       for (let child = node.child; child; child = child.sibling) {
          rect = computeReactClientRect(child, rect)
+      }
+      if (!rect && node.alternate) {
+         rect = computeReactClientRect(node.alternate, rect)
       }
       return rect
    }

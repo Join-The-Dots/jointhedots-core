@@ -42,7 +42,7 @@ export class ComponentNode extends DecoratorNode<JSX.Element> implements Element
     }
 
     get stretch() {
-        return ElementBoundingBox.Outer
+        return ElementBoundingBox.Inner
     }
 
     getDisplayInfos(): DisplayInfos {
@@ -176,7 +176,7 @@ class ComponentDock extends React.Component<{ node: ComponentNode }> {
         if (element) {
             const params = element.props.read(EmptyContext)
             return <InstrumentationZone controller={node}>
-                <InvokeView descriptor={{
+                <InvokeView origin="safe" descriptor={{
                     name: element.tag,
                     params,
                 }} />

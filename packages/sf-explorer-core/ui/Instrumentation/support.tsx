@@ -1,5 +1,5 @@
 import React from "react"
-import { EventHandlers, Instrumentation } from "./instrumentation"
+import { connectSupport, disconnectSupport, EventHandlers, Instrumentation } from "./instrumentation"
 
 export class InstrumentationSupport extends React.Component<{
    draggable?: boolean
@@ -44,14 +44,8 @@ export class InstrumentationSupport extends React.Component<{
       e.preventDefault()
    }
    useSupport = (element: HTMLElement) => {
-      if (element) {
-         element.appendChild(Instrumentation.overlay)
-         element.appendChild(Instrumentation.tracker.capturer)
-      }
-      else if (Instrumentation.overlay.parentElement === this.support) {
-         this.support.removeChild(Instrumentation.overlay)
-         this.support.removeChild(Instrumentation.tracker.capturer)
-      }
+      if (element) connectSupport(element)
+      else disconnectSupport(this.support)
       this.support = element
    }
    render() {

@@ -11,6 +11,8 @@
       "@sf-explorer/gear": "./packages/sf-explorer-gear",
       "@types/mocha": "^10.0.8",
       "@types/node": "^22.7.4",
+      "@types/react": "^18.3.12",
+      "@types/react-dom": "^18.3.1",
       "@types/typescript": "^2.0.0",
       "esm": "^3.2.25",
       "mocha": "^10.7.3",

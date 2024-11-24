@@ -78,6 +78,7 @@ export class InstrumentationState {
    hovered: ZoneSelection = null
    overlay: HTMLElement = null
    tracker: HTMLEventTracker = null
+   support: HTMLElement = null
 
    constructor() {
       this.overlay = document.createElement("div")
@@ -92,7 +93,7 @@ export class InstrumentationState {
             }
          }
       }
-      this.hovered = this.hovered?.updateOverlay()
+      this.hovered?.updateOverlay()
       this.tracker.update()
    }
    select(target: ElementInstrumentation | Element, multiple: boolean, focused?: ElementInstrumentation) {
@@ -168,7 +169,8 @@ export class InstrumentationState {
          if (hovered) {
             this.hovered = hovered
             this.hovered.setRenderer(renderer)
-            this.hovered = this.hovered.updateOverlay()
+            this.hovered.updateOverlay()
+            zoneRunRefresh()
          }
       }
       else if (this.hovered) {
@@ -203,8 +205,7 @@ export class InstrumentationState {
          zone.selection = selection
          zone.updateZone()
       }
-
-      if (timer === 0) zoneRunRefresh()
+      zoneRunRefresh()
    }
    unregisterZone(zone: ElementInstrumentation) {
       const { instrumenteds } = Instrumentation
@@ -226,7 +227,7 @@ export class InstrumentationState {
       }
    }
    shallUpdate() {
-      return this.tracker.tracked && this.selections.size > 0 || this.hovered
+      return this.tracker.tracked || this.selections.size > 0 || this.hovered
    }
 }
 
@@ -237,13 +238,13 @@ class HTMLEventTracker {
       const capturer = this.capturer = document.createElement("div")
       capturer.className = "LDX-Instrumentation-Tracker"
       capturer.draggable = true
-    /*   capturer.addEventListener("mousedown", EventHandlers.onZoneSelect, { capture: true })
-      capturer.addEventListener("mouseenter", EventHandlers.onZoneHover, { capture: true })
-      capturer.addEventListener("mousemove", EventHandlers.onZoneHover, { capture: true })
-      capturer.addEventListener("mouseleave", EventHandlers.onZoneHover, { capture: true })*/
+      /*   capturer.addEventListener("mousedown", EventHandlers.onZoneSelect, { capture: true })
+        capturer.addEventListener("mouseenter", EventHandlers.onZoneHover, { capture: true })
+        capturer.addEventListener("mousemove", EventHandlers.onZoneHover, { capture: true })
+        capturer.addEventListener("mouseleave", EventHandlers.onZoneHover, { capture: true })*/
       capturer.addEventListener("dragstart", EventHandlers.onZoneDragStart, { capture: true })
       capturer.addEventListener("dragover", EventHandlers.onZoneDragOver, { capture: true })
-      capturer.addEventListener("dragleave", EventHandlers.onZoneDragLeave, { capture: true }) 
+      capturer.addEventListener("dragleave", EventHandlers.onZoneDragLeave, { capture: true })
    }
    track(element: HTMLElement) {
       if (!element) {
@@ -309,13 +310,15 @@ const drag_img = new Image()
 drag_img.src = dragImageUrl.toString()
 
 function zoneRunRefresh() {
-   timer = setInterval(() => {
-      if (Instrumentation.shallUpdate()) {
-         requestAnimationFrame(() => {
-            Instrumentation?.update()
-         })
-      }
-   }, 25)
+   if (timer === 0) {
+      timer = setInterval(() => {
+         if (Instrumentation.shallUpdate()) {
+            requestAnimationFrame(() => {
+               Instrumentation?.update()
+            })
+         }
+      }, 25)
+   }
 }
 function zoneSelectedRenderer(sel: ZoneSelection) {
    sel.element.className = "LDX-Overlay-Selected"
@@ -378,6 +381,22 @@ export function findIntrumentationFromDOM(element: HTMLElement): ElementInstrume
       node = ReactTools.getNodeParent(node)
    }
    return null
+}
+
+export function connectSupport(support) {
+   if (!Instrumentation.support) {
+      support.appendChild(Instrumentation.overlay)
+      support.appendChild(Instrumentation.tracker.capturer)
+      Instrumentation.support = support
+   }
+}
+
+export function disconnectSupport(support) {
+   if (support && Instrumentation.support === support) {
+      support.removeChild(Instrumentation.overlay)
+      support.removeChild(Instrumentation.tracker.capturer)
+      Instrumentation.support = null
+   }
 }
 
 export const EventHandlers = {

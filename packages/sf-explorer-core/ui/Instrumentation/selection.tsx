@@ -24,13 +24,16 @@ export class ZoneSelection {
    getRect() {
       const controller = this.zone.getController()
       if (controller.stretch === ElementBoundingBox.Inner) {
+         return ReactTools.getHTMLClientRect(this.node, this.overlay)
+      }
+      else { // ElementBoundingBox.Outer
          for (let parent = this.node; parent; parent = ReactTools.getNodeParent(parent)) {
             if (parent.stateNode instanceof HTMLElement) {
                return ReactTools.getHTMLClientRect(parent, this.overlay)
             }
          }
+         return null
       }
-      return ReactTools.getHTMLClientRect(this.node, this.overlay)
    }
    getRoot() {
       if (!this.root) this.root = ReactDOMClient.createRoot(this.element)
@@ -43,9 +46,11 @@ export class ZoneSelection {
       this.renderer = renderer
       if (this.parent) this.parent.setRenderer(rendererParent, rendererParent)
    }
-   updateOverlay(): this {
+   updateOverlay(): boolean {
       const rect = this.getRect()
-      if (!rect) return null
+      if (!rect) {
+         return false
+      }
 
       let new_element: HTMLElement
       if (!this.element) {
@@ -63,7 +68,7 @@ export class ZoneSelection {
       if (this.parent && this.parent.renderer) {
          this.parent.updateOverlay()
       }
-      return this
+      return true
    }
    cleanOverlay() {
       if (this.element) {

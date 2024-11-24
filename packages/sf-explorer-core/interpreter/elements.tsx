@@ -182,7 +182,7 @@ export abstract class Element {
    write(value: any, ctx: IContext): any {
       throw new Error(`Cannot be write`)
    }
-   consolidate(builer: Builder) {
+   consolidate(builder: Builder) {
    }
    update(data: ElementJSON | Element) {
       const { model } = this
@@ -252,9 +252,9 @@ export class IdentifierExpr extends Element {
 export class MemberExpr extends Element {
    object: Element
    property: Element
-   override consolidate(builer: Builder) {
-      this.object = builer.consolidate(this.object, CommonTypes.any)
-      this.property = builer.consolidate(this.property, CommonTypes.string)
+   override consolidate(builder: Builder) {
+      this.object = builder.consolidate(this.object, CommonTypes.any)
+      this.property = builder.consolidate(this.property, CommonTypes.string)
    }
    override read(ctx: IContext): any {
       const base = this.object.read(ctx)
@@ -280,9 +280,9 @@ export class BinaryExpr extends Element {
    left: Element
    right: Element
    operator: AST.BinaryOperator
-   override consolidate(builer: Builder) {
-      this.left = builer.consolidate(this.left, CommonTypes.any)
-      this.right = builer.consolidate(this.right, CommonTypes.any)
+   override consolidate(builder: Builder) {
+      this.left = builder.consolidate(this.left, CommonTypes.any)
+      this.right = builder.consolidate(this.right, CommonTypes.any)
    }
    override read(ctx: IContext): any {
       const { left, right, operator } = this
@@ -319,10 +319,10 @@ export class ConditionalExpr extends Element {
    test: Element
    consequent: Element
    alternate: Element
-   override consolidate(builer: Builder) {
-      this.test = builer.consolidate(this.test, CommonTypes.boolean)
-      this.consequent = builer.consolidate(this.consequent, CommonTypes.any)
-      this.alternate = builer.consolidate(this.alternate, CommonTypes.any)
+   override consolidate(builder: Builder) {
+      this.test = builder.consolidate(this.test, CommonTypes.boolean)
+      this.consequent = builder.consolidate(this.consequent, CommonTypes.any)
+      this.alternate = builder.consolidate(this.alternate, CommonTypes.any)
    }
    override read(ctx: IContext): any {
       const { test, consequent, alternate } = this
@@ -343,9 +343,9 @@ export class LogicalExpr extends Element {
    left: Element
    right: Element
    operator: AST.LogicalOperator
-   override consolidate(builer: Builder) {
-      this.left = builer.consolidate(this.left, CommonTypes.any)
-      this.right = builer.consolidate(this.right, CommonTypes.any)
+   override consolidate(builder: Builder) {
+      this.left = builder.consolidate(this.left, CommonTypes.any)
+      this.right = builder.consolidate(this.right, CommonTypes.any)
    }
    override read(ctx: IContext): any {
       const { left, right, operator } = this
@@ -371,8 +371,8 @@ export class LogicalExpr extends Element {
 export class UnaryExpr extends Element {
    argument: Element
    operator: AST.UnaryOperator
-   override consolidate(builer: Builder) {
-      this.argument = builer.consolidate(this.argument, CommonTypes.any)
+   override consolidate(builder: Builder) {
+      this.argument = builder.consolidate(this.argument, CommonTypes.any)
    }
    override read(ctx: IContext): any {
       const { argument, operator } = this
@@ -401,9 +401,9 @@ export class UnaryExpr extends Element {
 export class DeleteMemberExpr extends Element {
    object: Element
    property: Element
-   override consolidate(builer: Builder) {
-      this.object = builer.consolidate(this.object, CommonTypes.any)
-      this.property = builer.consolidate(this.property, CommonTypes.string)
+   override consolidate(builder: Builder) {
+      this.object = builder.consolidate(this.object, CommonTypes.any)
+      this.property = builder.consolidate(this.property, CommonTypes.string)
    }
    override read(ctx: IContext): any {
       const object = this.object.read(ctx)
@@ -426,8 +426,8 @@ export class DeleteMemberExpr extends Element {
 @SerializableClass()
 export class ArrayAppendElement {
    value: Element
-   consolidate(builer: Builder) {
-      this.value = builer.consolidate(this.value, CommonTypes.any)
+   consolidate(builder: Builder) {
+      this.value = builder.consolidate(this.value, CommonTypes.any)
       return this
    }
    assign(object: any[], ctx: IContext) {
@@ -442,8 +442,8 @@ export class ArrayAppendElement {
 @SerializableClass()
 export class ArraySpreadElement {
    value: Element
-   consolidate(builer: Builder) {
-      this.value = builer.consolidate(this.value, CommonTypes.any)
+   consolidate(builder: Builder) {
+      this.value = builder.consolidate(this.value, CommonTypes.any)
       return this
    }
    assign(object: any[], ctx: IContext) {
@@ -460,8 +460,8 @@ export class ArraySpreadElement {
 
 export class ArrayExpr extends Element {
    elements: (ArrayAppendElement | ArraySpreadElement)[] = []
-   override consolidate(builer: Builder) {
-      this.elements = this.elements.map(item => item.consolidate(builer))
+   override consolidate(builder: Builder) {
+      this.elements = this.elements.map(item => item.consolidate(builder))
    }
    override read(ctx: IContext): any {
       const object: any[] = []
@@ -484,17 +484,17 @@ export abstract class ObjectProperty<K extends any = any> {
    get name(): string { return null }
    abstract assign(object: MapLike<any>, ctx: IContext)
    abstract exportAST(gen: ASTGenerator, from: Element)
-   consolidate(builer: Builder) {
-      this.value = builer.consolidate(this.value, CommonTypes.any)
+   consolidate(builder: Builder) {
+      this.value = builder.consolidate(this.value, CommonTypes.any)
       return this
    }
 }
 
 @SerializableClass()
 export class ObjectDynamicProperty extends ObjectProperty<Element> {
-   override consolidate(builer: Builder) {
-      this.key = builer.consolidate(this.key, CommonTypes.string)
-      this.value = builer.consolidate(this.value, CommonTypes.any)
+   override consolidate(builder: Builder) {
+      this.key = builder.consolidate(this.key, CommonTypes.string)
+      this.value = builder.consolidate(this.value, CommonTypes.any)
       return this
    }
    assign(object: MapLike<any>, ctx: IContext) {
@@ -548,8 +548,8 @@ export class ObjectSpreadProperty extends ObjectProperty<never> {
 @ElementClass()
 export class ObjectExpr extends Element {
    properties: ObjectProperty[] = []
-   override consolidate(builer: Builder) {
-      this.properties = this.properties.map(item => item.consolidate(builer))
+   override consolidate(builder: Builder) {
+      this.properties = this.properties.map(item => item.consolidate(builder))
    }
    override read(ctx: IContext): any {
       const object: MapLike<any> = {}
@@ -570,9 +570,9 @@ export class ObjectExpr extends Element {
 export class CallExpr extends Element {
    callee: Element
    arguments: ArrayExpr
-   override consolidate(builer: Builder) {
-      this.callee = builer.consolidate(this.callee, CommonTypes.any)
-      this.arguments = builer.consolidate(this.arguments, CommonTypes.any)
+   override consolidate(builder: Builder) {
+      this.callee = builder.consolidate(this.callee, CommonTypes.any)
+      this.arguments = builder.consolidate(this.arguments, CommonTypes.any)
    }
    override read(ctx: IContext): any {
       const callee = this.callee.read(ctx)
@@ -621,8 +621,8 @@ export class UpdateExpr extends Element {
    argument: Element
    operator: AST.UpdateOperator
    prefix: boolean
-   override consolidate(builer: Builder) {
-      this.argument = builer.consolidate(this.argument, CommonTypes.any)
+   override consolidate(builder: Builder) {
+      this.argument = builder.consolidate(this.argument, CommonTypes.any)
    }
    override read(ctx: IContext): any {
       const { argument, operator, prefix } = this
@@ -653,9 +653,9 @@ export class AssignmentExpr extends Element {
    left: Element
    right: Element
    operator: AST.AssignmentOperator
-   override consolidate(builer: Builder) {
-      this.left = builer.consolidate(this.left, CommonTypes.any)
-      this.right = builer.consolidate(this.right, CommonTypes.any)
+   override consolidate(builder: Builder) {
+      this.left = builder.consolidate(this.left, CommonTypes.any)
+      this.right = builder.consolidate(this.right, CommonTypes.any)
    }
    override read(ctx: IContext): any {
       const { left, right, operator } = this
@@ -706,10 +706,10 @@ export class LDXDisplayExpr extends LDXElementExpr {
       else this.props = context.New(ObjectExpr, this, CommonTypes.any)
       return this
    }
-   override consolidate(builer: Builder) {
+   override consolidate(builder: Builder) {
       const propsTyping = this.entry.manifest["view"]
-      this.props = builer.consolidate(this.props, propsTyping)
-      this.dock = builer.consolidate(this.dock, CommonTypes.any)
+      this.props = builder.consolidate(this.props, propsTyping)
+      this.dock = builder.consolidate(this.dock, CommonTypes.any)
    }
    override read(ctx: IContext): any {
    }
@@ -788,9 +788,9 @@ export class LDXDocumentExpr extends Element {
    embeds: MapLike<Element> = {}
    markdown: string
    state: EditorState
-   override consolidate(builer: Builder) {
+   override consolidate(builder: Builder) {
       for (const key in this.embeds) {
-         this.embeds[key] = builer.consolidate(this.embeds[key], CommonTypes.display)
+         this.embeds[key] = builder.consolidate(this.embeds[key], CommonTypes.display)
       }
    }
    override read(ctx: IContext): any {
@@ -814,8 +814,8 @@ function LDXDocumentEditor(props: {
 @ElementClass()
 export class DocumentLayer extends Element {
    layout: Element
-   override consolidate(builer: Builder) {
-      this.layout = builer.consolidate(this.layout, CommonTypes.display)
+   override consolidate(builder: Builder) {
+      this.layout = builder.consolidate(this.layout, CommonTypes.display)
    }
    override read(ctx: IContext): any {
       return this.layout.read(ctx)
