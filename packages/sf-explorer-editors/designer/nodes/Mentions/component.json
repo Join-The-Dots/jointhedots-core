@@ -1,5 +1,5 @@
 {
-   "id": "mensions",
+   "$id": "mensions",
    "description": "Mensions to someone",
    "icon": "bi:at",
    "view": {
@@ -9,7 +9,7 @@
          }
       }
    },
-   "attachments": {
+   "services": {
       "view.lexical": "./MentionNode#MentionNode",
       "addon.lexical": "./MentionsPlugin"
    }

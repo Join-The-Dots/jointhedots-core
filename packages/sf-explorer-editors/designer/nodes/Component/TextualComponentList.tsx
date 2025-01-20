@@ -4,7 +4,9 @@ import { INSERT_HORIZONTAL_RULE_COMMAND } from '@lexical/react/LexicalHorizontal
 import { $createHeadingNode, $createQuoteNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { $createParagraphNode, $getSelection, $isRangeSelection, FORMAT_ELEMENT_COMMAND } from 'lexical';
-import { ComponentPublication, IComponentProvider, MapLike, ComponentsRegistry, CombinedComponentProvider, MemoryComponentProvider } from '@sf-explorer/core';
+import { ComponentPublication, IComponentProvider, MapLike, ComponentsRegistry } from '@sf-explorer/core';
+import { InMemComponentProvider, InMemComponentPublisher } from '@sf-explorer/core/library/providers/InMemComponentProvider'
+import { CombinedComponentProvider } from '@sf-explorer/core/library/providers/CombinedComponentProvider'
 
 type TextualComponentEntry = Partial<ComponentPublication> & {
    onSelect: (editor) => void
@@ -116,7 +118,7 @@ function getComponentId(title: string): string {
    return "text:" + title.toLowerCase()
 }
 
-export const TextualComponentProvider = new MemoryComponentProvider(TextualComponentEntries.map(entry => ({
+export const TextualComponentProvider = new InMemComponentProvider(TextualComponentEntries.map(entry => ({
    component_id: getComponentId(entry.title),
    title: entry.title,
    icon: entry.icon,

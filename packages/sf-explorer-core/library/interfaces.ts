@@ -1,27 +1,40 @@
 import { URI } from 'vscode-uri'
 import { JSONSchema } from "../ast/schema/schema"
+import { MapLike } from 'typescript'
+
+export type ComponentID = string
 
 export interface ComponentPublication {
-   component_id: string
-   icon: string
+   component_id: ComponentID
+   type?: string
+   icon?: string
    title: string
+   services?: string[]
    description?: string
    keywords?: string[]
    tags?: string[]
 }
 
 export interface ResourceContent {
-   component_id: string
+   component_id: ComponentID
    name: string
    format: string
    content?: Blob
 }
 
-export type ComponentManifest = JSONSchema
+export type ComponentManifest = JSONSchema & {
+   $id: string
+   type?: string
+   keywords?: string[]
+   tags?: string[]
+} & MapLike<any>
 
-export interface IComponentProvider {
-   search_component_publications(pattern?: string): Promise<ComponentPublication[]>
+export interface IComponentPublisher {
+   search_component_publications(pattern?: string, services?: string[]): Promise<ComponentPublication[]>
    get_component_publication(component_id: string): Promise<ComponentPublication>
+}
+
+export interface IComponentProvider extends IComponentPublisher {
    get_component_manifest(component_id: string): Promise<ComponentManifest>
 }
 
@@ -53,5 +66,19 @@ export function parseComponentURI(ref: string): URI {
    }
    else {
       return URI.parse(ref)
+   }
+}
+
+export function makeComponentPublication(manif: ComponentManifest): ComponentPublication {
+   const { $id } = manif
+   return {
+      component_id: $id,
+      type: manif.type,
+      icon: manif.icon,
+      title: manif.title || manif.name || $id,
+      services: manif.services ? Object.keys(manif.services) : [],
+      description: manif.description || "",
+      keywords: manif.keywords,
+      tags: manif.tags,
    }
 }

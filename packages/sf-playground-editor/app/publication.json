@@ -1,6 +1,6 @@
 {
    "application": {
-      "name": "livedoc",
+      "name": "playground-editor",
       "entry": "./startup.tsx",
       "favicon": "../favicon.webp"
    }

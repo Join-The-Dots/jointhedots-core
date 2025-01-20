@@ -5,7 +5,7 @@ import { MapLike } from "typescript"
 import { useLocation } from "react-router-dom"
 import { ErrorDisplayer } from "../ui/ErrorBoundary"
 import qs from 'query-string';
-import { JSONSchema, SecurityRule, SecuritySchema } from "../ast/schema/schema"
+import { JSONSchema, SecurityRule, SecurityGuard } from "../ast/schema/schema"
 import { ComponentManifest } from "./interfaces"
 
 export type ViewDescriptor = {
@@ -39,7 +39,7 @@ export function getViewDescriptorFromHash(hash: string, content?: string): ViewD
    return { name, params, content }
 }
 
-function checkValue(security: SecuritySchema, data: any): Error {
+function checkValue(security: SecurityGuard, data: any): Error {
    if (security === "safe") {
       return null
    }

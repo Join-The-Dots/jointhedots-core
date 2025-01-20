@@ -1,5 +1,5 @@
 {
-   "id": "tweet",
+   "$id": "tweet",
    "description": "Embed tweet",
    "icon": "bi:twitter",
    "view": {
@@ -10,7 +10,7 @@
          }
       }
    },
-   "attachments": {
+   "services": {
       "view.react": "./Tweet#TweetComponent"
    }
 }

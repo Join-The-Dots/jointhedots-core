@@ -1,5 +1,5 @@
 {
-   "id": "layout.columns",
+   "$id": "layout.columns",
    "title": "Columns Layout",
    "description": "Display content as columns layout",
    "icon": "bi:layout-three-columns",
@@ -11,7 +11,7 @@
          }
       }
    },
-   "attachments": {
+   "services": {
       "view.lexical": "./LayoutContainerNode#LayoutContainerNode",
       "addon.lexical": "./LayoutPlugin"
    }

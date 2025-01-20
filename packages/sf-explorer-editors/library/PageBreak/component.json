@@ -1,10 +1,10 @@
 {
-   "id": "pagebreak",
+   "$id": "pagebreak",
    "description": "Pagination page break",
    "icon": "bi:scissors",
    "view": {
    },
-   "attachments": {
+   "services": {
       "view.web": "./PageBreak#PageBreak"
    }
 }

@@ -1,5 +1,5 @@
 {
-   "id": "youtube",
+   "$id": "youtube",
    "description": "Embed youtube video",
    "icon": "bi:youtube",
    "view": {
@@ -10,7 +10,7 @@
          }
       }
    },
-   "attachments": {
+   "services": {
       "view.react": "./YouTube#YouTubeComponent"
    }
 }

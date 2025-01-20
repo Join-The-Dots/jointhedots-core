@@ -1,5 +1,5 @@
 {
-   "id": "soql",
+   "$id": "soql",
    "description": "SOQL query displayer",
    "icon": "bi:query",
    "view": {
@@ -9,7 +9,7 @@
          }
       }
    },
-   "attachments": {
+   "services": {
       "view.react": "./SOQL#SOQLComponent"
    }
 }

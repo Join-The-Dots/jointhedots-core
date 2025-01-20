@@ -37,7 +37,9 @@ export function getIconCollection(name: string) {
    }
 }
 
-export default function Icon(props: {
+registerIconCollection("data", new IconUrlCollection(""))
+
+export function Icon(props: {
    name: string
    className?: string
    style?: React.CSSProperties
@@ -50,4 +52,21 @@ export default function Icon(props: {
    return collection.draw(props, props.inversed ? theme.contrastTheme : theme)
 }
 
-registerIconCollection("data", new IconUrlCollection(""))
+const ButtonClassname = "sfe-icon-button "
+
+export function IconButton(props: {
+   name: string
+   className?: string
+   style?: React.CSSProperties
+   inversed?: boolean
+   title?: string
+   onClick?: (evt) => void
+}) {
+   const { className } = props
+   return <Icon
+      {...props}
+      className={className ? ButtonClassname + className : ButtonClassname}
+   />
+}
+
+export default Icon

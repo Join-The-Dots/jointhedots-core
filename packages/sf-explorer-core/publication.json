@@ -1,0 +1,16 @@
+{
+   "features": [
+      "workbench",
+      "experiment"
+   ],
+   "publish": {
+      "workbench": [
+         {
+            "name": "connexions",
+            "component": {
+               "$ref": "./ui/connexions/bench"
+            }
+         }
+      ]
+   }
+}

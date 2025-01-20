@@ -1,0 +1,116 @@
+.cub8-item-short {
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+   cursor: pointer;
+   font-size: 14px;
+
+   &>.item-icon {
+      display: flex;
+      flex-direction: row;
+      flex: 0;
+      min-width: 32px;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 3px;
+      font-size: 150%;
+   }
+
+   &>.item-infos {
+      flex: 1;
+      padding: 3px;
+
+      text-transform: capitalize;
+      font-weight: bold;
+      font-size: 12px;
+   }
+
+}
+
+.cub8-item-large {
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+   cursor: pointer;
+   position: relative;
+   font-size: 14px;
+   min-height: 32px;
+
+   &:hover {
+      outline: solid thin rgba(50, 100, 200, 0.3);
+   }
+
+   &.selected {
+      padding-left: 10px;
+      border-top: solid thin rgba(50, 100, 200, 0.3);
+      border-right: solid thin rgba(50, 100, 200, 0.5);
+      border-bottom: solid thin rgb(50, 100, 200);
+
+      &::before {
+         content: "";
+         position: absolute;
+         flex: 0;
+         left: 0;
+         top: 0;
+         bottom: 0;
+         min-width: 5px;
+         background-color: rgb(50, 100, 200);
+      }
+   }
+
+   &.unselected {
+      padding-left: 10px;
+
+      &:hover {
+         background-color: rgba(50, 100, 200, 0.3);
+      }
+
+      &::before {
+         content: "";
+         position: absolute;
+         flex: 0;
+         left: 0;
+         top: 0;
+         bottom: 0;
+         min-width: 5px;
+         border-color: rgb(168, 168, 168);
+      }
+   }
+
+   &>.item-selector {
+      min-width: 32px;
+   }
+
+   &>.item-icon {
+      display: flex;
+      flex-direction: row;
+      flex: 0;
+      min-width: 40px;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 5px;
+      font-size: 200%;
+   }
+
+   &>.item-infos {
+      flex: 1;
+      padding: 0 20px 0 3px;
+      padding: 5px;
+
+      &>:first-child {
+         text-transform: capitalize;
+         font-weight: bold;
+         font-size: 12px;
+      }
+
+      &>:nth-child(2) {
+         color: #666;
+         font-size: 11px;
+         padding-top: 5px;
+      }
+   }
+
+   &>.item-tooling {}
+}

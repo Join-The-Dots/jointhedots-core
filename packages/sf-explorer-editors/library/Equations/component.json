@@ -1,5 +1,5 @@
 {
-   "id": "equation",
+   "$id": "equation",
    "description": "Display math equation",
    "icon": "bi:math",
    "view": {
@@ -13,7 +13,7 @@
          }
       }
    },
-   "attachments": {
+   "services": {
       "view.react": "./EquationComponent#EquationComponent"
    }
 }

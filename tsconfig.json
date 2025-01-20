@@ -26,9 +26,6 @@
       ],
       "@sf-explorer/editors/*": [
         "./packages/sf-explorer-editors/*"
-      ],
-      "@sf-explorer/playground/*": [
-        "./packages/sf-explorer-playground/*"
       ]
     },
     "plugins": [

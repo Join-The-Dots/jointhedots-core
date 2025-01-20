@@ -130,8 +130,9 @@ export type JSONSchemaCustom = {
    // Programming interface
    args?: JSONSchema[]
    placeholder?: boolean // require a placeholder structure when empty
-   attachments?: MapLike<ResourceLink>
-   security?: SecuritySchema
+   resources?: MapLike<ResourceEntry> // Resources catalog with undefined interface
+   services?: MapLike<ResourceEntry> // Resources providing specific services interfaces
+   security?: SecurityGuard
    "allow-origin"?: string
 
    // Component related schema
@@ -141,9 +142,16 @@ export type JSONSchemaCustom = {
    aliases?: MapLike<string>
 }
 
+export type ResourceEntry<ResourceInterface = any> = ResourceLink<ResourceInterface> | true | {
+   type: ResourceLink<ResourceFactory<ResourceInterface>>
+   data?: any
+}
+
+export type ResourceFactory<ResourceInterface = any> = (data: any) => Promise<ResourceInterface>
+
 export type ResourceLink<ResourceInterface = any> = string
 
-export type SecuritySchema =
+export type SecurityGuard =
    "safe" |
    ResourceLink<SecurityRule> |
    {

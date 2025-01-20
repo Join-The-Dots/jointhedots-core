@@ -1,5 +1,5 @@
 {
-   "id": "excalidraw",
+   "$id": "excalidraw",
    "description": "Display excalidraw diagram",
    "icon": "bi:easel2",
    "view": {
@@ -10,7 +10,7 @@
          }
       }
    },
-   "attachments": {
+   "services": {
       "view.react": "./ExcalidrawComponent#ExcalidrawComponent"
    }
 }

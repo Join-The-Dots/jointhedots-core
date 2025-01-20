@@ -1,0 +1,7 @@
+{
+   "application": {
+      "name": "playground-services",
+      "entry": "./startup.tsx",
+      "favicon": "../favicon.webp"
+   }
+}

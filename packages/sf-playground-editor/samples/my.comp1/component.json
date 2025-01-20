@@ -1,5 +1,5 @@
 {
-   "id": "my.comp1",
+   "$id": "my.comp1",
    "description": "my comp1",
    "icon": "bi:scissors",
    "view": {
@@ -21,7 +21,7 @@
          }
       }
    },
-   "attachments": {
+   "services": {
       "view.react": "."
    }
 }

@@ -1,5 +1,5 @@
 {
-   "id": "layout.table",
+   "$id": "layout.table",
    "title": "Table Layout",
    "description": "Display grid as table layout",
    "icon": "bi:table",
@@ -16,7 +16,7 @@
          }
       }
    },
-   "attachments": {
+   "services": {
       "view.lexical": "./TableNode#TableNode",
       "addon.lexical": "./TablePlugin"
    }

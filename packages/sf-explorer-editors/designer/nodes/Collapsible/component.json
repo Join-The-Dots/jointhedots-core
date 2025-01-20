@@ -1,5 +1,5 @@
 {
-   "id": "layout.collapsible",
+   "$id": "layout.collapsible",
    "title": "Collapsible layout",
    "description": "Display as collapsible layout",
    "icon": "bi:arrows-collapse",
@@ -11,7 +11,7 @@
          }
       }
    },
-   "attachments": {
+   "services": {
       "view.lexical": "./CollapsibleContainerNode#CollapsibleContainerNode",
       "addon.lexical": "./CollapsiblePlugin"
    }

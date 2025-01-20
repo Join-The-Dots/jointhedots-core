@@ -1,5 +1,5 @@
 {
-   "id": "mermaid",
+   "$id": "mermaid",
    "description": "Mermaid diagram displayer",
    "icon": "bi:diagram-3-fill",
    "view": {
@@ -10,7 +10,7 @@
          }
       }
    },
-   "attachments": {
+   "services": {
       "view.react": "./Mermaid#MermaidComponent"
    }
 }

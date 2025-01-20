@@ -5,6 +5,9 @@ import Path from "node:path"
 import Crypto from "node:crypto"
 import MIME from 'mime'
 import { copyToStorageStream, readJsonFile } from "./storage.js"
+import { checkComponentManifest, ComponentID, ComponentManifest, ComponentPublication, makeComponentPublication, ResourceEntry } from "./component.js"
+
+const debug_trace = false
 
 export interface IStorageStream {
    begin(cleanup: boolean)
@@ -56,25 +59,6 @@ export type DeclarationDescriptor = {
    assets?: AssetsEntry[]
 }
 
-export type ComponentDescriptor = {
-   id: string
-   name?: string
-   features?: FeatureID[]
-   attachments?: {
-      [name: string]: string
-   }
-   [metadata: string]: any
-}
-
-export interface ComponentPublication {
-   component_id: string
-   icon: string
-   title: string
-   description: string
-   keywords?: string[]
-   tags?: string[]
-}
-
 export interface PackageDescriptor {
    name: string
    version: string
@@ -116,7 +100,7 @@ export interface PackageDescriptor {
 export class Library {
    delivered: PackageDescriptor = null
    declarations = new Map<string, DeclarationDescriptor>()
-   components = new Map<string, ComponentDescriptor>()
+   components = new Map<ComponentID, ComponentManifest>()
    applications: ApplicationEntry[] = []
    entries: { [url: string]: string } = {}
    manifests: { [url: string]: any } = {}
@@ -200,15 +184,16 @@ async function discover_library_components(lib: Library, path: string) {
          if (fname === "declaration.json" || fname === "publication.json" || is_component) {
             try {
                const data = await Fsp.readFile(fpath)
-               const desc = JSON.parse(data.toString()) as (ComponentDescriptor & DeclarationDescriptor)
+               const desc = JSON.parse(data.toString()) as (ComponentManifest & DeclarationDescriptor)
                if (lib.is_enabled_for(desc.features)) {
                   if (is_component) {
-                     if (typeof desc.id !== "string") throw new Error("Component descriptor shall have 'id'")
-                     lib.components.set(fpath, desc as ComponentDescriptor)
+                     const err = checkComponentManifest(desc, fpath)
+                     if (err) throw err
+                     lib.components.set(fpath, desc as ComponentManifest)
                      console.log("+ component:", fpath)
                   }
                   else {
-                     lib.declarations.set(fpath, desc as ComponentDescriptor)
+                     lib.declarations.set(fpath, desc as ComponentManifest)
                      console.log("+ declaration:", fpath)
                   }
                }
@@ -425,14 +410,7 @@ export async function emit_library_assets(lib: Library, storage: IStorageStream,
    const catalogs: MapLike<ComponentPublication[]> = { "every": [] }
    for (const id in lib.manifests) {
       const manif = lib.manifests[id]
-      const pub = {
-         component_id: id,
-         icon: manif.icon,
-         title: manif.title || id,
-         description: manif.description || "",
-         keywords: manif.keywords,
-         tags: manif.tags,
-      }
+      const pub = makeComponentPublication(manif)
       if (Array.isArray(manif.catalogs)) {
          for (const name of manif.catalogs) {
             let catalog = catalogs[name]
@@ -555,9 +533,9 @@ async function prepare_library(lib: Library) {
       entryfiles[lib.entries[url]] = url
    }
    for (const [path, desc] of lib.components) {
-      const { id } = desc
+      const id = desc.$id
 
-      const manifest: Partial<ComponentDescriptor> = {
+      const manifest: Partial<ComponentManifest> = {
          ...desc,
          application: undefined,
          publish: undefined,
@@ -565,22 +543,36 @@ async function prepare_library(lib: Library) {
          entries: undefined,
       }
       lib.manifests[id] = manifest
-      console.log(`+ manifest: ${id}`)
+      console.log(`+ component: ${id}`)
 
-      if (desc.attachments) {
-         const baseDir = Path.dirname(path)
-         manifest.attachments = {}
-         for (const name in desc.attachments) {
-            const parts = desc.attachments[name].split("#")
-            const file = resolve_entry_path(lib, parts[0], baseDir)
-            let ref = entryfiles[name]
-            if (!ref) {
-               ref = make_filename("addon_" + compute_hashID(file))
-               lib.entries[ref] = file
+      function compile_resource_map(kind: string, entries: MapLike<ResourceEntry>, baseDir: string) {
+         const catalog: MapLike<ResourceEntry> = {}
+         for (const name in entries) {
+            const link = entries[name]
+            if (typeof link === "string") {
+               const parts = link.split("#")
+               const file = resolve_entry_path(lib, parts[0], baseDir)
+               let ref = entryfiles[name]
+               if (!ref) {
+                  ref = make_filename("addon_" + compute_hashID(file))
+                  lib.entries[ref] = file
+               }
+               catalog[name] = `./${ref}.js#${parts[1] || "default"}`
+               if (debug_trace) console.log(`+ ${kind}: ${id}#${name} -> ${catalog[name]}`)
             }
-            manifest.attachments[name] = `./${ref}.js#${parts[1] || "default"}`
-            console.log(`+ attachment: ${id}#${name} -> ${manifest.attachments[name]}`)
+            else {
+               catalog[name] = link
+            }
          }
+         return catalog
+      }
+
+      if (desc.services) {
+         manifest.services = compile_resource_map("service", desc.services, Path.dirname(path))
+      }
+
+      if (desc.resources) {
+         manifest.resources = compile_resource_map("resource", desc.resources, Path.dirname(path))
       }
    }
 

@@ -1,5 +1,5 @@
 {
-   "id": "sticky",
+   "$id": "sticky",
    "description": "Sticky note in air",
    "icon": "bi:sticky-fill",
    "view": {
@@ -22,7 +22,7 @@
          }
       }
    },
-   "attachments": {
+   "services": {
       "view.lexical": "./StickyNode#StickyNode",
       "addon.lexical": "./StickyPlugin"
    }

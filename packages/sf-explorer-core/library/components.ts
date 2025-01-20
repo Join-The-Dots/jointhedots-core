@@ -1,11 +1,14 @@
-import { ComponentManifest, IComponentProvider, IContentProvider, IResourceLoader } from "./interfaces"
+import { ComponentManifest, ComponentPublication, IComponentProvider, IContentProvider, IResourceLoader } from "./interfaces"
 import { URI, Utils } from "vscode-uri"
-import { CommonResourceProvider } from "./handlers/resource-loader"
-import { StaticComponentProvider } from "./handlers/component-provider"
-import { StaticComponentContent } from "./handlers/content-provider"
+import { CommonResourceProvider } from "./handlers/CommonResourceProvider"
+import { StaticContentProvider } from "./handlers/StaticContentProvider"
+import { StaticComponentProvider } from "./providers/StaticComponentProvider"
+import { CombinedComponentProvider } from "./providers/CombinedComponentProvider"
+import { ComponentDriverService } from "../services/ComponentDriver"
 
 export class ComponentEntry {
    manifest?: ComponentManifest = undefined
+   instance?: any = undefined
    failure?: Error = undefined
    constructor(
       readonly id: string,
@@ -78,14 +81,14 @@ export class ComponentEntry {
    }
    getResource(identifier: string): ComponentResource {
       const { manifest } = this
-      if (manifest?.attachments?.[identifier]) {
+      if (manifest?.services?.[identifier]) {
          return this.acquireResource(identifier)
       }
       return null
    }
    hasResource(identifier: string): boolean {
       const { manifest } = this
-      if (manifest?.attachments?.[identifier]) {
+      if (manifest?.services?.[identifier]) {
          return true
       }
       return null
@@ -121,30 +124,50 @@ export class ComponentResource {
          if (loading) return loading
 
          loading = new Promise(async (resolve) => {
-
-            // Fetch manifest with resource catalog
-            const { component } = this
-            if (component.loaded === false) {
-               await component.fetch()
-            }
-
-            // Fetch resource data
-            const { manifest } = component
-            const ref = manifest.attachments?.[this.resource]
-            if (ref) {
-               let uri: string = ref
-               let identifier: string = null
-               const pos = ref.indexOf("#")
-               if (pos > 0) {
-                  uri = ref.slice(0, pos)
-                  identifier = ref.slice(pos + 1) || null
+            try {
+               // Fetch manifest with resource catalog
+               const { component } = this
+               if (component.loaded === false) {
+                  await component.fetch()
                }
-               this.entry = await ComponentsRegistry.resources_loader.load_resource(uri)
-               this.identifier = identifier
+
+               // Fetch resource data
+               const { manifest } = component
+               const ref = manifest.services?.[this.resource]
+               if (typeof ref === "string") {
+                  let uri: string = ref
+                  let identifier: string = null
+                  const pos = ref.indexOf("#")
+                  if (pos > 0) {
+                     uri = ref.slice(0, pos)
+                     identifier = ref.slice(pos + 1) || null
+                  }
+                  this.entry = await ComponentsRegistry.resources_loader.load_resource(uri)
+                  this.identifier = identifier
+               }
+               else if (ref === true) {
+                  const driver = await ComponentsRegistry.acquireComponent(manifest.type).acquireResource("component").fetch<ComponentDriverService>()
+                  if (component.instance === undefined) {
+                     component.instance = null
+                     await driver.create(component, component.manifest)
+                  }
+                  this.entry = await driver.getService(component, this.resource)
+                  this.identifier = null
+               }
+               else if (ref) {
+                  const factory = await ComponentsRegistry.acquireComponent(ref.type).acquireResource("factory").fetch()
+                  this.entry = await factory(ref.data)
+                  this.identifier = null
+               }
+               else {
+                  this.entry = null
+                  this.identifier = null
+               }
             }
-            else {
-               this.identifier = null
+            catch (e) {
+               console.error(e)
                this.entry = null
+               this.identifier = null
             }
             resolve(this.get())
             ComponentsRegistry.loadings.set(this, null)
@@ -173,8 +196,8 @@ export class ComponentResource {
       this.identifier = null
    }
    get url(): string {
-      const ref = this.component.manifest?.attachments?.[this.resource]
-      if (ref) {
+      const ref = this.component.manifest?.services?.[this.resource]
+      if (typeof ref === "string") {
          const base = URI.parse(window.location.href).with({ fragment: null })
          const uri = Utils.joinPath(base, "..", ref.split("#")[0])
          return uri.toString()
@@ -183,19 +206,29 @@ export class ComponentResource {
    }
 }
 
+export type ComponentsListener = (target: ComponentEntry) => void
+
 export class ComponentsManifold {
    components = new Map<string, ComponentEntry>()
    resources = new Map<string, ComponentResource>()
    loadings = new Map<any, Promise<any>>()
+   listeners = new Set<ComponentsListener>()
 
-   components_provider: IComponentProvider = null
+   components_provider = new CombinedComponentProvider([])
    resources_loader: IResourceLoader = null
    content_provider: IContentProvider = null
 
    constructor() {
-      this.content_provider = new StaticComponentContent()
-      this.components_provider = new StaticComponentProvider(this.content_provider)
+      this.content_provider = new StaticContentProvider()
+      this.components_provider.add_provider(new StaticComponentProvider(this.content_provider))
       this.resources_loader = new CommonResourceProvider(this.content_provider)
+   }
+   listen(l: ComponentsListener) {
+      this.listeners.add(l)
+      return l
+   }
+   unlisten(l: ComponentsListener) {
+      this.listeners.delete(l)
    }
    acquireComponent(id: string): ComponentEntry {
       let obj = this.components.get(id) as ComponentEntry
@@ -219,6 +252,52 @@ export class ComponentsManifold {
       }
       return null
    }
+   updateComponent(manifest: ComponentManifest): Promise<ComponentEntry> {
+      return null
+   }
+}
+
+export async function createNewComponent(manifest: ComponentManifest): Promise<ComponentManifest> {
+   console.log("createNewComponent", manifest)
+   const { providers } = ComponentsRegistry.components_provider
+   const local = providers[providers.length - 1] as any
+   await local.add_component(manifest)
+   return manifest
+}
+
+export async function updateComponent(manifest: ComponentManifest): Promise<ComponentManifest> {
+   console.log("updateComponent", manifest)
+   const { providers } = ComponentsRegistry.components_provider
+   const local = providers[providers.length - 1] as any
+   await local.add_component(manifest)
+
+   const component = ComponentsRegistry.components.get(manifest.$id)
+   if (component && component.loaded) {
+      component.manifest = manifest
+      if (manifest.type) {
+         const driver = await ComponentsRegistry.acquireComponent(manifest.type).acquireResource("component").fetch<ComponentDriverService>()
+         await driver.update(component, manifest)
+         ComponentsRegistry.listeners.forEach(l => l(component))
+      }
+   }
+   return manifest
+}
+
+export async function fetchComponentsPublications(components_ids: string[]): Promise<ComponentPublication[]> {
+   const results: ComponentPublication[] = []
+   for (const id of components_ids) {
+      const cnx = await ComponentsRegistry.components_provider.get_component_publication(id)
+      if (cnx) {
+         results.push(cnx)
+      }
+      else {
+         results.push({
+            component_id: id,
+            title: "! Not found: " + id,
+         })
+      }
+   }
+   return results
 }
 
 export const ComponentsRegistry = new ComponentsManifold()

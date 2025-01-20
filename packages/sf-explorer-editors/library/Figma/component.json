@@ -1,5 +1,5 @@
 {
-   "id": "figma",
+   "$id": "figma",
    "description": "Display figma diagram",
    "icon": "bi:figma",
    "view": {
@@ -9,7 +9,7 @@
          }
       }
    },
-   "attachments": {
+   "services": {
       "view.react": "./Figma#FigmaComponent"
    }
 }

@@ -1,0 +1,195 @@
+import { ComponentID, ComponentManifest, ComponentPublication, IComponentProvider, makeComponentPublication } from "../interfaces"
+import { is_component_base_content, make_search_regexp } from "./InMemComponentProvider"
+
+function openComponentDatabase(): Promise<IDBDatabase> {
+   return new Promise((resolve, reject) => {
+      const request = window.indexedDB.open("LocalComponents", 2)
+
+      request.onerror = (e) => {
+         console.error('Database error:', e.target["error"])
+         reject(e.target["error"])
+      }
+
+      request.onupgradeneeded = () => {
+         const db = request.result
+
+         // Create "components" object store
+         if (!db.objectStoreNames.contains("components")) {
+            const componentsStore = db.createObjectStore("components", { keyPath: "component_id" })
+            componentsStore.createIndex("name", "name", { unique: false })
+         }
+
+         // Create "components_services" object store
+         if (!db.objectStoreNames.contains("components_services")) {
+            const servicesStore = db.createObjectStore("components_services", { keyPath: ["component_id", "service"] })
+            servicesStore.createIndex("component_id", "component_id", { unique: false })
+            servicesStore.createIndex("service", "service", { unique: false })
+         }
+
+         // Create "components_manifests" object store
+         if (!db.objectStoreNames.contains("components_manifests")) {
+            const servicesStore = db.createObjectStore("components_manifests", { keyPath: "component_id" })
+            servicesStore.createIndex("component_id", "component_id", { unique: false })
+         }
+      }
+
+      request.onsuccess = () => {
+         const db = request.result
+
+         db.onerror = (event) => {
+            console.error('Database error:', event)
+         }
+
+         resolve(request.result)
+      }
+
+   })
+}
+
+function getComponentManifest(db: IDBDatabase, component_id: string): Promise<ComponentManifest> {
+   return new Promise((resolve, reject) => {
+      const results: ComponentPublication[] = []
+      const transaction = db.transaction(["components_manifests"], "readonly")
+      const components_store = transaction.objectStore("components_manifests")
+      const components_req = components_store.getAll(component_id)
+      components_req.onsuccess = () => {
+         console.log("getComponentManifest", results)
+         resolve(components_req.result?.[0]?.manifest)
+      }
+      components_req.onerror = (e) => {
+         reject(e.target["error"])
+      }
+   })
+}
+
+function getComponentsPublications(db: IDBDatabase, components_ids: string[]): Promise<ComponentPublication[]> {
+   const transaction = db.transaction(["components", "components_services"], "readonly")
+   const components_store = transaction.objectStore("components")
+   const pendings = []
+   for (const id of components_ids) {
+      pendings.push(new Promise((resolve, reject) => {
+         const components_req = components_store.get(id)
+         components_req.onsuccess = () => {
+            resolve(components_req.result)
+         }
+         components_req.onerror = (e) => {
+            reject(e.target["error"])
+         }
+      }))
+   }
+   return Promise.all(pendings)
+}
+
+function filterComponentsPublications(db: IDBDatabase, filter: (value: ComponentPublication) => boolean): Promise<ComponentPublication[]> {
+   return new Promise((resolve, reject) => {
+      const transaction = db.transaction(["components"], "readonly")
+      const store = transaction.objectStore("components")
+      const request = store.openCursor()
+      const results: any[] = []
+      request.onsuccess = () => {
+         const cursor = request.result
+         if (cursor) {
+            const value = cursor["value"] as ComponentPublication
+            if (filter(value)) {
+               results.push(cursor.value) // Store the full entry
+            }
+            cursor.continue() // Move to the next entry
+         } else {
+            // When no more entries, resolve the promise with the results array
+            resolve(results)
+         }
+      }
+
+      request.onerror = () => {
+         reject(request.error)
+      }
+   })
+}
+
+function findComponentsByService(db: IDBDatabase, services: string[], results: Set<ComponentID>): Promise<unknown> {
+   const transaction = db.transaction(["components_services"], "readonly")
+   const components_services_store = transaction.objectStore("components_services")
+   const service_index = components_services_store.index("service")
+   const pendings = []
+   for (const service of services) {
+      pendings.push(new Promise((resolve, reject) => {
+         const components_ids_req = service_index.getAll(service)
+         components_ids_req.onsuccess = async () => {
+            for (const found of components_ids_req.result) {
+               if (found.service === service) results.add(found.component_id)
+            }
+            resolve(undefined)
+         }
+         components_ids_req.onerror = (e) => {
+            reject(e.target["error"])
+         }
+      }))
+   }
+   return Promise.all(pendings)
+}
+
+async function searchComponents(db: IDBDatabase, pattern?: string, services?: string[]): Promise<ComponentPublication[]> {
+   const filter = make_search_regexp(pattern)
+   if (services) {
+      const results = []
+      const found_ids = new Set<ComponentID>()
+      await findComponentsByService(db, services, found_ids)
+      console.log("findComponentsByService", found_ids)
+      for (const entry of await getComponentsPublications(db, Array.from(found_ids))) {
+         if (is_component_base_content(entry.title, filter)) {
+            results.push(entry)
+         }
+      }
+      return results
+   }
+   else {
+      return filterComponentsPublications(db, (entry) => {
+         return is_component_base_content(entry.title, filter)
+      })
+   }
+}
+
+function storeComponent(db: IDBDatabase, manifest: ComponentManifest): Promise<ComponentPublication> {
+   return new Promise((resolve, reject) => {
+      const entry = makeComponentPublication(manifest)
+      const db_T = db.transaction(["components", "components_services", "components_manifests"], "readwrite")
+
+      const components_store = db_T.objectStore("components")
+      components_store.put(entry)
+
+      const components_services = db_T.objectStore("components_services")
+      for (const srv of entry.services) {
+         components_services.put({
+            component_id: entry.component_id,
+            service: srv,
+         })
+      }
+
+      const components_manifests = db_T.objectStore("components_manifests")
+      components_manifests.put({
+         component_id: entry.component_id,
+         manifest: manifest,
+      })
+
+      db_T.onerror = (e) => reject(e.target["error"])
+      db_T.oncomplete = () => resolve(entry)
+      db_T.commit()
+   })
+}
+
+export class LocalComponentProvider implements IComponentProvider {
+   db = openComponentDatabase()
+   async add_component(manifest: ComponentManifest): Promise<ComponentPublication> {
+      return storeComponent(await this.db, manifest)
+   }
+   async get_component_publication(id: string): Promise<ComponentPublication> {
+      const results = await getComponentsPublications(await this.db, [id])
+      return results[0]
+   }
+   async search_component_publications(pattern?: string, services?: string[]): Promise<ComponentPublication[]> {
+      return searchComponents(await this.db, pattern, services)
+   }
+   async get_component_manifest(id: string): Promise<ComponentManifest> {
+      return getComponentManifest(await this.db, id)
+   }
+}

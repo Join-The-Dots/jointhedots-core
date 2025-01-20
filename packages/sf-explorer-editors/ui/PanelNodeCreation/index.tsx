@@ -3,7 +3,7 @@ import {
    ComponentPublication, ComponentEntry, ComponentManifest, ComponentsRegistry
 } from "@sf-explorer/core"
 import { useCallback, useEffect, useState } from "react"
-import { ComponentBrowser } from "../PanelBrowser"
+import { ComponentBrowser } from "@sf-explorer/core/ui/components/ComponentsBrowser"
 import Stack from "@sf-explorer/editors/ui/Stack"
 import Icon from "@sf-explorer/core/ui/Icon"
 import Button from "@sf-explorer/editors/ui/Button"
@@ -40,7 +40,7 @@ export function PanelSelectTemplate(props: {
 export function PanelNodeCreation(props: {
    component?: ComponentEntry,
    service: string
-   onComplete: (component?: ComponentEntry, params?: ElementJSON) => void;
+   onComplete: (component?: ComponentEntry, params?: ElementJSON) => void
    onCancel?: () => void
 }): JSX.Element {
    const { service, onComplete, onCancel } = props
@@ -75,7 +75,7 @@ export function PanelNodeCreation(props: {
 
    if (!selected) {
       return <ComponentBrowser
-         service={service}
+         services={[service]}
          onSelect={select}
       />
    }

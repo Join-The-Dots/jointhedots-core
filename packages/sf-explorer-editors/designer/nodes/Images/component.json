@@ -1,5 +1,5 @@
 {
-   "id": "image",
+   "$id": "image",
    "description": "Display image with caption",
    "icon": "bi:card-image",
    "view": {
@@ -9,7 +9,7 @@
          }
       }
    },
-   "attachments": {
+   "services": {
       "view.lexical": "./ImageNode#ImageNode",
       "addon.lexical": "./ImagesPlugin"
    }

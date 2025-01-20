@@ -721,11 +721,11 @@ export class LDXDisplayExpr extends LDXElementExpr {
       const manifest = await entry.fetch()
       this.tag = tag
       this.entry = entry
-      if (manifest.attachments["view.react"]) {
+      if (manifest.services["view.react"]) {
          this.type = DisplayType.React
          this.component = await entry.fetchResource("view.react")
       }
-      else if (manifest.attachments["view.web"]) {
+      else if (manifest.services["view.web"]) {
          this.type = DisplayType.WebComponent
          this.component = await entry.fetchResource("view.web")
       }

@@ -1,0 +1,24 @@
+{
+   "$id": "sfe:open-ai.service",
+   "name": "OpenAI",
+   "icon": "fa:home",
+   "component": {
+      "services": [
+         "language"
+      ],
+      "data": {
+         "type": "object",
+         "properties": {
+            "apiKey": {
+               "type": "string"
+            }
+         },
+         "required": [
+            "repo",
+            "accessKey"
+         ]
+      }
+   },
+   "services": {
+   }
+}
