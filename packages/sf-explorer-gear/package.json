@@ -1,6 +1,6 @@
 {
    "name": "@sf-explorer/gear",
-   "version": "1.0.3",
+   "version": "1.0.4",
    "type": "module",
    "bin": {
       "explorer-gear": "./esm/cli.js"

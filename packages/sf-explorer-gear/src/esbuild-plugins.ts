@@ -57,7 +57,7 @@ export async function create_esbuild_context(
       jsxImportSource: "react",
       mainFields: ['browser', 'module', 'main', 'index'],
       define: {
-         'globalThis': 'window',
+         //'globalThis': 'window',
          "process.browser": "true",
          ...workspace_constants,
       },
