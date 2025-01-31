@@ -1,5 +1,5 @@
 {
-   "name": "sf-explorer",
+   "name": "jointhedots",
    "version": "2.0.5",
    "type": "module",
    "private": true,
@@ -8,7 +8,7 @@
       "packages/*"
    ],
    "devDependencies": {
-      "@sf-explorer/gear": "./packages/sf-explorer-gear",
+      "@jointhedots/gear": "./packages/jointhedots-gear",
       "@types/mocha": "^10.0.8",
       "@types/node": "^22.7.4",
       "@types/react": "^18.3.12",
@@ -32,9 +32,9 @@
    },
    "scripts": {
       "watch": "tspc --watch --noEmit",
-      "serve": "explorer-gear serve --mode development",
-      "build": "explorer-gear make --versioned * --deliver --dist ./dist",
-      "make": "explorer-gear make --dist ../sf-explorer-app/react-chrome-app/dist",
+      "serve": "jointhedots-gear serve --mode development",
+      "build": "jointhedots-gear make --versioned * --deliver --dist ./dist",
+      "make": "jointhedots-gear make --dist ../jointhedots-app/react-chrome-app/dist",
       "test": "mocha"
    },
    "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"

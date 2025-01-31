@@ -1,0 +1,27 @@
+{
+   "name": "@jointhedots/ui",
+   "version": "0.0.0",
+   "type": "module",
+   "private": true,
+   "license": "MIT",
+   "componentsContainer": true,
+   "exports": {
+      "./theme": "./theme",
+      "./Icon": "./Icon",
+      "./Instrumentation": "./Instrumentation",
+      "./ErrorBoundary": "./ErrorBoundary"
+   },
+   "dependencies": {
+      "react-router-dom": "~6.3.0",
+      "react-bootstrap": "^2.10.5",
+      "@salesforce-ux/design-system": "^2.21.1",
+      "@rjsf/core": "^5.23.2",
+      "@rjsf/utils": "^5.23.2",
+      "@rjsf/validator-ajv8": "^5.23.2"
+   },
+   "peerDependencies": {
+      "@jointhedots/core": "*",
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0"
+   }
+}

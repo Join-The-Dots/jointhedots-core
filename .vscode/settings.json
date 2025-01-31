@@ -1,5 +1,5 @@
 {
-  "window.title": "SFE.Core",
+  "window.title": "JTD.Core",
   "terminal.integrated.env.windows": {
     "Path": "${env:PATH};node_modules/.bin"
  },

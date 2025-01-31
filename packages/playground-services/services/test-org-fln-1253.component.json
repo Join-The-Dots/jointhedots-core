@@ -1,0 +1,15 @@
+{
+   "name": "test-org-fln-1253",
+   "icon": "fa:home",
+   "services": {
+      "mock": {
+         "tag": "jtd:salesforce-service-factory",
+         "data": {
+            "name": "my app",
+            "clientId": "",
+            "clientSecret": "",
+            "endPoint": "https://xxx.my.salesforce.com"
+         }
+      }
+   }
+}

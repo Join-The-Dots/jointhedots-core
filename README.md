@@ -1,1 +1,1 @@
-# SF Explorer - Core
+# Join.The.Dots - Core

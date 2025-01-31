@@ -1,0 +1,47 @@
+{
+   "$id": "jtd:salesforce.service",
+   "title": "Salesforce Provider",
+   "icon": "fa:cloud",
+   "component": {
+      "service": [
+         "salesforce"
+      ],
+      "data": {
+         "type": "object",
+         "properties": {
+            "name": {
+               "type": "string",
+               "title": "Must be unique"
+            },
+            "clientId": {
+               "type": "string",
+               "title": "clientID"
+            },
+            "clientSecret": {
+               "type": "string"
+            },
+            "domain": {
+               "type": "string",
+               "title": "My domain: https://xxx.my.salesforce.com"
+            },
+            "cdp": {
+               "type": "boolean",
+               "title": "Connected app for cdp ingestion"
+            }
+         },
+         "default": {
+            "name": "my app",
+            "clientId": "",
+            "clientSecret": "",
+            "endPoint": "https://xxx.my.salesforce.com"
+         },
+         "required": [
+            "name",
+            "clientId",
+            "clientSecret",
+            "domain"
+         ]
+      }
+   },
+   "services": {}
+}

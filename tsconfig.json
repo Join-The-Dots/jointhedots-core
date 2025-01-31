@@ -21,11 +21,14 @@
     "outDir": "dist/lib",
     "jsx": "react-jsx",
     "paths": {
-      "@sf-explorer/core/*": [
-        "./packages/sf-explorer-core/*"
+      "@jointhedots/core/*": [
+        "./packages/jointhedots-core/*"
       ],
-      "@sf-explorer/editors/*": [
-        "./packages/sf-explorer-editors/*"
+      "@jointhedots/ui/*": [
+        "./packages/jointhedots-ui/*"
+      ],
+      "@jointhedots/editors/*": [
+        "packages/jointhedots-editors/*"
       ]
     },
     "plugins": [
