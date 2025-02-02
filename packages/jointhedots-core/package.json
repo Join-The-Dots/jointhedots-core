@@ -6,7 +6,8 @@
    "license": "MIT",
    "componentsContainer": true,
    "exports": {
-      ".": "./index.ts"
+      ".": "./index.ts",
+      "./react": "./react/index.ts"
    },
    "dependencies": {
       "acorn": "^8.11.3",

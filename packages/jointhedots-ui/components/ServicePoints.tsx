@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from "react"
 import openContextualMenu from "../openContextualMenu"
-import { ServicePointDescriptor, ServicePoint, ServicePoints, getServicePoint, } from "../../jointhedots-core/library/services"
-import { ItemIcon, ItemRowRich, ItemRowShort, LabelButton } from "../items"
+import {
+   ServicePointDescriptor, ServicePoint, ServicePoints, getServicePoint,
+   ComponentPublication, ComponentsRegistry, fetchComponentsPublications, gotoURLView
+} from "@jointhedots/core"
+import { ItemIcon, ItemRowShort, LabelButton } from "../items"
 import { Button } from "react-lightning-design-system"
-import { ComponentPublication, ComponentsRegistry, fetchComponentsPublications, gotoURLView, MapLike } from "@jointhedots/core"
-import { useAsyncMemo } from "../useAsyncMemo"
+import { useAsyncMemo } from "@jointhedots/core/react/useAsyncMemo"
 import { AddComponentButton } from "./Components"
 import { useAsyncState } from "@jointhedots/editors/hooks/useAsyncState"
 import { ComponentItem, ComponentItemDisplay } from "./ComponentsBrowser"

@@ -1,9 +1,9 @@
 /* eslint-disable no-use-before-define */
-import React, { Component, createRef, useContext, useEffect } from "react"
+import React, { Component } from "react"
 import { FeatureClass, FeatureInstance } from "./feature"
 import { FeaturesContext, ReactFeaturesContext } from "./context"
 import { Listenable, MapLike } from "@jointhedots/core"
-import { ErrorBoundary } from "@jointhedots/ui/ErrorBoundary"
+import { ErrorBoundary } from "@jointhedots/core/react"
 import Icon from "@jointhedots/ui/Icon"
 
 export type PanelDescriptor = {

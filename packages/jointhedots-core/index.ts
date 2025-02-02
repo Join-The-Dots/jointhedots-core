@@ -1,4 +1,5 @@
 export * from "./common/types"
+export * from "./common/handlers"
 
 export * from "./observable/attributes"
 export * from "./observable/observable"

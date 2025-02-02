@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom"
 import ReactDOMClient from 'react-dom/client'
-import { ReactTools, ReactFiberNode } from "../../jointhedots-core/common/react-tools"
+import { ReactTools, ReactFiberNode } from "@jointhedots/ui/Instrumentation/react-tools"
 import { ElementTooling, ElementInstrumentation, ElementBoundingBox, InstrumentationKind } from "./instrumentation"
 
 export class ZoneSelection {

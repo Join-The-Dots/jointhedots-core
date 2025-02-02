@@ -5,13 +5,13 @@ import "./components/icons-bootstrap"
 import "@jointhedots/ui/theme"
 import 'react-toastify/dist/ReactToastify.css'
 import "./style.scss"
-import { useService, createServiceGroup, ComponentsRegistry, createNewComponent, MountServicePoints, StorageService } from "@jointhedots/core"
+import { createServiceGroup, ComponentsRegistry, createNewComponent, StorageService } from "@jointhedots/core"
 import { Tab, Tabs } from "react-lightning-design-system"
 import { ServicePointStatus, ServicePointsConfigurator } from "@jointhedots/ui/components/ServicePoints"
 import '@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.css'
 import { ComponentsConfigurator } from "@jointhedots/ui/components/Components"
 import { LocalComponentProvider } from "@jointhedots/core/library/providers/LocalComponentProvider"
-import Icon from "@jointhedots/ui/Icon"
+import { MountServicePoints, useService } from "@jointhedots/core/react"
 
 
 const MockStorageServicePoint = createServiceGroup<StorageService>("Delivery Orgs", "storage")

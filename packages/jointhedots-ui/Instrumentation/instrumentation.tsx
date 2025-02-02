@@ -1,12 +1,10 @@
+import React, { useContext } from "react"
 import { ZoneSelection } from "./selection"
 import ReactDOMClient from 'react-dom/client'
-import EventEmitter from "events"
 import dragImageUrl from './drag_icon.svg'
-import React, { useContext } from "react"
+import { Element, HandlersManifold } from "@jointhedots/core"
+import { ReactTools, HtmlTools } from "@jointhedots/ui/Instrumentation/react-tools"
 import "./index.scss"
-import { Element } from "../../jointhedots-core/interpreter/elements"
-import { HandlersManifold } from "../../jointhedots-core/common/handlers"
-import { ReactTools, HtmlTools } from "@jointhedots/core/common/react-tools"
 
 export type ASTLocation = any
 

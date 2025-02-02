@@ -8,8 +8,7 @@
    "exports": {
       "./theme": "./theme",
       "./Icon": "./Icon",
-      "./Instrumentation": "./Instrumentation",
-      "./ErrorBoundary": "./ErrorBoundary"
+      "./Instrumentation": "./Instrumentation"
    },
    "dependencies": {
       "react-router-dom": "~6.3.0",

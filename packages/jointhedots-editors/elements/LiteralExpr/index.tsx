@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import TextInput from "@jointhedots/editors/ui/InputText"
+import { InputText } from "@jointhedots/editors/ui/InputText"
 import { ValueProps, EditorDescriptor, EditorValueMatch } from "../interfaces"
 import { ElementsEditors } from '..'
 import { LiteralExpr, Schema, JSONSchema } from '@jointhedots/core'
@@ -21,7 +21,7 @@ export function LiteralInputHOC(defaultPlaceholder?: string) {
       const text = value?.value !== undefined ? `${value.value}` : ""
       const placeholder = typing.examples && typing.examples.toString() || defaultPlaceholder
       return (<>
-         <TextInput value={text} placeholder={placeholder} onChange={onValidate} />
+         <InputText value={text} placeholder={placeholder} onChange={onValidate} />
       </>)
    }
 }
