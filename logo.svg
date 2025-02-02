@@ -1,0 +1,32 @@
+<svg width="120" height="50" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient definition for shiny effect -->
+  <defs>
+    <radialGradient id="shinyOrange" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:#FF8500; stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF4500; stop-opacity:1" />
+    </radialGradient>
+  </defs>
+
+  <!-- White disks under the orange dots -->
+  <!-- First disk -->
+  <circle cx="20" cy="25" r="12" fill="#ddd"/>
+
+  <!-- Second disk -->
+  <circle cx="60" cy="25" r="12" fill="#ddd"/>
+
+  <!-- Third disk -->
+  <circle cx="100" cy="25" r="12" fill="#ddd"/>
+
+  <!-- Orange line connecting the dots -->
+  <line x1="15" y1="25" x2="105" y2="25" stroke="#FF4500" stroke-width="7"/>
+
+  <!-- Orange dots on top of the white disks -->
+  <!-- First dot -->
+  <circle cx="20" cy="25" r="10" fill="url(#shinyOrange)"/>
+
+  <!-- Second dot -->
+  <circle cx="60" cy="25" r="10" fill="url(#shinyOrange)"/>
+
+  <!-- Third dot -->
+  <circle cx="100" cy="25" r="10" fill="url(#shinyOrange)"/>
+</svg>
