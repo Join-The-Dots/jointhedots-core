@@ -28,7 +28,7 @@ import {
 import { useCallback, useEffect } from "react"
 import { ComponentNode } from "./ComponentNode"
 import { useDocumentContext } from '../../context/DocumentContext'
-import { createLDXKey, ElementJSON, LDXDocumentExpr, serializeElement } from '@jointhedots/core'
+import { createLDXKey, ElementJSON, DXDocumentLayout, serializeElement } from '@jointhedots/core'
 import { EventHandlers, Instrumentation, InstrumentationEndpoints, InstrumentationEvents } from '@jointhedots/ui/Instrumentation'
 import { useFeature } from '@jointhedots/editors/ui/FeaturesLayout'
 import { ViewEditor } from '@jointhedots/editors/designer/editor'
@@ -46,7 +46,7 @@ export function getDOMSelection(targetWindow: Window | null): Selection | null {
    return CAN_USE_DOM ? (targetWindow || window).getSelection() : null
 }
 
-export async function insertComponentInto(editor: LexicalEditor, layout: LDXDocumentExpr, payload: ElementJSON) {
+export async function insertComponentInto(editor: LexicalEditor, layout: DXDocumentLayout, payload: ElementJSON) {
    const key = createLDXKey()
    const data = serializeElement(layout)
    data.embeds.inner[key] = payload

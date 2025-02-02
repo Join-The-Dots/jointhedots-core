@@ -27,7 +27,7 @@ import ImageResizer from '../../designer/nodes/Images/ImageResizer'
 import ExcalidrawImage from './ExcalidrawImage'
 import ExcalidrawModal from './ExcalidrawModal'
 import { useInstrumentation } from '@jointhedots/ui/Instrumentation'
-import { LDXDisplayExpr, serializeElement } from '@jointhedots/core'
+import { DXDisplay, serializeElement } from '@jointhedots/core'
 import { ComponentNode } from '@jointhedots/editors/designer/nodes/Component/ComponentNode'
 
 export function ExcalidrawComponent({

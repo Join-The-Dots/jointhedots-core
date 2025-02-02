@@ -2,15 +2,15 @@ import {
     $createTableCellNode, $createTableNode, $createTableRowNode, $isTableCellNode,
     $isTableNode, $isTableRowNode, TableCellHeaderStates, TableCellNode, TableNode, TableRowNode
 } from '@lexical/table'
-import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown'
+import { $convertFromMarkdownString } from '@lexical/markdown'
 import { exportAstToMarkdown, MARKDOWN_TRANSFORMERS, registerMarkdownTransformer } from '../../markdown/markdown-to-lexical'
 import { $isParagraphNode, $isTextNode, LexicalNode } from 'lexical'
-import { emitJSXMarkdownText } from '@jointhedots/core'
+import { emitJSXElement } from '@jointhedots/core'
 
 export { TableNode, TableCellNode, TableRowNode }
 
 TableNode.prototype["exportAST"] = function () {
-    const output: string[] = []
+    const output = []
 
     for (const row of this.getChildren()) {
         const rowOutput = []
@@ -22,25 +22,22 @@ TableNode.prototype["exportAST"] = function () {
         for (const cell of row.getChildren()) {
             // It's TableCellNode so it's just to make flow happy
             if ($isTableCellNode(cell)) {
-                rowOutput.push(
-                    $convertToMarkdownString(MARKDOWN_TRANSFORMERS, cell).replace(
-                        /\n/g,
-                        '\\n',
-                    ),
-                )
+                rowOutput.push(cell["exportAST"]())
                 if (cell.__headerState === TableCellHeaderStates.ROW) {
                     isHeaderRow = true
                 }
             }
         }
 
-        output.push(`| ${rowOutput.join(' | ')} |`)
         if (isHeaderRow) {
-            output.push(`| ${rowOutput.map((_) => '---').join(' | ')} |`)
+            output.push(emitJSXElement('thead', rowOutput))
+        }
+        else {
+            output.push(emitJSXElement('tbody', rowOutput))
         }
     }
 
-    return emitJSXMarkdownText(output.join('\n'))
+    return emitJSXElement('table', output)
 }
 
 // Very primitive table setup

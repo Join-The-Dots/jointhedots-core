@@ -6,6 +6,7 @@
       "properties": {
          "code": {
             "type": "string",
+            "format": "text/mermaid",
             "examples": "pie\n\"Dogs\" : 386\n\"Cats\" : 85.9\n\"Rats\" : 15"
          }
       }

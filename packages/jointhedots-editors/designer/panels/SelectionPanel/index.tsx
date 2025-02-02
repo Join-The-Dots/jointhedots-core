@@ -1,10 +1,10 @@
 import React from 'react'
 import { ViewEditor } from '../../editor'
 import { EditionContext } from '../../../elements/interfaces'
-import ValuePanel from '@jointhedots/editors/ui/ValuePanel'
+import ValuePanel from '@jointhedots/editors/elements/ui/ElementPanel'
 import { PanelComponent, PanelDescriptor } from '@jointhedots/editors/ui/FeaturesLayout'
 import { ElementEditionSelection, ModelEditionSession } from '../../EditionSession'
-import { Element, ElementJSON } from '@jointhedots/core'
+import { DXElement, ElementJSON } from '@jointhedots/core'
 
 export class SelectionPanel extends PanelComponent<ViewEditor, {
    session: ModelEditionSession
@@ -28,7 +28,7 @@ export class SelectionPanel extends PanelComponent<ViewEditor, {
       cset.updates[selection.element.$key] = node
       selection.element.model.commit(cset) */
    }
-   select(descriptor: Element, focused: boolean) {
+   select(descriptor: DXElement, focused: boolean) {
       this.feature.select(new ElementEditionSelection(descriptor, this.feature.session), focused)
    }
    render() {

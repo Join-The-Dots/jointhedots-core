@@ -1,9 +1,9 @@
 import { Klass, LexicalEditor, LexicalNode } from 'lexical'
 import { useCallback } from 'react'
-import { ComponentEntry, ComponentsRegistry, createValueFromTyping, ElementJSON, LDXDisplayExpr, MapLike, ObjectExpr } from '@jointhedots/core'
+import { ComponentEntry, ComponentsRegistry, createValueFromTyping, ElementJSON, DXDisplay, MapLike, DXObject } from '@jointhedots/core'
 import { $insertNodeToNearestRoot } from '@lexical/utils'
 import { PanelNodeCreation } from '@jointhedots/editors/ui/PanelNodeCreation'
-import { LDXDocumentExpr } from '@jointhedots/core'
+import { DXDocumentLayout } from '@jointhedots/core'
 import { INSERT_COMPONENT_COMMAND } from './ComponentPluginDragDrop'
 import "@jointhedots/editors/elements/register"
 
@@ -27,7 +27,7 @@ export function ComponentViewDialog({
   onClose,
 }: {
   activeEditor: LexicalEditor
-  layout: LDXDocumentExpr
+  layout: DXDocumentLayout
   onClose: () => void
 }): JSX.Element {
 

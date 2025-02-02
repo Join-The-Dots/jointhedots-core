@@ -2,7 +2,7 @@ import React, { useContext } from "react"
 import { ZoneSelection } from "./selection"
 import ReactDOMClient from 'react-dom/client'
 import dragImageUrl from './drag_icon.svg'
-import { Element, HandlersManifold } from "@jointhedots/core"
+import { DXElement, HandlersManifold } from "@jointhedots/core"
 import { ReactTools, HtmlTools } from "@jointhedots/ui/Instrumentation/react-tools"
 import "./index.scss"
 
@@ -40,7 +40,7 @@ export interface ElementController {
    readonly layout: InstrumentationLayout
    readonly stretch: ElementBoundingBox
    getDisplayInfos(): DisplayInfos
-   getElement(): Element
+   getElement(): DXElement
 }
 
 export interface ElementTooling {
@@ -53,7 +53,7 @@ export interface ElementInstrumentation {
    selection: ZoneSelection
    getBase(): React.Component
    getController(): ElementController
-   getElement(): Element
+   getElement(): DXElement
    displayTooling(target: ReactDOMClient.Root, hasPreview: boolean)
    updateZone()
 }
@@ -70,8 +70,8 @@ export function useInstrumentation(): ElementInstrumentation {
 }
 
 export class InstrumentationState {
-   instrumenteds = new Map<Element, ElementInstrumentation[]>()
-   selections = new Set<Element>()
+   instrumenteds = new Map<DXElement, ElementInstrumentation[]>()
+   selections = new Set<DXElement>()
    focused: ElementInstrumentation = null
    hovered: ZoneSelection = null
    overlay: HTMLElement = null
@@ -94,8 +94,8 @@ export class InstrumentationState {
       this.hovered?.updateOverlay()
       this.tracker.update()
    }
-   select(target: ElementInstrumentation | Element, multiple: boolean, focused?: ElementInstrumentation) {
-      if (target instanceof Element) {
+   select(target: ElementInstrumentation | DXElement, multiple: boolean, focused?: ElementInstrumentation) {
+      if (target instanceof DXElement) {
          if (!this.selections.has(target)) {
             if (!multiple) this.unselect()
             this.selections.add(target)
@@ -120,8 +120,8 @@ export class InstrumentationState {
          this.unselect()
       }
    }
-   unselect(target?: Element) {
-      if (target instanceof Element) {
+   unselect(target?: DXElement) {
+      if (target instanceof DXElement) {
          this.selections.delete(target)
          if (this.focused?.getElement() === target) {
             this.focus(null)
@@ -152,8 +152,8 @@ export class InstrumentationState {
          }
       }
    }
-   findZone(target: ElementController | Element): ElementInstrumentation {
-      if (target instanceof Element) {
+   findZone(target: ElementController | DXElement): ElementInstrumentation {
+      if (target instanceof DXElement) {
          return this.instrumenteds.get(target)?.[0]
       }
       else {
@@ -181,13 +181,13 @@ export class InstrumentationState {
          this.hovered = null
       }
    }
-   registerElement(element: Element): ElementInstrumentation[] {
+   registerElement(element: DXElement): ElementInstrumentation[] {
       const { instrumenteds } = Instrumentation
       let zones = instrumenteds.get(element)
       if (!zones) instrumenteds.set(element, zones = [])
       return zones
    }
-   unregisterElement(element: Element) {
+   unregisterElement(element: DXElement) {
       const { instrumenteds, selections } = Instrumentation
       if (selections.has(element)) this.unselect(element)
       instrumenteds.delete(element)
@@ -289,7 +289,7 @@ export const InstrumentationEndpoints = {
    }>(),
    "Command": new HandlersManifold<{
       cmd: ElementCommand
-      target: Element
+      target: DXElement
    }>(),
    "Select": new HandlersManifold<{
       zone: ElementInstrumentation

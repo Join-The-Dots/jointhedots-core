@@ -1,8 +1,9 @@
 import {
-    EmptyContext, AST, InvokeView, LDXDocumentExpr, createLDXKey, ASTGenerator,
-    ElementJSON, LDXElementExpr, DisplayType, serializeElement, stringify_node_jsx,
-    DocumentModel, LDXDisplayExpr
+    EmptyContext, AST, InvokeView, DXDocumentLayout, createLDXKey, ASTGenerator,
+    ElementJSON, DisplayType, serializeElement,
+    DocumentModel, DXDisplay
 } from '@jointhedots/core'
+import { stringify_document } from '@jointhedots/core/ast/serde/printer'
 import { DisplayInfos, ElementBoundingBox, ElementController, InstrumentationLayout, InstrumentationZone } from '@jointhedots/ui/Instrumentation'
 import type { EditorConfig, LexicalEditor, NodeKey, SerializedLexicalNode, Spread } from 'lexical'
 import { $getEditor, DecoratorNode } from 'lexical'
@@ -18,7 +19,7 @@ export type SerializedComponentNode = Spread<
 
 export class ComponentNode extends DecoratorNode<JSX.Element> implements ElementController {
     __dock = createRef<ComponentDock>()
-    __element: LDXElementExpr
+    __element: DXDisplay
     __dom: HTMLElement
 
     static getType(): string {
@@ -30,7 +31,7 @@ export class ComponentNode extends DecoratorNode<JSX.Element> implements Element
     }
 
     constructor(
-        public __layout: LDXDocumentExpr,
+        public __layout: DXDocumentLayout,
         public __embed: string,
         key?: NodeKey
     ) {
@@ -54,11 +55,11 @@ export class ComponentNode extends DecoratorNode<JSX.Element> implements Element
     }
 
     getElement() {
-        return this.__layout.embeds[this.__embed]
+        return null//this.__layout.embeds[this.__embed]
     }
 
     createDOM(_config: EditorConfig): HTMLElement {
-        const element = this.getElement() as LDXDisplayExpr
+        const element = this.getElement() as DXDisplay
         if (element.type === DisplayType.React) {
             const root = document.createElement(this.isInline() ? 'span' : 'div')
             root.draggable = $getEditor().isEditable()
@@ -95,19 +96,19 @@ export class ComponentNode extends DecoratorNode<JSX.Element> implements Element
 
     setProperty(name: string, value: string | number) {
         console.log("setProperty", name, value)
-        const element = this.getElement() as LDXDisplayExpr
+        const element = this.getElement() as DXDisplay
         const xprops = serializeElement(element.props)
         xprops.properties[0].value = {
-            $type: "LiteralExpr",
+            $type: "DXLiteral",
             value,
         }
         element.props.update(xprops)
     }
 
     static importJSON(serializedNode: SerializedComponentNode): ComponentNode {
-        const { document, descriptor } = serializedNode
+        /* const { document, descriptor } = serializedNode
         const model = DocumentModel.models.get(document)
-        const layout = model.base.layout as LDXDocumentExpr
+        const layout = model.base.layout as DXDocument
 
         const node = new ComponentNode(layout, createLDXKey())
         layout.embeds[node.__embed] = null
@@ -118,7 +119,7 @@ export class ComponentNode extends DecoratorNode<JSX.Element> implements Element
             await layout.update(data)
             node.markDirty()
         }
-        update(layout)
+        update(layout) */
 
         return null
     }
@@ -141,7 +142,7 @@ export class ComponentNode extends DecoratorNode<JSX.Element> implements Element
             if (element) {
                 const ctx = new ASTGenerator()
                 const ast = ctx.generate(null, element)
-                return stringify_node_jsx(ast)
+                return stringify_document(ast)
             }
         }
         catch (_) {
@@ -172,7 +173,7 @@ class ComponentDock extends React.Component<{ node: ComponentNode }> {
     }
     render() {
         const { node } = this.props
-        const element = node.getElement() as LDXDisplayExpr
+        const element = node.getElement() as DXDisplay
         if (element) {
             const params = element.props.read(EmptyContext)
             return <InstrumentationZone controller={node}>
@@ -181,10 +182,10 @@ class ComponentDock extends React.Component<{ node: ComponentNode }> {
                     params,
                 }} />
             </InstrumentationZone>
-        }
+        }/* 
         else if (node.__layout.embeds[node.__embed] !== undefined) {
             return "loading..."
-        }
+        } */
         else {
             return "<not found>"
         }

@@ -1,7 +1,7 @@
 import { JSONSchema } from '@jointhedots/core'
 import { ElementsEditors } from '..'
 import { EditionDriver, EditorDescriptor, EditorValueMatch } from '../interfaces'
-import { LiteralInputHOC } from '../LiteralExpr'
+import { LiteralInputHOC } from '../DXLiteral'
 
 const editor: EditorDescriptor = {
    input: LiteralInputHOC("none"),

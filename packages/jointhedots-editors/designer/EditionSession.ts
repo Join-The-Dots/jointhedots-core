@@ -1,4 +1,4 @@
-import { CommonTypes, DocumentLayer, DocumentModel, Element } from "@jointhedots/core"
+import { DocumentModel, DXElement } from "@jointhedots/core"
 import { EditionEnvironment } from "../elements/interfaces"
 
 export interface IModelEditionContext {
@@ -13,7 +13,7 @@ export class ModelEditionSession {
 }
 
 export class ElementEditionSelection extends EditionEnvironment {
-   constructor(public element: Element, readonly session: ModelEditionSession) {
+   constructor(public element: DXElement, readonly session: ModelEditionSession) {
       super()
       this.attachements["model"] = session.model
    }

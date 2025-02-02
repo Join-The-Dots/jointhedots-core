@@ -1,11 +1,11 @@
-import { emitJSXMarkdownText } from '@jointhedots/core'
+import { emitJSXElement } from '@jointhedots/core'
 import { $createHorizontalRuleNode, HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode'
 import { exportAstToMarkdown, registerMarkdownTransformer } from '../../markdown/markdown-to-lexical'
 
 export { HorizontalRuleNode }
 
 HorizontalRuleNode.prototype["exportAST"] = function () {
-   return emitJSXMarkdownText('***')
+   return emitJSXElement('hr')
 }
 
 registerMarkdownTransformer({

@@ -2,10 +2,53 @@ import { MapLike } from "../common/types"
 import { JSONSchema } from "./schema/schema"
 import { Schema } from "./schema/helpers"
 import * as AST from './nodes'
+import { JSXElementData } from "./interpreter"
 
 function parseJson(text: string): any {
    try { return JSON.parse(text) }
    catch (e) { return undefined }
+}
+
+export function emitJSXElement(tag: string, content?: AST.Any | AST.Any[], props?: MapLike<AST.Any>): AST.JSXElement {
+   return {
+      type: "JSXElement",
+      tag,
+      content,
+   }
+}
+
+export function emitJSXElementFromData(data: JSXElementData): AST.JSXElement {
+   const attributes: AST.JSXAttribute[] = []
+   for (const ns in data) {
+      const attrs = data[ns]
+      if (attrs instanceof Object) {
+
+         if (Array.isArray(attrs)) {
+
+         }
+         else {
+            for (const key in attrs) {
+               const value = attrs[key]
+               if (value === undefined) {
+                  continue
+               }
+               attributes.push({
+                  type: "JSXAttribute",
+                  ns: (ns === "props") ? "" : ns,
+                  name: key,
+                  value: emitASTFromValue(value),
+               } as AST.JSXAttribute)
+            }
+         }
+      }
+   }
+   const content = data.children?.map(c => emitASTFromValue(c) as any) || []
+   return {
+      type: 'JSXElement',
+      tag: data.tag,
+      attributes,
+      content,
+   } as AST.JSXElement
 }
 
 export function emitASTFromValue(value: any): AST.Literal | AST.ArrayExpression | AST.ObjectExpression {
@@ -171,4 +214,23 @@ export function createValueFromTyping(typing: JSONSchema): any {
    else if (items) {
       return []
    }
+}
+
+export function createAttributes(properties: MapLike<any>): AST.JSXAttribute[] {
+   let attrs: AST.JSXAttribute[] = null
+   for (const key in properties) {
+      const value = properties[key]
+      if (value !== undefined && (value instanceof Object) === false) {
+         attrs.push({
+            type: "JSXAttribute",
+            ns: "",
+            name: key,
+            value: {
+               type: "Literal",
+               value: value as any,
+            },
+         })
+      }
+   }
+   return attrs
 }
