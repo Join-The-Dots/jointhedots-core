@@ -20,13 +20,7 @@ export function DocumentViewer(props: {
          if (content && editor) {
             createDocumentModel(createDocumentID(), content).then((model) => {
                editor?.update(() => {
-                  const { layout } = model.base
-                  if (layout instanceof DXDocumentLayout) {
-                     $updateEditorStateFromModel(layout)
-                  }
-                  else {
-                     throw new Error()
-                  }
+                  $updateEditorStateFromModel(model.base)
                })
             })
          }

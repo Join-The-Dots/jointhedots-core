@@ -1,0 +1,47 @@
+{
+   "id": "@salesforce:lightning:accordion",
+   "type": "view",
+   "title": "Accordion",
+   "icon": "bi:layout-sidebar-inset-reverse",
+   "properties": {
+      "panels": {
+         "type": "object",
+         "additionalProperties": {
+            "type": "object",
+            "properties": {
+               "title": {
+                  "type": "string"
+               },
+               "summary": {
+                  "type": "element",
+                  "placeholder": true
+               },
+               "children": {
+                  "type": "element",
+                  "placeholder": true
+               }
+            }
+         }
+      }
+   },
+   "template": {
+      "title": "Simple accordion",
+      "content": {
+         "type": "@salesforce:lightning:accordion",
+         "props": {
+            "panels": {
+               "type": "record",
+               "fields": {
+                  "item_0": {
+                     "type": "record"
+                  }
+               }
+            }
+         }
+      }
+   },
+   "attachments": {
+      "view": "./display",
+      "plugin": "./plugin"
+   }
+}

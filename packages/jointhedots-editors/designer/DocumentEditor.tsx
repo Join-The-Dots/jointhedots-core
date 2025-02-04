@@ -51,14 +51,8 @@ export function DocumentEditor(props: {
     if (content && editor) {
       createDocumentModel(createDocumentID(), content).then((model) => {
         editor?.update(() => {
-          const { layout } = model.base
-          if (layout instanceof DXDocumentLayout) {
-            $updateEditorStateFromModel(layout)
-            setModel(model)
-          }
-          else {
-            throw new Error()
-          }
+          $updateEditorStateFromModel(model.base)
+          setModel(model)
         })
       })
     }

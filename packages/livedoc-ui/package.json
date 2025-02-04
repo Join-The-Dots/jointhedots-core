@@ -1,0 +1,26 @@
+{
+    "name": "@livedoc/ui",
+    "version": "0.0.0",
+    "type": "module",
+    "private": true,
+    "componentsContainer": true,
+    "dependencies": {
+        "@types/json-schema": "^7.0.15",
+        "@types/node": "^20.14.11",
+        "@types/react": "^18.2.45",
+        "@types/react-dom": "^18.2.18",
+        "@types/serviceworker": "^0.0.88",
+        "@types/typescript": "^2.0.0",
+        "acorn": "^8.11.3",
+        "astring": "^1.8.6",
+        "crypto-js": "^4.2.0",
+        "js-yaml": "^4.1.0",
+        "json-schema": "^0.4.0",
+        "mime": "^4.0.4",
+        "npm": "^10.8.2",
+        "query-string": "^9.1.1",
+        "react": "~18.2.0",
+        "react-dom": "~18.2.0",
+        "vscode-uri": "^3.0.8"
+    }
+}

@@ -1,0 +1,62 @@
+.InSlick-TabsBar {
+   display: flex;
+   flex-direction: row;
+   align-items: stretch;
+   min-height: 24px;
+
+   background-color: var(--app-shadow-background);
+
+   &>.Item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-items: center;
+      flex: 0;
+      min-width: 24px;
+      max-width: 24px;
+      cursor: pointer;
+
+      &.active {
+         background-color: var(--app-background);
+      }
+
+      &:hover {
+         background-color: var(--app-highlight-background);
+         color: var(--app-highlight-foreground);
+      }
+   }
+
+   &.atTop>.Item {
+      padding-top: 5px;
+
+      &.active {
+         background-image: linear-gradient(to bottom,
+               var(--app-indicator-active) 0px,
+               var(--app-indicator-active) 2px,
+               transparent 2px);
+      }
+   }
+
+   &.atBottom>.Item {
+      padding-top: 3px;
+
+      &.active {
+         background-image: linear-gradient(to top,
+               var(--app-indicator-active) 0px,
+               var(--app-indicator-active) 2px,
+               transparent 2px);
+      }
+   }
+}
+
+.InSlick-Tabs {
+   display: flex;
+   flex-direction: column;
+   align-items: stretch;
+
+   &>.content {
+      flex: 1 1 auto;
+      overflow: auto;
+      background-color: var(--app-value-background);
+   }
+}

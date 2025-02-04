@@ -1,0 +1,46 @@
+.poly-Popup-modal-group {
+
+   &>:first-child {
+      opacity: 0.8;
+      position: fixed;
+      height: 100%;
+      width: 100%;
+      z-index: 998;
+      background-color: #444;
+   }
+
+   &>:last-child {
+      position: fixed;
+      height: 100%;
+      width: 100%;
+      z-index: 998;
+      display: flex;
+      flex-direction: row;
+
+      &>* {
+         display: flex;
+         flex-direction: row;
+         margin: auto;
+         padding: 0;
+         width: calc(min(90%, 800px));
+         min-width: calc(min(90%, 800px));
+         max-width: 90%;
+         min-height: var(--poly-Popup-min-height);
+         max-height: var(--poly-Popup-max-height);
+         box-shadow: 0 2px 5px #000;
+         z-index: 999;
+         background-color: var(--app-background);
+         border-width: 1px;
+         border-radius: 6px;
+
+         &>* {
+            flex: 1;
+
+            &>* {
+               height: 100%;
+               overflow: auto;
+            }
+         }
+      }
+   }
+}

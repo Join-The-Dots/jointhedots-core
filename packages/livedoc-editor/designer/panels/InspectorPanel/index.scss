@@ -1,0 +1,17 @@
+.InspectorPanel-FrameNode {
+   margin: 1px;
+   padding-left: 8px !important;
+   padding-right: 10px !important;
+   border-radius: 5px;
+   user-select: none;
+
+   &.selected {
+      background-color: var(--app-panels-btn-backColor);
+      outline: solid thin #666; //#00CCF980;
+   }
+
+   &:hover {
+      cursor: pointer;
+      outline: dashed thin #0086C2; //#00CCF980;
+   }
+}

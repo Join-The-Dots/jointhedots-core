@@ -1,0 +1,30 @@
+.editable-Accordion {
+
+   &>.toolbox {
+      cursor: pointer;
+      visibility: hidden;
+      position: relative;
+      float: right;
+      z-index: 10000001;
+      margin-right: 5px;
+      min-height: 20px;
+      min-width: 20px;
+      top: -10px;
+      background-image: url("./plus-circle.svg");
+      background-repeat: no-repeat;
+      background-size: cover;
+   }
+
+   &>.toolbox:hover {
+      margin-right: 4px;
+      min-height: 22px;
+      min-width: 22px;
+      top: -11px;
+   }
+
+   &:hover {
+      &>.toolbox {
+         visibility: visible;
+      }
+   }
+}

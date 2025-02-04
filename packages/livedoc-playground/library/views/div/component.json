@@ -1,0 +1,13 @@
+{
+   "id": "std:div",
+   "type": "view",
+   "title": "Div",
+   "icon": "bi:layout-split",
+   "properties": {
+      "children": {}
+   },
+   "attachments": {
+      "view": "./display",
+      "plugin": "./plugin"
+   }
+}

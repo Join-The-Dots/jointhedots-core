@@ -1,0 +1,40 @@
+.LDX-Button {
+   display: flex;
+   max-width: 24px;
+   max-height: 24px;
+   width: 24px;
+   height: 24px;
+   cursor: pointer;
+
+   &.primary {
+      background-color: var(--app-button-prim-background);
+      color: var(--app-button-prim-foreground);
+
+      &:hover {
+         background-color: var(--app-button-prim-hoverBackground);
+      }
+   }
+
+   &.secondary {
+      background-color: var(--app-button-sec-background);
+      color: var(--app-button-sec-foreground);
+
+      &:hover {
+         background-color: var(--app-highlight-background);
+         color: var(--app-highlight-foreground);
+      }
+   }
+
+   &.watermark {
+      background-color: transparent;
+      color: var(--app-button-sec-foreground);
+
+      &:hover {
+         background-color: var(--app-highlight-background);
+      }
+   }
+
+   &>* {
+      margin: auto;
+   }
+}

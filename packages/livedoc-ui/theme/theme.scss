@@ -1,0 +1,34 @@
+
+body {
+  --app-separator: #555;
+  
+  --app-background: var(--vscode-panel-background);
+  --app-foreground: var(--vscode-panel-foreground);
+
+  --app-shadow-background: #0005;
+  --app-shadow-foreground: var(--app-foreground);
+
+  --app-button-prim-border: var(--vscode-button-hoverBackground);
+  --app-button-prim-background: var(--vscode-button-background);
+  --app-button-prim-foreground: var(--vscode-button-foreground);
+  --app-button-prim-hoverBackground: var(--vscode-button-hoverBackground);
+
+  --app-button-sec-border: var(--vscode-checkbox-border);
+  --app-button-sec-background: var(--vscode-checkbox-background);
+  --app-button-sec-foreground: var(--vscode-checkbox-foreground);
+  --app-button-sec-hoverBackground: var(--vscode-checkbox-border);
+  
+  --app-value-font-size: var(--vscode-editor-font-size);
+  --app-value-font-style: var(--vscode-editor-font-weight);
+  --app-value-font-family: var(--vscode-editor-font-family);
+  --app-value-background: var(--vscode-editor-background); 
+  --app-value-forecolor: var(--vscode-editor-foreground);
+
+  --app-highlight-background: var(--vscode-editor-selectionHighlightBackground);
+  --app-highlight-foreground: var(--vscode-editor-foreground);
+
+  --app-indicator-active: #ad7c00;
+
+  --app-heading-background: var(--vscode-sideBar-background);
+  --app-heading-foreground: var(--vscode-editor-foreground);
+}

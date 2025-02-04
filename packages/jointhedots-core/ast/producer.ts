@@ -1,7 +1,7 @@
 import { MapLike } from "../common/types"
 import { JSONSchema } from "./schema/schema"
 import { Schema } from "./schema/helpers"
-import * as AST from './nodes'
+import { AST } from "."
 import { JSXElementData } from "./interpreter"
 
 function parseJson(text: string): any {

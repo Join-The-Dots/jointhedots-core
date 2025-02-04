@@ -1,5 +1,5 @@
-import * as AST from "../ast/nodes"
-import { MapLike } from "../common/types"
+import { AST } from "../ast"
+import { MapLike, ObjectClass } from "../common/types"
 import { IContext, LocalContext } from "./context"
 import { EditorState } from 'lexical'
 import { emitASTFromValue } from "../ast/producer"
@@ -34,7 +34,6 @@ export interface IDeserializerContext {
    revise(target: DXElement)
 }
 
-export type ObjectClass = new (...args) => any
 export const ElementTypenames = new Map<ObjectClass, string>()
 export const ElementSerializers = new Map<string, (object: Object, data: ElementJSON) => ElementJSON>()
 export const ElementDeserializers = new Map<string, (object: Object, data: ElementJSON, owner: DXElement, context: IDeserializerContext) => Promise<Object>>()
@@ -722,6 +721,7 @@ export class DXDisplay extends DXElement {
    entry: ComponentEntry
    component: React.ComponentType | HTMLElement
    props: DXObject
+   content: DXElement[]
    dock: DXObject
    override async deserialize(data: ElementJSON, context: IDeserializerContext): Promise<DXDisplay> {
       await this.loadComponent(data.tag)

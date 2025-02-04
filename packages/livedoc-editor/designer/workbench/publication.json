@@ -1,0 +1,6 @@
+{
+   "application": {
+      "name": "builder.workbench",
+      "entry": "."
+   }
+}

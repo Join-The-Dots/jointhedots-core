@@ -29,6 +29,12 @@
       ],
       "@jointhedots/editors/*": [
         "packages/jointhedots-editors/*"
+      ],
+      "@livedoc/editor/*": [
+        "packages/livedoc-editor/*"
+      ],
+      "@livedoc/core/*": [
+        "packages/livedoc-core/*"
       ]
     },
     "plugins": [

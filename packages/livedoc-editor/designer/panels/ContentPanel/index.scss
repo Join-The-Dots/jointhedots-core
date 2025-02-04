@@ -1,0 +1,21 @@
+.InSlick-ContentEditor {
+   display: flex;
+   flex-direction: column;
+   align-items: stretch;
+   flex: 1;
+
+   & .InSlick-ContentHeader {
+      font-weight: 500;
+      border-radius: 5px 5px 0 0;
+      border: dashed 1px var(--vscode-editor-inactiveSelectionBackground);
+      border-bottom: 0;
+      padding: 5px 10px 15px 10px;
+      margin-top: 5px;
+   }
+
+   &>.Frame {
+      flex: 1;
+      border: 0;
+      border-top: solid 1px #333;
+   }
+}

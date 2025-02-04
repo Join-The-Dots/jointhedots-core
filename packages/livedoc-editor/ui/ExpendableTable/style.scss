@@ -1,0 +1,27 @@
+.poly-ListTable {
+   display: table;
+   width: 100%;
+   border-collapse: collapse;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+   table-layout: auto !important;
+
+   &>* {
+      display: table-row;
+
+      &>.cell-fitted {
+         width: 1% !important;
+      }
+
+      &>* {
+         display: table-cell;
+         border: solid thin #333;
+         padding: 0 5px;
+
+         &>.expander {
+            cursor: pointer;
+         }
+      }
+
+   }
+}

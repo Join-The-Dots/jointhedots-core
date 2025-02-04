@@ -1,4 +1,4 @@
-import * as AST from "../ast/nodes"
+import { AST } from "../ast"
 import {
    ArrayAppendElement, DXArray, ArraySpreadElement, DXAssignment,
    DXBinary, DXCall, DXConditional, DXDeleteMember, DocumentLayer, DocumentModel,
@@ -106,6 +106,7 @@ export class ModelBuilder implements IDeserializerContext {
       const layer = new DocumentLayer(model)
       layer.$key = createLDXKey()
       layer.typing = CommonTypes.display
+      layer.items = []
       for (const item of ast.items) {
          const node = await this.NewFrom(layer, item)
          layer.items.push(node)
@@ -288,34 +289,54 @@ export function createLDXKey(): string {
    return (ldx_keys++).toString()
 }
 
+function getContentProperty(xpr: DXObject): JSONSchema {
+   const { properties } = xpr.typing
+   for (const key in properties) {
+      if (properties[key]?.binding?.source === "content") {
+         return properties[key]
+      }
+   }
+   return CommonTypes.any
+}
+
 export async function buildLDXElement(builder: ModelBuilder, node: AST.JSXElement, owner: DXElement, typing: JSONSchema): Promise<DXDisplay> {
-   const { tag, attributes } = node
+   const { tag, attributes, content } = node
    const xpr = owner.New(DXDisplay, typing)
 
    await xpr.loadComponent(tag)
    xpr.typing = typing
    xpr.props = xpr.New(DXObject, xpr.entry.manifest["view"])
    xpr.dock = xpr.New(DXObject)
-
-   for (const attr of attributes) {
-      if (attr.type === "JSXAttribute") {
-         const ns = attr.ns || "props"
-         const key = attr.name
-         let target = xpr[ns]
-         if (target instanceof DXObject) {
-            const xprop = new ObjectNamedProperty()
-            const xtyping = xpr.props?.properties?.[key] || CommonTypes.any
-            xprop.key = target.NewConst(key)
-            xprop.value = await builder.NewFrom(target, attr.value, xtyping)
-            target.properties.push(xprop)
+   if (attributes) {
+      for (const attr of attributes) {
+         if (attr.type === "JSXAttribute") {
+            const ns = attr.ns || "props"
+            const key = attr.name
+            let target = xpr[ns]
+            if (target instanceof DXObject) {
+               const xprop = new ObjectNamedProperty()
+               const xtyping = xpr.props?.properties?.[key] || CommonTypes.any
+               xprop.key = target.NewConst(key)
+               xprop.value = await builder.NewFrom(target, attr.value, xtyping)
+               target.properties.push(xprop)
+            }
+            else {
+               console.error(`Unsupported JSX attributes namespace '${ns}'`)
+            }
          }
          else {
-            console.error(`Unsupported JSX attributes namespace '${ns}'`)
+            console.error(`Unsupported JSX additionnals attributes`)
          }
       }
-      else {
-         console.error(`Unsupported JSX additionnals attributes`)
+   }
+   if (content) {
+      const contentType = getContentProperty(xpr.props)
+      const children = Array.isArray(content) ? content : [content]
+      const result = []
+      for (const child of children) {
+         result.push(await buildExpression(builder, child, xpr, CommonTypes.any))
       }
+      xpr.content = result
    }
    return xpr
 }

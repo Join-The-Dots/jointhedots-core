@@ -1,0 +1,10 @@
+{
+   "$id": "function",
+   "type": "expression",
+   "tags": [
+      "operator"
+   ],
+   "services": {
+      "expression": "./function#DXFunctionOperator"
+   }
+}

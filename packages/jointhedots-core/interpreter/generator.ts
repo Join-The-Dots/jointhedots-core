@@ -1,4 +1,4 @@
-import * as AST from "../ast/nodes"
+import { AST } from "../ast"
 import { DXElement } from "./elements"
 
 export class ASTGenerator {

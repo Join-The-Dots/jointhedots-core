@@ -1,0 +1,54 @@
+.Diagram_v2 {
+   position: relative;
+   margin: 10px;
+
+   .diag_link {
+      fill: transparent;
+      stroke: #111;
+      stroke-width: 2px;
+
+      &.select_in {
+         stroke: rgb(158, 42, 193);
+      }
+
+      &.select_out {
+         stroke: rgb(0, 199, 159);
+      }
+
+      &:hover {
+         stroke: #444;
+         cursor: pointer;
+         stroke-width: 5px;
+      }
+   }
+
+   .diag_group {
+      position: absolute;
+      user-select: none;
+      pointer-events: none;
+
+      border-radius: 5px;
+      outline: dashed 1px #666;
+   }
+
+   .diag_block {
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      border-radius: 5px;
+      background-color: #444;
+      outline: solid 1px #111;
+
+      &.selected {
+         background-color: rgb(0, 53, 42);
+         outline: solid 1px rgb(0, 199, 159);
+      }
+
+      &:hover {
+         outline: solid 1px #888;
+         cursor: pointer;
+      }
+   }
+}

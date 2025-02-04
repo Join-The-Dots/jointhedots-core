@@ -1,8 +1,8 @@
 import { ComponentsRegistry, createNewComponent } from "@jointhedots/core/library/components"
 import { ComponentBrowser, ComponentsFilteredList } from "./ComponentsBrowser"
+import { ComponentManifest } from "@jointhedots/core/library/interfaces"
 import { LabelButton } from "../items"
 import { askData } from "../ask"
-import { ComponentManifest } from "@jointhedots/core/library/interfaces"
 
 export function generateGUID() {
    const buf = new Uint8Array(16) // create a 16-byte array

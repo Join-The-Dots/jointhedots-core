@@ -1,5 +1,5 @@
 {
-   "id": "list",
+   "$id": "list",
    "description": "List",
    "view": {
       "properties": {
@@ -11,7 +11,7 @@
          }
       }
    },
-   "attachments": {
+   "services": {
       "view.web": "./HtmlList#List",
       "view.web.editor": "./HtmlList#ListEditor"
    }

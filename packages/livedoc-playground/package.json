@@ -1,0 +1,19 @@
+{
+    "name": "@livedoc/playground",
+    "version": "0.0.0",
+    "type": "module",
+    "private": true,
+    "componentsContainer":true,
+    "dependencies": {
+        "@types/react": "^18.2.45",
+        "@types/react-dom": "^18.2.18",
+        "@types/typescript": "^2.0.0",
+        "bootstrap": "^5.3.3",
+        "bootstrap-icons": "^1.11.3",
+        "font-awesome": "~4.7.0",
+        "mermaid": "^11.1.1",
+        "react": "~18.2.0",
+        "react-bootstrap": "^2.10.4",
+        "react-dom": "~18.2.0"
+    }
+}

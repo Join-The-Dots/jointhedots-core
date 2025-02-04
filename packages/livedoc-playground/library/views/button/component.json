@@ -1,0 +1,61 @@
+{
+   "id": "@salesforce:lightning:button",
+   "type": "view",
+   "title": "Button",
+   "icon": "bi:dpad-fill",
+   "properties": {
+      "label": {
+         "type": "element"
+      },
+      "inverse": {
+         "type": "boolean"
+      },
+      "type": {
+         "type": "string",
+         "enum": [
+            "reset",
+            "submit",
+            "button"
+         ]
+      },
+      "title": {
+         "type": "string"
+      },
+      "tooltip": {
+         "type": "element"
+      },
+      "variant": {
+         "type": "string",
+         "enum": [
+            "base",
+            "link",
+            "neutral",
+            "brand",
+            "outline-brand",
+            "destructive",
+            "success",
+            "text-destructive",
+            "icon"
+         ]
+      },
+      "onClick": {
+         "type": "function",
+         "args": [
+            {}
+         ]
+      }
+   },
+   "template": {
+      "title": "Simple button",
+      "content": {
+         "type": "@salesforce:lightning:button",
+         "props": {
+            "label": "Click here"
+         }
+      }
+   },
+   "attachments": {
+      "view": "./display",
+      "plugin": "./plugin"
+   }
+}

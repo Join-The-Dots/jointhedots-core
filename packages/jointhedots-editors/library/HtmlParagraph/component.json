@@ -1,5 +1,5 @@
 {
-   "id": "p",
+   "$id": "p",
    "description": "Paragraph",
    "view": {
       "properties": {
@@ -15,7 +15,7 @@
          }
       }
    },
-   "attachments": {
+   "services": {
       "view.web": "./HtmlParagraph#Paragraph",
       "view.docking.web": "./HtmlParagraph#Paragraph"
    }

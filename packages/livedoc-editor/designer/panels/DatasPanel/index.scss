@@ -1,0 +1,33 @@
+.DatasPanel-Item {
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+   padding: 0 2px;
+   gap: 8px;
+   border-bottom: solid thin transparent;
+
+   color: var(--app-foreground);
+
+   &>:nth-child(3) {
+      color: var(--app-shadow-foreground);
+   }
+
+   &:hover {
+      background-color: var(--app-background);
+      border-bottom: solid thin var(--app-separator);
+      cursor: pointer;
+   }
+}
+
+.DatasPanel-Block {
+   &>:first-child {
+      margin: 5px;
+      padding: 2px;
+      border-bottom: solid thin var(--app-separator);
+
+      &:hover {
+         color: var(--app-highlight-foreground);
+         cursor: pointer;
+      }
+   }
+}

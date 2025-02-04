@@ -1,0 +1,16 @@
+.FlowTable_V2 {
+   display: flex;
+   flex-direction: row;
+
+   &>.diagram {
+      background-color: red;
+      min-width: 400px;
+      flex: 0;
+   }
+
+   &>table {
+      background-color: greenyellow;
+      flex: 1;
+      min-height: 400px;
+   }
+}

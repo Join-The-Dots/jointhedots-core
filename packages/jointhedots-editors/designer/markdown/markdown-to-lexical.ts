@@ -1,7 +1,7 @@
 import { Transformer, $convertFromMarkdownString, $convertToMarkdownString, ElementTransformer, TextMatchTransformer, CHECK_LIST, ELEMENT_TRANSFORMERS, MULTILINE_ELEMENT_TRANSFORMERS, TEXT_FORMAT_TRANSFORMERS, TEXT_MATCH_TRANSFORMERS } from '@lexical/markdown'
 import { EditorState, $getRoot, ElementNode, LexicalNode } from 'lexical'
 import { ComponentNode } from '../nodes/Component/ComponentNode'
-import { DXDocumentLayout, DXDisplay } from '@jointhedots/core'
+import { DXDocumentLayout, DXDisplay, DocumentLayer } from '@jointhedots/core'
 import { stringify_document } from '@jointhedots/core/ast/serde/printer'
 
 export const MARKDOWN_TRANSFORMERS: Transformer[] = [
@@ -54,21 +54,21 @@ export function transformEditorStateToMarkdown(editorState: EditorState, shouldP
    return content
 }
 
-export function $updateEditorStateFromModel(layout: DXDocumentLayout) {
+export function $updateEditorStateFromModel(layer: DocumentLayer) {
 
    const COMPONENT_TRANSFORMER: Transformer = {
       type: "element",
       export: () => null,
       replace: (parentNode, chilren, match, isImport) => {
-        /*  const key = match[1]
-         const value = layout.embeds[key]
-         if (value instanceof DXDisplay) {
-            const node = new ComponentNode(layout, key)
-            parentNode.replace(node)
-         }
-         else {
-            // TODO: expression embeds
-         } */
+         /*  const key = match[1]
+          const value = layout.embeds[key]
+          if (value instanceof DXDisplay) {
+             const node = new ComponentNode(layout, key)
+             parentNode.replace(node)
+          }
+          else {
+             // TODO: expression embeds
+          } */
       },
       regExp: /\x00([0-9]+)\x01/,
       dependencies: [],
@@ -85,6 +85,6 @@ export function $updateEditorStateFromModel(layout: DXDocumentLayout) {
       $getRoot(), //node
       true,
    ) */
-   throw new Error("TODO")
-   return layout
+   console.log("TODO: make markdown:", layer)
+   return layer
 }

@@ -11,7 +11,7 @@ export * from "./ast/schema/helpers"
 export * from "./ast/schema/schema"
 export * from "./ast/schema/json"
 
-export * as AST from "./ast/nodes"
+export * from "./ast"
 export * from "./ast/interpreter"
 export * from "./ast/updater"
 export * from "./ast/producer"

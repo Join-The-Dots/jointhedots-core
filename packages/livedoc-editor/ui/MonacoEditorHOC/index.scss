@@ -1,0 +1,14 @@
+.MonacoEditorHOC {
+   min-height: 100px;
+
+   & .monaco-editor .quick-input-widget {
+      min-height: 90px !important;
+      max-height: 100% !important;
+      overflow-y: hidden;
+
+      & .monaco-list {
+         min-height: none !important;
+         max-height: none !important;
+      }
+   }
+}
