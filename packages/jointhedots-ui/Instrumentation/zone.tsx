@@ -2,7 +2,7 @@ import React from "react"
 import ReactDOMClient from 'react-dom/client'
 import { ElementInstrumentation, InstrumentationContext, ElementController, InstrumentationKind, InstrumentationLayout, isInstrumentationCompacted, Instrumentation } from "./instrumentation"
 import { InstrumentationHandle, InstrumentationToolBox } from "./handle"
-import { ErrorDisplayer } from "@jointhedots/core/react/ErrorBoundary"
+import { ErrorDisplayer } from "@jointhedots/core/react"
 import type { ZoneSelection } from "./selection"
 
 export type PropsType = {

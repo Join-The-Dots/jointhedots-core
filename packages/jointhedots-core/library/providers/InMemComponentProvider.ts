@@ -44,6 +44,9 @@ export class InMemComponentProvider extends InMemComponentPublisher implements I
    async get_component_manifest(component_id: string): Promise<ComponentManifest> {
       return this.manifests.get(component_id)
    }
+   async set_component_manifest(component_id: string, manifest: ComponentManifest): Promise<boolean> {
+      return false
+   }
 }
 
 export function make_search_regexp(pattern: string) {

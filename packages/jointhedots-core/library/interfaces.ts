@@ -22,7 +22,7 @@ export interface ResourceContent {
    content?: Blob
 }
 
-export type ComponentManifest = JSONSchema & {
+export type ComponentManifest = Omit<JSONSchema, "type"> & {
    $id: string
    type?: string
    keywords?: string[]
@@ -36,6 +36,7 @@ export interface IComponentPublisher {
 
 export interface IComponentProvider extends IComponentPublisher {
    get_component_manifest(component_id: string): Promise<ComponentManifest>
+   set_component_manifest(component_id: string, manifest: ComponentManifest): Promise<boolean>
 }
 
 export interface IResourceLoader {

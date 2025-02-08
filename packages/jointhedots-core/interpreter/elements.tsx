@@ -1,20 +1,21 @@
-import * as AST from "../ast/nodes"
-import { MapLike } from "../common/types"
+import { AST } from "../ast"
+import { MapLike, ObjectClass } from "../common/types"
 import { IContext, LocalContext } from "./context"
 import { EditorState } from 'lexical'
-import { emitASTFromValue } from "../ast/producer"
+import { emitASTFromValue } from "../ast/emitter"
 import { ASTGenerator } from "./generator"
-import { Builder } from "./builder"
+import { ModelBuilder } from "./builder"
 import { CommonTypes } from "../ast/schema/helpers"
 import { JSONSchema } from "../ast/schema/schema"
 import { ComponentEntry, ComponentsRegistry } from "../library/components"
-import { copyData } from "../ast/updater"
+import { copyData } from "../common/datatree"
+import React from "react"
 
-export type ElementClass<T extends Element = Element> = new (model: DocumentModel) => T
+export type ElementClass<T extends DXElement = DXElement> = new (model: DocumentModel) => T
 export type ElementKey = string
 
 export interface ElementReferenceUpdater {
-   update<T extends Element>(target: T): T
+   update<T extends DXElement>(target: T): T
 }
 
 export type ElementJSON = {
@@ -23,20 +24,19 @@ export type ElementJSON = {
 }
 
 export interface IElementSerializer {
-   generate(target: Element): ElementJSON
+   generate(target: DXElement): ElementJSON
 }
 
 export interface IDeserializerContext {
    readonly model: DocumentModel
-   resolveReference($ref: string): Element
-   New<T extends Element>(Cls: ElementClass<T>, owner: Element, typing: JSONSchema): T
-   revise(target: Element)
+   resolveReference($ref: string): DXElement
+   New<T extends DXElement>(Cls: ElementClass<T>, owner: DXElement, typing: JSONSchema): T
+   revise(target: DXElement)
 }
 
-export type ObjectClass = new (...args) => any
 export const ElementTypenames = new Map<ObjectClass, string>()
 export const ElementSerializers = new Map<string, (object: Object, data: ElementJSON) => ElementJSON>()
-export const ElementDeserializers = new Map<string, (object: Object, data: ElementJSON, owner: Element, context: IDeserializerContext) => Promise<Object>>()
+export const ElementDeserializers = new Map<string, (object: Object, data: ElementJSON, owner: DXElement, context: IDeserializerContext) => Promise<Object>>()
 export const ElementInstanciers = new Map<string, (context: IDeserializerContext) => Object>()
 export const ElementClasses = new Map<string, ObjectClass>()
 
@@ -53,7 +53,7 @@ function RegisterObject() {
       }
       return data
    })
-   ElementDeserializers.set(Object.name, async (object: Object, data: ElementJSON, owner: Element, context: IDeserializerContext) => {
+   ElementDeserializers.set(Object.name, async (object: Object, data: ElementJSON, owner: DXElement, context: IDeserializerContext) => {
       const { inner } = data
       for (const key in inner) {
          object[key] = await deserializeValue(inner[key], owner, context)
@@ -66,14 +66,14 @@ function RegisterObject() {
 }
 
 function ElementClass() {
-   return function (constructor: ElementClass<Element>) {
+   return function (constructor: ElementClass<DXElement>) {
       const $type = constructor.name
       ElementTypenames.set(constructor, $type)
       ElementClasses.set($type, constructor)
-      ElementSerializers.set($type, (object: Element, data: ElementJSON) => {
+      ElementSerializers.set($type, (object: DXElement, data: ElementJSON) => {
          return object.serialize(data)
       })
-      ElementDeserializers.set($type, (object: Element, data: ElementJSON, owner: Element, context: IDeserializerContext) => {
+      ElementDeserializers.set($type, (object: DXElement, data: ElementJSON, owner: DXElement, context: IDeserializerContext) => {
          context.revise(object)
          object.owner = owner
          return object.deserialize(data, context)
@@ -97,7 +97,7 @@ function SerializableClass() {
    }
 }
 
-function serialize_element_properties(object: Element, data: ElementJSON): ElementJSON {
+function serialize_element_properties(object: DXElement, data: ElementJSON): ElementJSON {
    for (const key in object) {
       if (["model", "$key", "owner", "typing"].includes(key) === false) {
          const value = serializeValue(object[key])
@@ -107,7 +107,7 @@ function serialize_element_properties(object: Element, data: ElementJSON): Eleme
    return data
 }
 
-async function deserialize_element_properties(object: Element, data: ElementJSON, owner: Element, context: IDeserializerContext) {
+async function deserialize_element_properties(object: DXElement, data: ElementJSON, owner: DXElement, context: IDeserializerContext) {
    for (const key in data) {
       if (key[0] !== "$") {
          object[key] = await deserializeValue(data[key], owner, context)
@@ -121,7 +121,7 @@ function serializeValue(value: any): any {
       return value.map(x => serializeValue(x))
    }
    else if (value instanceof Object) {
-      if (value instanceof Element && value.$key !== null) {
+      if (value instanceof DXElement && value.$key !== null) {
          return { $ref: value.$key }
       }
       const $type = ElementTypenames.get(value.constructor)
@@ -134,11 +134,11 @@ function serializeValue(value: any): any {
    return value
 }
 
-export function serializeElement(object: Element): ElementJSON {
+export function serializeElement(object: DXElement): ElementJSON {
    return object.serialize({ $type: object.constructor.name })
 }
 
-async function deserializeValue(data: any, owner: Element, context: IDeserializerContext): Promise<any> {
+async function deserializeValue(data: any, owner: DXElement, context: IDeserializerContext): Promise<any> {
    if (Array.isArray(data)) {
       const object = []
       for (const item of data) {
@@ -160,19 +160,19 @@ async function deserializeValue(data: any, owner: Element, context: IDeserialize
    return data
 }
 
-export abstract class Element {
+export abstract class DXElement {
    $key: ElementKey = null
    typing: JSONSchema = CommonTypes.any
-   owner: Element = null
+   owner: DXElement = null
    constructor(
       readonly model: DocumentModel,
    ) {
    }
-   New<T extends Element>(Cls: ElementClass<T>, typing: JSONSchema = CommonTypes.any): T {
+   New<T extends DXElement>(Cls: ElementClass<T>, typing: JSONSchema = CommonTypes.any): T {
       return this.model.builder.New(Cls, this, typing)
    }
-   NewConst(value: any, typing: JSONSchema = CommonTypes.any): LiteralExpr {
-      const node = this.New(LiteralExpr, typing)
+   NewConst(value: any, typing: JSONSchema = CommonTypes.any): DXLiteral {
+      const node = this.New(DXLiteral, typing)
       node.value = value
       return node
    }
@@ -182,12 +182,12 @@ export abstract class Element {
    write(value: any, ctx: IContext): any {
       throw new Error(`Cannot be write`)
    }
-   consolidate(builder: Builder) {
+   consolidate(builder: ModelBuilder) {
    }
-   update(data: ElementJSON | Element) {
+   update(data: ElementJSON | DXElement) {
       const { model } = this
       const cset = this.model.createChangeset()
-      if (data instanceof Element) {
+      if (data instanceof DXElement) {
          data = serializeElement(data)
       }
       cset.updates[this.$key] = data
@@ -196,7 +196,7 @@ export abstract class Element {
    serialize(data: ElementJSON): ElementJSON {
       return serialize_element_properties(this, data)
    }
-   deserialize(data: ElementJSON, context: IDeserializerContext): Promise<Element> {
+   deserialize(data: ElementJSON, context: IDeserializerContext): Promise<DXElement> {
       return deserialize_element_properties(this, data, this, context)
    }
    toTitle() {
@@ -209,7 +209,7 @@ export abstract class Element {
 }
 
 @ElementClass()
-export class LiteralExpr extends Element {
+export class DXLiteral extends DXElement {
    value: any
    override read(): any {
       return this.value
@@ -220,7 +220,7 @@ export class LiteralExpr extends Element {
 }
 
 @ElementClass()
-export class ThisExpr extends Element {
+export class DXThis extends DXElement {
    override read(ctx: IContext): any {
       return ctx.getThis()
    }
@@ -232,7 +232,7 @@ export class ThisExpr extends Element {
 }
 
 @ElementClass()
-export class IdentifierExpr extends Element {
+export class DXIdentifier extends DXElement {
    name: string
    override read(ctx: IContext): any {
       return ctx.getValue(this.name)
@@ -249,10 +249,10 @@ export class IdentifierExpr extends Element {
 }
 
 @ElementClass()
-export class MemberExpr extends Element {
-   object: Element
-   property: Element
-   override consolidate(builder: Builder) {
+export class DXMember extends DXElement {
+   object: DXElement
+   property: DXElement
+   override consolidate(builder: ModelBuilder) {
       this.object = builder.consolidate(this.object, CommonTypes.any)
       this.property = builder.consolidate(this.property, CommonTypes.string)
    }
@@ -276,11 +276,11 @@ export class MemberExpr extends Element {
 }
 
 @ElementClass()
-export class BinaryExpr extends Element {
-   left: Element
-   right: Element
+export class DXBinary extends DXElement {
+   left: DXElement
+   right: DXElement
    operator: AST.BinaryOperator
-   override consolidate(builder: Builder) {
+   override consolidate(builder: ModelBuilder) {
       this.left = builder.consolidate(this.left, CommonTypes.any)
       this.right = builder.consolidate(this.right, CommonTypes.any)
    }
@@ -315,11 +315,11 @@ export class BinaryExpr extends Element {
 }
 
 @ElementClass()
-export class ConditionalExpr extends Element {
-   test: Element
-   consequent: Element
-   alternate: Element
-   override consolidate(builder: Builder) {
+export class DXConditional extends DXElement {
+   test: DXElement
+   consequent: DXElement
+   alternate: DXElement
+   override consolidate(builder: ModelBuilder) {
       this.test = builder.consolidate(this.test, CommonTypes.boolean)
       this.consequent = builder.consolidate(this.consequent, CommonTypes.any)
       this.alternate = builder.consolidate(this.alternate, CommonTypes.any)
@@ -339,11 +339,11 @@ export class ConditionalExpr extends Element {
 }
 
 @ElementClass()
-export class LogicalExpr extends Element {
-   left: Element
-   right: Element
+export class DXLogical extends DXElement {
+   left: DXElement
+   right: DXElement
    operator: AST.LogicalOperator
-   override consolidate(builder: Builder) {
+   override consolidate(builder: ModelBuilder) {
       this.left = builder.consolidate(this.left, CommonTypes.any)
       this.right = builder.consolidate(this.right, CommonTypes.any)
    }
@@ -368,10 +368,10 @@ export class LogicalExpr extends Element {
 }
 
 @ElementClass()
-export class UnaryExpr extends Element {
-   argument: Element
+export class DXUnary extends DXElement {
+   argument: DXElement
    operator: AST.UnaryOperator
-   override consolidate(builder: Builder) {
+   override consolidate(builder: ModelBuilder) {
       this.argument = builder.consolidate(this.argument, CommonTypes.any)
    }
    override read(ctx: IContext): any {
@@ -398,10 +398,10 @@ export class UnaryExpr extends Element {
 }
 
 @ElementClass()
-export class DeleteMemberExpr extends Element {
-   object: Element
-   property: Element
-   override consolidate(builder: Builder) {
+export class DXDeleteMember extends DXElement {
+   object: DXElement
+   property: DXElement
+   override consolidate(builder: ModelBuilder) {
       this.object = builder.consolidate(this.object, CommonTypes.any)
       this.property = builder.consolidate(this.property, CommonTypes.string)
    }
@@ -425,8 +425,8 @@ export class DeleteMemberExpr extends Element {
 
 @SerializableClass()
 export class ArrayAppendElement {
-   value: Element
-   consolidate(builder: Builder) {
+   value: DXElement
+   consolidate(builder: ModelBuilder) {
       this.value = builder.consolidate(this.value, CommonTypes.any)
       return this
    }
@@ -434,15 +434,15 @@ export class ArrayAppendElement {
       const value = this.value.read(ctx)
       object.push(value)
    }
-   exportAST(gen: ASTGenerator, from: Element) {
+   exportAST(gen: ASTGenerator, from: DXElement) {
       return gen.generate(from, this.value)
    }
 }
 
 @SerializableClass()
 export class ArraySpreadElement {
-   value: Element
-   consolidate(builder: Builder) {
+   value: DXElement
+   consolidate(builder: ModelBuilder) {
       this.value = builder.consolidate(this.value, CommonTypes.any)
       return this
    }
@@ -450,7 +450,7 @@ export class ArraySpreadElement {
       const value = this.value.read(ctx)
       object.push(...value)
    }
-   exportAST(gen: ASTGenerator, from: Element) {
+   exportAST(gen: ASTGenerator, from: DXElement) {
       return {
          type: "SpreadElement",
          argument: gen.generate(from, this.value),
@@ -458,9 +458,9 @@ export class ArraySpreadElement {
    }
 }
 
-export class ArrayExpr extends Element {
+export class DXArray extends DXElement {
    elements: (ArrayAppendElement | ArraySpreadElement)[] = []
-   override consolidate(builder: Builder) {
+   override consolidate(builder: ModelBuilder) {
       this.elements = this.elements.map(item => item.consolidate(builder))
    }
    override read(ctx: IContext): any {
@@ -480,19 +480,19 @@ export class ArrayExpr extends Element {
 
 export abstract class ObjectProperty<K extends any = any> {
    key?: K = null
-   value: Element = null
+   value: DXElement = null
    get name(): string { return null }
    abstract assign(object: MapLike<any>, ctx: IContext)
-   abstract exportAST(gen: ASTGenerator, from: Element)
-   consolidate(builder: Builder) {
+   abstract exportAST(gen: ASTGenerator, from: DXElement)
+   consolidate(builder: ModelBuilder) {
       this.value = builder.consolidate(this.value, CommonTypes.any)
       return this
    }
 }
 
 @SerializableClass()
-export class ObjectDynamicProperty extends ObjectProperty<Element> {
-   override consolidate(builder: Builder) {
+export class ObjectDynamicProperty extends ObjectProperty<DXElement> {
+   override consolidate(builder: ModelBuilder) {
       this.key = builder.consolidate(this.key, CommonTypes.string)
       this.value = builder.consolidate(this.value, CommonTypes.any)
       return this
@@ -502,7 +502,7 @@ export class ObjectDynamicProperty extends ObjectProperty<Element> {
       const value = this.value.read(ctx)
       object[key] = value
    }
-   exportAST(gen: ASTGenerator, from: Element) {
+   exportAST(gen: ASTGenerator, from: DXElement) {
       return {
          type: "Property",
          kind: "init",
@@ -513,7 +513,7 @@ export class ObjectDynamicProperty extends ObjectProperty<Element> {
 }
 
 @SerializableClass()
-export class ObjectNamedProperty extends ObjectProperty<LiteralExpr> {
+export class ObjectNamedProperty extends ObjectProperty<DXLiteral> {
    get name(): string {
       return this.key.value
    }
@@ -521,7 +521,7 @@ export class ObjectNamedProperty extends ObjectProperty<LiteralExpr> {
       const value = this.value.read(ctx)
       object[this.key.value] = value
    }
-   exportAST(gen: ASTGenerator, from: Element) {
+   exportAST(gen: ASTGenerator, from: DXElement) {
       return {
          type: "Property",
          kind: "init",
@@ -537,7 +537,7 @@ export class ObjectSpreadProperty extends ObjectProperty<never> {
       const value = this.value.read(ctx)
       Object.assign(object, value)
    }
-   exportAST(gen: ASTGenerator, from: Element) {
+   exportAST(gen: ASTGenerator, from: DXElement) {
       return {
          type: "SpreadElement",
          argument: gen.generate(from, this.value),
@@ -546,9 +546,9 @@ export class ObjectSpreadProperty extends ObjectProperty<never> {
 }
 
 @ElementClass()
-export class ObjectExpr extends Element {
+export class DXObject extends DXElement {
    properties: ObjectProperty[] = []
-   override consolidate(builder: Builder) {
+   override consolidate(builder: ModelBuilder) {
       this.properties = this.properties.map(item => item.consolidate(builder))
    }
    override read(ctx: IContext): any {
@@ -567,10 +567,10 @@ export class ObjectExpr extends Element {
 }
 
 @ElementClass()
-export class CallExpr extends Element {
-   callee: Element
-   arguments: ArrayExpr
-   override consolidate(builder: Builder) {
+export class DXCall extends DXElement {
+   callee: DXElement
+   arguments: DXArray
+   override consolidate(builder: ModelBuilder) {
       this.callee = builder.consolidate(this.callee, CommonTypes.any)
       this.arguments = builder.consolidate(this.arguments, CommonTypes.any)
    }
@@ -594,7 +594,7 @@ export class Script {
 }
 
 @ElementClass()
-export class FunctionExpr extends Element {
+export class DXFunction extends DXElement {
    thisRelay: boolean = false
    expression: boolean = false
    generator: boolean = false
@@ -617,11 +617,11 @@ export class FunctionExpr extends Element {
 }
 
 @ElementClass()
-export class UpdateExpr extends Element {
-   argument: Element
+export class DXUpdate extends DXElement {
+   argument: DXElement
    operator: AST.UpdateOperator
    prefix: boolean
-   override consolidate(builder: Builder) {
+   override consolidate(builder: ModelBuilder) {
       this.argument = builder.consolidate(this.argument, CommonTypes.any)
    }
    override read(ctx: IContext): any {
@@ -649,11 +649,11 @@ export class UpdateExpr extends Element {
 }
 
 @ElementClass()
-export class AssignmentExpr extends Element {
-   left: Element
-   right: Element
+export class DXAssignment extends DXElement {
+   left: DXElement
+   right: DXElement
    operator: AST.AssignmentOperator
-   override consolidate(builder: Builder) {
+   override consolidate(builder: ModelBuilder) {
       this.left = builder.consolidate(this.left, CommonTypes.any)
       this.right = builder.consolidate(this.right, CommonTypes.any)
    }
@@ -684,34 +684,63 @@ export class AssignmentExpr extends Element {
    }
 }
 
-export abstract class LDXElementExpr extends Element {
-}
-
 export enum DisplayType {
    React,
    WebComponent,
 }
 
 @ElementClass()
-export class LDXDisplayExpr extends LDXElementExpr {
+export class DXContent extends DXElement {
+   format: string
+   content: DXElement[] = []
+
+   override consolidate(builder: ModelBuilder) {
+   }
+   override exportAST(gen: ASTGenerator) {
+      const content: AST.JSXContentChunk[] = []
+      for (const item of this.content) {
+         if (item instanceof DXLiteral) {
+            content.push(item.value.toString())
+         }
+         else {
+            content.push(gen.generate(this, item))
+         }
+      }
+      return {
+         type: 'JSXContent',
+         format: this.format,
+         content,
+      } as AST.JSXContent
+   }
+}
+
+@ElementClass()
+export class DXDisplay extends DXElement {
    tag: string
    type: DisplayType
    entry: ComponentEntry
    component: React.ComponentType | HTMLElement
-   props: ObjectExpr
-   dock: ObjectExpr
-   override async deserialize(data: ElementJSON, context: IDeserializerContext): Promise<LDXDisplayExpr> {
+   props: DXObject
+   content: DXElement[]
+   dock: DXObject
+   override async deserialize(data: ElementJSON, context: IDeserializerContext): Promise<DXDisplay> {
       await this.loadComponent(data.tag)
       if (data.props) this.props = await deserializeValue(data.props, this, context)
-      else this.props = context.New(ObjectExpr, this, CommonTypes.any)
+      else this.props = context.New(DXObject, this, CommonTypes.any)
       return this
    }
-   override consolidate(builder: Builder) {
+   override consolidate(builder: ModelBuilder) {
       const propsTyping = this.entry.manifest["view"]
       this.props = builder.consolidate(this.props, propsTyping)
       this.dock = builder.consolidate(this.dock, CommonTypes.any)
    }
    override read(ctx: IContext): any {
+      const { type } = this
+      if (type === DisplayType.React) {
+         const props = this.props.read(ctx)
+         return React.createElement(this.component as React.ComponentType, props)
+      }
+      return null
    }
    override toTitle(): string {
       return this.tag
@@ -734,97 +763,82 @@ export class LDXDisplayExpr extends LDXElementExpr {
       const attributes: AST.JSXAttribute[] = []
       for (const ns in this) {
          const attrs = this[ns]
-         if (attrs instanceof ObjectExpr) {
+         if (attrs instanceof DXObject) {
             for (const att of attrs.properties) {
                const name = att.name
                const value = att.value
                attributes.push({
                   type: "JSXAttribute",
-                  name: (ns === "props") ? {
-                     type: "JSXIdentifier",
-                     name,
-                  } : {
-                     type: "JSXNamespacedName",
-                     namespace: {
-                        type: "JSXIdentifier",
-                        name: ns,
-                     },
-                     name: {
-                        type: "JSXIdentifier",
-                        name,
-                     }
-                  },
-                  value: {
-                     type: "JSXExpressionContainer",
-                     expression: gen.generate(attrs, value),
-                  }
-               } as AST.JSXAttribute)
+                  ns: (ns === "props") ? "" : ns,
+                  name: name,
+                  value: gen.generate(attrs, value),
+               })
             }
          }
       }
-      const tag = {
-         type: "JSXIdentifier",
-         name: this.tag,
-      }
-      const children = []// this.children?.map(c => emitASTFromValue(c) as any) || []
       return {
          type: 'JSXElement',
-         openingElement: {
-            type: "JSXOpeningElement",
-            name: tag,
-            attributes,
-         },
-         closingElement: children.length > 0 && {
-            type: "JSXClosingElement",
-            name: tag,
-         },
-         children,
+         tag: this.tag,
+         attributes,
       } as AST.JSXElement
    }
 }
 
 @ElementClass()
-export class LDXDocumentExpr extends Element {
-   embeds: MapLike<Element> = {}
+export class DXDocumentLayout extends DXElement {
+   embeds: MapLike<DXElement> = {}
    markdown: string
    state: EditorState
-   override consolidate(builder: Builder) {
+   override consolidate(builder: ModelBuilder) {
       for (const key in this.embeds) {
          this.embeds[key] = builder.consolidate(this.embeds[key], CommonTypes.display)
       }
    }
    override read(ctx: IContext): any {
-      return <LDXDocumentEditor model={this} />
+      return <DXDocumentEditor model={this} />
    }
    override exportAST(gen: ASTGenerator) {
       const result = this.markdown.split(/\x00([0-9]+)\x01/)
+      for (const key in this.embeds) {
+         //this.embeds[key] = builder.consolidate(this.embeds[key], CommonTypes.display)
+      }
       return {
-         type: "LDXDocument",
+         type: "JSXDocument",
+         format: "markdown",
          items: result,
-      } as AST.LDXDocument
+      } as AST.JSXDocument
    }
 }
 
-function LDXDocumentEditor(props: {
-   model: LDXDocumentExpr,
+function DXDocumentEditor(props: {
+   model: DXDocumentLayout,
 }) {
    return <></>
 }
 
 @ElementClass()
-export class DocumentLayer extends Element {
-   layout: Element
-   override consolidate(builder: Builder) {
-      this.layout = builder.consolidate(this.layout, CommonTypes.display)
+export class DocumentLayer extends DXElement {
+   items: DXElement[]
+   layout: DXDocumentLayout
+   override consolidate(builder: ModelBuilder) {
+      this.items = this.items.map(item => builder.consolidate(item, CommonTypes.any))
+      this.layout = builder.consolidate(this.layout, CommonTypes.any)
    }
    override read(ctx: IContext): any {
-      return this.layout.read(ctx)
+      const children = []
+      for (const item of this.items) {
+         if (item.typing.type === "display") {
+            children.push(item.read(ctx))
+         }
+      }
+      return React.createElement(React.Fragment, ...children)
    }
-   override exportAST(gen: ASTGenerator) {
+   override exportAST(gen: ASTGenerator): AST.JSXDocument {
       return {
-         type: "LDXLayer",
-         layout: gen.generate(this, this.layout),
-      } as AST.LDXLayer
+         type: "JSXDocument",
+         format: "markdown",
+         items: this.items.map(item => gen.generate(this, item)),
+      }
    }
 }
 
@@ -911,10 +925,10 @@ export function createDocumentDraft(log: DocumentChangeLog): Blob {
 export class DocumentModel {
    static models = new Map<string, DocumentModel>()
    base: DocumentLayer = null
-   nodes = new Map<string, Element>()
+   nodes = new Map<string, DXElement>()
    listeners = new Set<() => void>
    log: DocumentChangeLog = null
-   builder: Builder = null
+   builder: ModelBuilder = null
    version: number = 0
    constructor(
       readonly id: string,
@@ -926,23 +940,23 @@ export class DocumentModel {
          updates: {},
       }
    }
-   getAST<T extends Element>(element: T): ReturnType<T["exportAST"]> {
+   getAST<T extends DXElement>(element: T): ReturnType<T["exportAST"]> {
       return this.log?.nodes[element.$key] as any
    }
-   cloneAST<T extends Element>(element: T): ReturnType<T["exportAST"]> {
+   cloneAST<T extends DXElement>(element: T): ReturnType<T["exportAST"]> {
       return copyData(this.getAST(element)) as any
    }
    async commit(changeset: DocumentChangeSet) {
 
-      const builder = new Builder(this)
+      const builder = new ModelBuilder(this)
       await builder.update(changeset)
 
       for (const listener of this.listeners) {
          listener()
       }
    }
-   async update<T extends Element>(target: T, updater: (target: T, builder: Builder) => Element | Promise<Element>): Promise<Element> {
-      const builder = new Builder(this)
+   async update<T extends DXElement>(target: T, updater: (target: T, builder: ModelBuilder) => DXElement | Promise<DXElement>): Promise<DXElement> {
+      const builder = new ModelBuilder(this)
       let result = updater(target, builder)
       if (result instanceof Promise) {
          result = await result

@@ -1,8 +1,8 @@
-import * as AST from "../ast/nodes"
-import { Element } from "./elements"
+import { AST } from "../ast"
+import { DXElement } from "./elements"
 
 export class ASTGenerator {
-   generate(from: Element, target: Element): AST.Any {
+   generate(from: DXElement, target: DXElement): AST.Any {
       if (from === null || from === target.owner) {
          return target.exportAST(this)
       }

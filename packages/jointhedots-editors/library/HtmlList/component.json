@@ -1,0 +1,18 @@
+{
+   "$id": "list",
+   "description": "List",
+   "view": {
+      "properties": {
+         "children": {
+            "type": "array",
+            "items": {
+               "type": "display"
+            }
+         }
+      }
+   },
+   "services": {
+      "view.web": "./HtmlList#List",
+      "view.web.editor": "./HtmlList#ListEditor"
+   }
+}

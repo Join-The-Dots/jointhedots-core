@@ -28,4 +28,11 @@ export class CombinedComponentProvider implements IComponentProvider {
       }
       return null
    }
+   async set_component_manifest(component_id: string, manifest: ComponentManifest): Promise<boolean> {
+      for (const provider of this.providers) {
+         const done = await provider.set_component_manifest(component_id, manifest)
+         if (done) return true
+      }
+      return false
+   }
 }

@@ -3,8 +3,8 @@ import {
    ComponentPublication, ComponentEntry, ComponentManifest, ComponentsRegistry
 } from "@jointhedots/core"
 import { useCallback, useEffect, useState } from "react"
-import { ComponentBrowser } from "@jointhedots/ui/components/ComponentsBrowser"
-import Stack from "@jointhedots/editors/ui/Stack"
+import { ComponentBrowser } from "@jointhedots/ui/ComponentsLibrary/ComponentsBrowser"
+import { Stack } from "@jointhedots/ui/Layouts"
 import Icon from "@jointhedots/ui/Icon"
 import Button from "@jointhedots/editors/ui/Button"
 

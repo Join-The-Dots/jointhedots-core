@@ -1,19 +1,17 @@
 
-# Notebook features
+# Notebook[URL ](https://reactjs.org/) {uri.name} features
 
-## Introduction
-SF Explorer Notebooks offer a versatile and interactive computing environment designed for Salesforce. Here are some of the key benefits:
-1. **Interactivity**: SF Explorer Notebooks allow for an interactive coding experience. Dedicated components can be used to interact with your Salesforce org like the examples given below.
-2. **Visualization**: Integrated support for data visualization powered by [Mermaid ](https://mermaid.js.org/)and rich components behind SF Explorer toolkit.
-3. **Documentation**: Markdown support enables users to add rich text, and hyperlinks directly within the notebook. This makes it easier to document code, explain methodologies, and share insights.
-4. **Reproducibility**: Notebooks can be shared easily, preserving code, outputs, and documentation in a single file. This ensures that others can reproduce the results by running the notebook on their own machines.
-5. **Educational Use**: The interactive nature of SF Explorer Notebooks makes them an excellent tool for on boarding individuals, and other technical subjects. Instructors can provide students with interactive assignments and tutorials.
-6. **Sharing**: Notebooks can be shared and promoted in your pipelines with support of a dedicated Custom Metadata. See at the end of this notebook for more detail.
-In summary, SF Explorer Notebooks offer a powerful and flexible environment for documentation, data analysis, visualization, and coding.
-By the way, this is a notebook. Try editing it to see for yourself!
+````javascript my.mermaid[prettier onClick={()=>alert("")}]
+function stringify_node_json(n: AST.Any) {
+   return JSON.stringify(n, (key, value) => {
+      if ((key === "position" || key === "loc") && value?.start && value?.end) {
+         return undefined
+      } 
+````
 
-
-<mermaid code={"mindmap\n    root((Notebook))\n        Markdown\n            Rich text\n            Diagrams\n                Timeline\n                Flows\n      SOQL\n        Tooling api\n        Object compare\n        Stats\n      Apex\n      Rest "} />
+<mermaid 
+   code={"mindmap\n    root((Notebook))\n        Markdown\n            Rich text\n            Diagrams\n                Timeline\n                Flows\n      SOQL\n        Tooling api\n        Object compare\n        Stats\n      Apex\n      Rest "} 
+/>
 
 
 <mermaid code={"gantt\n    title Demo script\n    dateFormat YYYY-MM-DD\n    section Part 1\n        Create with rest          :a1, 2014-01-01, 30d\n        SOQL    :after a1, 20d\n    section Part 2\n        Anonymous :2014-01-12, 12d\n        other features    :24d"} />
@@ -42,6 +40,7 @@ Config
 
 ## Execute Anonymous Apex
 Anonymous Apex is a way to execute Apex code on the fly in Salesforce without having to save it to a file. It is often used for quick testing or debugging. Here is an example of an anonymous Apex call that creates a new Contact record:
+
 <soql code={"// Create a new Contact record\nContact newContact = new Contact();\nnewContact.LastName = 'Sample Contact';\nnewContact.FirstName = 'Explorer';\n\n// Insert the new Contact record into the database\ninsert newContact;\n\n// Output some debug information\nSystem.debug('New Contact created with Id: ' + newContact.Id);\n"} />
 
 You can also execute anonymous apex. Try hovering keywords like **Contact**, **System** or **insert** to see associated documentation. Code completion is of also available.

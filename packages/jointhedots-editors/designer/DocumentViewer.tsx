@@ -5,7 +5,7 @@ import ContentEditable from './ui/ContentEditable'
 import { InitialConfigType, LexicalComposer } from '@lexical/react/LexicalComposer'
 import PlaygroundNodes from './nodes/PlaygroundNodes'
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme'
-import { createDocumentID, createDocumentModel, LDXDocumentExpr } from '@jointhedots/core'
+import { createDocumentID, createDocumentModel, DXDocumentLayout } from '@jointhedots/core'
 import { $updateEditorStateFromModel } from './markdown/markdown-to-lexical'
 import "./index.css"
 
@@ -20,13 +20,7 @@ export function DocumentViewer(props: {
          if (content && editor) {
             createDocumentModel(createDocumentID(), content).then((model) => {
                editor?.update(() => {
-                  const { layout } = model.base
-                  if (layout instanceof LDXDocumentExpr) {
-                     $updateEditorStateFromModel(layout)
-                  }
-                  else {
-                     throw new Error()
-                  }
+                  $updateEditorStateFromModel(model.base)
                })
             })
          }

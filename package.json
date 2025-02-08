@@ -34,7 +34,7 @@
       "watch": "tspc --watch --noEmit",
       "serve": "jointhedots-gear serve --mode development",
       "build": "jointhedots-gear make --versioned * --deliver --dist ./dist",
-      "make": "jointhedots-gear make --dist ../jointhedots-app/react-chrome-app/dist",
+      "make": "jointhedots-gear make --dist ../sf-explorer-app/dist",
       "test": "mocha"
    },
    "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"

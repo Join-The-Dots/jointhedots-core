@@ -1,6 +1,6 @@
 import React from "react"
 import ReactDOMClient from 'react-dom/client'
-import Stack from "@jointhedots/editors/ui/Stack"
+import { Stack } from "@jointhedots/ui/Layouts"
 import "./style.scss"
 
 const modalStack = []

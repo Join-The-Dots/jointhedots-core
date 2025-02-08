@@ -9,6 +9,7 @@ import "./style.scss"
 import doc_mdx from "../samples/Livedoc4.txt"
 import { useState } from 'react'
 import { DocumentEditable } from '@jointhedots/editors'
+import { parse_document, stringify_document } from '@jointhedots/core/ast'
 
 function getDocumentState(id: string) {
    try {
@@ -21,6 +22,19 @@ function getDocumentState(id: string) {
 function setDocumentState(id: string, content: any) {
    localStorage.setItem(id, JSON.stringify(content))
    toast.success(`Document '${id}' saved`)
+}
+
+function Test() {
+   const ast = parse_document(doc_mdx)
+   const doc_mdx2 = stringify_document(ast)
+   return <div style={{ display: "flex", flexDirection: "row" }}>
+      <pre style={{ flex: 1, backgroundColor: "#bfb", overflow: "hidden" }}>
+         {doc_mdx}
+      </pre>
+      <pre style={{ flex: 1, backgroundColor: "#bbf", overflow: "hidden" }}>
+         {doc_mdx2}
+      </pre>
+   </div>
 }
 
 function App() {

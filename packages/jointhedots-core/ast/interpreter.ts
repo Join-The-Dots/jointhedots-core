@@ -1,4 +1,4 @@
-import * as AST from './nodes'
+import { AST } from "."
 import { MapLike } from '../common/types'
 
 export interface InterpreterScope<C> {
@@ -204,11 +204,32 @@ export function evaluateExpression<C>(node: AST.Any, scope: InterpreterScope<C>)
          }
       }
 
-      case 'JSXExpressionContainer': {
-         return evaluateExpression(node.expression, scope)
-      }
-
       default:
          throw new Error(`Unsupported node type: ${node.type}`)
    }
+}
+
+export type JSXElementData = {
+   tag: string
+   props: MapLike<any>
+   additionnals?: any[]
+   children?: any[]
+   [ns: string]: any
+}
+
+export function evaluateJSXElementData(n: AST.JSXElement): JSXElementData {
+   const { attributes } = n
+   const result: any = {
+      type: "element",
+      tag: n.tag,
+      children: n.content,
+   }
+   for (const attr of attributes) {
+      const ns = attr.ns || "props"
+      const key = attr.name
+      let props = result[ns]
+      if (!props) result[ns] = props = {}
+      props[key] = evaluateExpression(attr.value, EmptyScope)
+   }
+   return result
 }

@@ -18,7 +18,7 @@ import { $applyNodeReplacement, $createTextNode, TextNode } from 'lexical'
 import "./index.css"
 import { exportAstToMarkdown, registerMarkdownTransformer } from '../../markdown/markdown-to-lexical'
 import emojiList from './emoji-list'
-import { emitJSXMarkdownText } from '@jointhedots/core'
+import { emitJSXElementFromData } from '@jointhedots/core'
 
 export type SerializedEmojiNode = Spread<
   {
@@ -86,7 +86,11 @@ export class EmojiNode extends TextNode {
   }
 
   exportAST() {
-    return emitJSXMarkdownText(this.__text)
+    return emitJSXElementFromData({
+      tag: "span",
+      props: null,
+      children: [this.__text],
+    })
   }
 
   getClassName(): string {

@@ -1,4 +1,4 @@
-import * as AST from "../ast/nodes"
+import { AST } from "../ast"
 import { MapLike } from "../common/types"
 
 export interface IContext {

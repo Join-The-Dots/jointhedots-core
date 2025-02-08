@@ -1,5 +1,5 @@
 import { JSONSchema } from "./schema"
-import { getDataAtKeys } from "../updater"
+import { getDataAtKeys } from "../../common/datatree"
 import { CommonTypes } from "./helpers"
 
 export function getJSONSchemaName(schema: JSONSchema): string {
@@ -72,4 +72,13 @@ function compileJSONRelations(schema: any, doc: JSONDocument): any {
       }
    }
    return schema
+}
+
+export function stringifyDescriptor(what: Object): string {
+   return JSON.stringify(what, (key, value) => {
+      if (value instanceof JSONSchemaRelation) {
+         return { $ref: value.$ref }
+      }
+      return value
+   }, 2)
 }

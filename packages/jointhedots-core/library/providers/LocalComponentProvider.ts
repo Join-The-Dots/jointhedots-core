@@ -192,4 +192,7 @@ export class LocalComponentProvider implements IComponentProvider {
    async get_component_manifest(id: string): Promise<ComponentManifest> {
       return getComponentManifest(await this.db, id)
    }
+   async set_component_manifest(component_id: string, manifest: ComponentManifest): Promise<boolean> {
+      return false
+   }
 }

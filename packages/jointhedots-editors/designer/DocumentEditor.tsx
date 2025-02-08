@@ -10,7 +10,7 @@ import { TableContext } from './nodes/Table/TablePlugin'
 import { SharedAutocompleteContext } from './context/SharedAutocompleteContext'
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme'
 import { $updateEditorStateFromModel, transformEditorStateToMarkdown } from '@jointhedots/editors/designer/markdown/markdown-to-lexical'
-import { createDocumentID, createDocumentModel, DocumentModel, LDXDocumentExpr } from '@jointhedots/core'
+import { createDocumentID, createDocumentModel, DocumentModel, DXDocumentLayout } from '@jointhedots/core'
 import { DocumentContext } from './context/DocumentContext'
 import { FeaturesContext, FeaturesMaterializer } from '../ui/FeaturesLayout'
 import WindowedContainer, { DisplayLayout } from '../ui/WindowedContainer'
@@ -51,14 +51,8 @@ export function DocumentEditor(props: {
     if (content && editor) {
       createDocumentModel(createDocumentID(), content).then((model) => {
         editor?.update(() => {
-          const { layout } = model.base
-          if (layout instanceof LDXDocumentExpr) {
-            $updateEditorStateFromModel(layout)
-            setModel(model)
-          }
-          else {
-            throw new Error()
-          }
+          $updateEditorStateFromModel(model.base)
+          setModel(model)
         })
       })
     }
@@ -122,7 +116,7 @@ export function DocumentEditor(props: {
 
   const commentStore = useMemo(() => new CommentStore(editor), [editor])
 
-  const layout = model?.base?.layout as LDXDocumentExpr
+  const layout = model?.base?.layout as DXDocumentLayout
   return <DocumentContext.Provider value={layout}>
     <ManageSettings id="settings:lexical-editor">
       <FlashMessageContext>

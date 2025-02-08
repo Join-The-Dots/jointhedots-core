@@ -64,3 +64,8 @@ export class StaticContentProvider implements IContentProvider {
       return false
    }
 }
+
+export function contentLocalURI(id: string, norm: string, key?: string): URI {
+   const path = key ? `/${norm}/${key}` : `/${norm}`
+   return URI.from({ scheme: "local", authority: id, path })
+}

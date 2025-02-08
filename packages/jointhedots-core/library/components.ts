@@ -45,7 +45,11 @@ export class ComponentEntry {
       return this
    }
    setError(error: Error) {
-      this.manifest = null
+      this.manifest = {
+         $id: this.id,
+         error,
+         services: {}
+      }
       this.failure = error
       console.error(error)
       return this
@@ -56,7 +60,8 @@ export class ComponentEntry {
 
       if (this.manifest === undefined) {
          loading = ComponentsRegistry.components_provider.get_component_manifest(this.id).then(async (manifest) => {
-            this.manifest = manifest
+            if (manifest) this.manifest = manifest
+            else this.setError(new Error(`Component '${this.id}' not found`))
             return this.manifest
          }, (e) => {
             this.setError(e)
@@ -194,6 +199,10 @@ export class ComponentResource {
    set(data: any) {
       this.entry = data
       this.identifier = null
+   }
+   get descriptor() {
+      const kind = this.resource.split(".")[0]
+      return this.component.manifest?.[kind]
    }
    get url(): string {
       const ref = this.component.manifest?.services?.[this.resource]

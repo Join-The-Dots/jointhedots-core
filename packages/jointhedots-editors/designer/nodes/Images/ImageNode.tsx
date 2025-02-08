@@ -6,7 +6,6 @@
  *
  */
 
-import { emitJSXMarkdownText } from '@jointhedots/core'
 import type {
   DOMConversionMap,
   DOMConversionOutput,
@@ -24,6 +23,7 @@ import { $applyNodeReplacement, createEditor, DecoratorNode } from 'lexical'
 import * as React from 'react'
 import { Suspense } from 'react'
 import { exportAstToMarkdown, registerMarkdownTransformer } from '../../markdown/markdown-to-lexical'
+import { emitJSXElementFromData } from '@jointhedots/core'
 
 const ImageComponent = React.lazy(() => import('./ImageComponent'))
 
@@ -179,7 +179,13 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
 
   exportAST() {
     const text = `![${this.getAltText()}](${this.getSrc()})`
-    return emitJSXMarkdownText(text)
+    return emitJSXElementFromData({
+      tag: 'img',
+      props: {
+        altText: this.getAltText(),
+        src: this.getSrc(),
+      }
+    })
   }
 
   setWidthAndHeight(

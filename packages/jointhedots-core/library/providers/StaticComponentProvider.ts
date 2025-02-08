@@ -55,4 +55,7 @@ export class StaticComponentProvider implements IComponentProvider {
       catch (_) { }
       return null
    }
+   async set_component_manifest(component_id: string, manifest: ComponentManifest): Promise<boolean> {
+      return false
+   }
 }

@@ -1,22 +1,23 @@
-import { ASTGenerator, Element, ElementClass, JSONSchema, stringify_node_jsx } from "@jointhedots/core"
+import { ASTGenerator, DXElement, ElementClass, JSONSchema } from "@jointhedots/core"
 import { EditionDriver, EditorValueMatch } from "./interfaces"
+import { stringify_document } from "@jointhedots/core/ast/serde/printer"
 
 export class ElementDriverProvider {
    drivers = new Map<ElementClass, EditionDriver>()
    defaultController: EditionDriver = null
 
-   registerController<T extends Element>(driver: EditionDriver<T>, isDefault?: boolean) {
+   registerController<T extends DXElement>(driver: EditionDriver<T>, isDefault?: boolean) {
       if (!driver.matchType) driver.matchType = () => EditorValueMatch.None
       if (isDefault === true) this.defaultController = driver
       this.drivers.set(driver.cls, driver)
    }
 
-   findControllerOf<T extends Element>(value: T): EditionDriver<T> {
+   findControllerOf<T extends DXElement>(value: T): EditionDriver<T> {
       const driver = this.drivers.get(value?.constructor as any) || this.defaultController
       return driver as EditionDriver<T>
    }
 
-   async listControllerOf<T extends Element>(value: T, typing: JSONSchema): Promise<Map<EditionDriver<T>, EditorValueMatch>> {
+   async listControllerOf<T extends DXElement>(value: T, typing: JSONSchema): Promise<Map<EditionDriver<T>, EditorValueMatch>> {
       const matchings = new Map<EditionDriver<T>, EditorValueMatch>()
       if (typing) {
          for (const driver of this.drivers.values()) {
@@ -37,7 +38,7 @@ export class ElementDriverProvider {
       const ast = ctx.generate(null, value)
       return {
          lang: 'javascript',
-         text: stringify_node_jsx(ast),
+         text: stringify_document(ast),
       }
    }
 }

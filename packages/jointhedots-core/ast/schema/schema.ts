@@ -117,7 +117,8 @@ export type JSONSchema7TypeNameCustom =
    "expression" |
    "function" |
    "element" |
-   "view"
+   "view" |
+   "display"
 
 export type JSONSchemaCustom = {
 

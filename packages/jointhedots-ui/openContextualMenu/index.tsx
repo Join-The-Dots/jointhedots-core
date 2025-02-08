@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom'
 import { computeEdgeBoxDOM, PositionType } from "../computeEdgeBox"
 import Icon from "@jointhedots/ui/Icon"
 import "./style.scss"
-import { ItemProps, ItemRowRich, ItemRowShort } from "../items"
+import { ItemProps, ItemRowRich, ItemRowShort } from "../Items"
 
 export type MenuIcon = string
 

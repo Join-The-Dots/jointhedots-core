@@ -3,7 +3,7 @@ import { ComponentsRegistry } from "./components"
 import React, { ReactElement, useEffect, useState } from "react"
 import { MapLike } from "typescript"
 import { useLocation } from "react-router-dom"
-import { ErrorDisplayer } from "../react/ErrorBoundary"
+import { ErrorDisplayer } from "../react"
 import qs from 'query-string';
 import { JSONSchema, SecurityRule, SecurityGuard } from "../ast/schema/schema"
 import { ComponentManifest } from "./interfaces"

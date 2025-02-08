@@ -78,7 +78,6 @@ export async function create_esbuild_context(
          '.svg': 'file',
          '.woff': 'file',
          '.woff2': 'file',
-         '.md': 'file',
       },
    }
 

@@ -14,7 +14,28 @@ export const ContentBlob = {
          const bytes = JSON.stringify(data)
          return new Blob([bytes], { type: "application/json" })
       },
-   }
+   },
+   text: {
+      async read(content: Blob): Promise<string> {
+         return content.text()
+      },
+      write(data: string, type?: string): Blob {
+         const bytes = JSON.stringify(data)
+         return new Blob([bytes], { type: type || "text/plain" })
+      },
+   },
+   buffer: {
+      async read(content: Blob): Promise<ArrayBuffer> {
+         if (content && content.type == "text/plain") {
+            return content.arrayBuffer()
+         }
+         return null
+      },
+      write(data: ArrayBuffer | string, type: string): Blob {
+         const bytes = JSON.stringify(data)
+         return new Blob([bytes], { type })
+      },
+   },
 }
 
 export async function blob_b64(blob: Blob) {

@@ -1,4 +1,6 @@
-import { ComponentID, ComponentsRegistry, MapLike } from "@jointhedots/core"
+import { MapLike } from "../common/types"
+import { ComponentsRegistry } from "./components"
+import { ComponentID } from "./interfaces"
 
 const servicepoints_storekey = "settings://service-points"
 

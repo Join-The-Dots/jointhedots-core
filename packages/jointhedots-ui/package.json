@@ -6,9 +6,16 @@
    "license": "MIT",
    "componentsContainer": true,
    "exports": {
-      "./theme": "./theme",
+      "./askDialog": "./askDialog",
+      "./ComponentsLibrary": "./ComponentsLibrary",
       "./Icon": "./Icon",
-      "./Instrumentation": "./Instrumentation"
+      "./Instrumentation": "./Instrumentation",
+      "./Items": "./Items",
+      "./openContextualMenu": "./openContextualMenu",
+      "./openDialog": "./openDialog",
+      "./ServicePoint": "./ServicePoint",
+      "./Layouts": "./Layouts",
+      "./theme": "./theme"
    },
    "dependencies": {
       "react-router-dom": "~6.3.0",

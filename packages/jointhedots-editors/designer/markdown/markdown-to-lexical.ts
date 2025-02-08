@@ -1,8 +1,8 @@
 import { Transformer, $convertFromMarkdownString, $convertToMarkdownString, ElementTransformer, TextMatchTransformer, CHECK_LIST, ELEMENT_TRANSFORMERS, MULTILINE_ELEMENT_TRANSFORMERS, TEXT_FORMAT_TRANSFORMERS, TEXT_MATCH_TRANSFORMERS } from '@lexical/markdown'
 import { EditorState, $getRoot, ElementNode, LexicalNode } from 'lexical'
-import { stringify_node_jsx } from '@jointhedots/core'
 import { ComponentNode } from '../nodes/Component/ComponentNode'
-import { LDXDocumentExpr, LDXDisplayExpr } from '@jointhedots/core'
+import { DXDocumentLayout, DXDisplay, DocumentLayer } from '@jointhedots/core'
+import { stringify_document } from '@jointhedots/core/ast/serde/printer'
 
 export const MARKDOWN_TRANSFORMERS: Transformer[] = [
    CHECK_LIST,
@@ -20,7 +20,7 @@ export function exportAstToMarkdown(node: LexicalNode) {
    if (node["exportAST"] instanceof Function) {
       try {
          const ast = node["exportAST"]()
-         return stringify_node_jsx(ast)
+         return stringify_document(ast)
       }
       catch (e) {
          return `\`\`\`json\n// ! Invalid component:\n ${JSON.stringify(node.exportJSON(), null, 2)}\`\`\``
@@ -54,7 +54,8 @@ export function transformEditorStateToMarkdown(editorState: EditorState, shouldP
    return content
 }
 
-export function $updateEditorStateFromModel(layout: LDXDocumentExpr) {
+export function $updateEditorStateFromModel(layer: DocumentLayer) {
+   const { layout } = layer
 
    const COMPONENT_TRANSFORMER: Transformer = {
       type: "element",
@@ -62,7 +63,7 @@ export function $updateEditorStateFromModel(layout: LDXDocumentExpr) {
       replace: (parentNode, chilren, match, isImport) => {
          const key = match[1]
          const value = layout.embeds[key]
-         if (value instanceof LDXDisplayExpr) {
+         if (value instanceof DXDisplay) {
             const node = new ComponentNode(layout, key)
             parentNode.replace(node)
          }
@@ -85,6 +86,6 @@ export function $updateEditorStateFromModel(layout: LDXDocumentExpr) {
       $getRoot(), //node
       true,
    )
-
-   return layout
+   console.log("TODO: make markdown:", layer)
+   return layer
 }

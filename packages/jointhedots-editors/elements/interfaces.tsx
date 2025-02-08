@@ -1,7 +1,7 @@
 import React from 'react'
-import { JSONSchema, Element, MapLike, ComponentResource, ElementClass, ElementJSON } from '@jointhedots/core'
+import { JSONSchema, DXElement, MapLike, ComponentResource, ElementClass, ElementJSON } from '@jointhedots/core'
 
-export type ValueProps<T extends Element = Element> = {
+export type ValueProps<T extends DXElement = DXElement> = {
    name?: string
    value: T
    typing: JSONSchema
@@ -16,19 +16,19 @@ export enum EditorValueMatch {
    Best = 3,
 }
 
-export type EditorPanel<T extends Element = Element> = {
+export type EditorPanel<T extends DXElement = DXElement> = {
    icon?: string
    view: React.ComponentType<ValueProps<T>>
 }
 
-export type EditorMenuItem<T extends Element = Element> = {
+export type EditorMenuItem<T extends DXElement = DXElement> = {
    title: string
    icon?: string
    condition?: (value: T, typing: JSONSchema, context: EditionEnvironment) => boolean
    execute: (value: T, typing: JSONSchema, context: EditionEnvironment, onChange: (value: ElementJSON) => void) => void
 }
 
-export type EditorMenu<T extends Element = Element> = {
+export type EditorMenu<T extends DXElement = DXElement> = {
    icon?: string
    sections: {
       title?: string
@@ -37,14 +37,14 @@ export type EditorMenu<T extends Element = Element> = {
    }[]
 }
 
-export type EditorDescriptor<T extends Element = Element> = {
+export type EditorDescriptor<T extends DXElement = DXElement> = {
    input?: React.ComponentType<ValueProps<T>>
    heading?: React.ComponentType<ValueProps<T>>
    panels?: MapLike<EditorPanel<T>>
    menu?: EditorMenu<T>
 }
 
-export type EditionDriver<T extends Element = Element> = {
+export type EditionDriver<T extends DXElement = DXElement> = {
 
    // UI
    name: string
@@ -68,7 +68,7 @@ export class EditionEnvironment {
    get editing(): boolean {
       return this.operations.size > 0
    }
-   getAttachment<T extends Element = Element>(name: string): T {
+   getAttachment<T extends DXElement = DXElement>(name: string): T {
       return this.attachements[name]
    }
    registerOperation(op: IEditionOperation) {

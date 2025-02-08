@@ -7,9 +7,9 @@ import 'react-toastify/dist/ReactToastify.css'
 import "./style.scss"
 import { createServiceGroup, ComponentsRegistry, createNewComponent, StorageService } from "@jointhedots/core"
 import { Tab, Tabs } from "react-lightning-design-system"
-import { ServicePointStatus, ServicePointsConfigurator } from "@jointhedots/ui/components/ServicePoints"
+import { ServicePointStatus, ServicePointsConfigurator } from "@jointhedots/ui/ServicePoint"
 import '@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.css'
-import { ComponentsConfigurator } from "@jointhedots/ui/components/Components"
+import { ComponentsConfigurator } from "@jointhedots/ui/ComponentsLibrary"
 import { LocalComponentProvider } from "@jointhedots/core/library/providers/LocalComponentProvider"
 import { MountServicePoints, useService } from "@jointhedots/core/react"
 

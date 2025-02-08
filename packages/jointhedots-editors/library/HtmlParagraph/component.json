@@ -1,0 +1,22 @@
+{
+   "$id": "p",
+   "description": "Paragraph",
+   "view": {
+      "properties": {
+         "children": {
+            "type": "array",
+            "items": {
+               "type": "display",
+               "docking": {
+                  "type": "display",
+                  "view": "p#view.docking.web"
+               }
+            }
+         }
+      }
+   },
+   "services": {
+      "view.web": "./HtmlParagraph#Paragraph",
+      "view.docking.web": "./HtmlParagraph#Paragraph"
+   }
+}
