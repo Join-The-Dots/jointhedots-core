@@ -3,51 +3,71 @@ import "source-map-support/register.js"
 import Process from "node:process"
 import Path from 'node:path'
 import Fs from 'node:fs'
-import Yargs from "yargs"
+import Yargs, { CommandModule } from "yargs"
 import { hideBin } from 'yargs/helpers'
 import { publish_aws_s3 } from './publish.js'
 import { command_run } from "./run.js"
 import { StorageFiles } from "./storage.js"
 import { open_workspace } from "./workspace.js"
-import { build_workspace } from "./build-workspace.js"
+import { build_workspace, BuildMode } from "./build-workspace.js"
 import { build_library, make_libname } from "./build-library.js"
 
-export function command_build() {
+export function command_build(): CommandModule<any, {
+   mode?: BuildMode
+   features?: string
+   port?: number
+   dist?: string
+}> {
    return {
       command: 'build',
       describe: 'Build web application',
       builder: (yargs) => yargs
-         .option("env", {
+         .option("mode", {
             type: "string",
-            default: "development",
+            choices: ["production", "development"],
+            default: "production",
          })
          .option("features", {
             type: "string",
             default: "",
+         })
+         .option("port", {
+            type: "number",
+            default: 0,
          })
          .option("dist", {
             type: "string",
             default: "./dist/web",
          }),
       handler: async (argv) => {
-         const outputDir = Path.resolve(argv.dist)
-         const storage = new StorageFiles(outputDir)
          const ws = await open_workspace(".", argv.features)
+         const storage = new StorageFiles(ws.name, argv.dist)
          console.time("build")
-         await build_workspace(ws, storage, argv.mode, argv.dist, argv.port)
+         await build_workspace({
+            ws,
+            storage,
+            mode: argv.mode,
+            port: argv.port,
+         })
          console.timeEnd("build")
       }
    }
 }
 
-export function command_serve() {
+export function command_serve(): CommandModule<any, {
+   mode?: BuildMode
+   features?: string
+   port?: number
+   dist?: string
+}> {
    return {
       command: 'serve',
       describe: 'Server web application with continues build',
       builder: (yargs) => yargs
-         .option("env", {
+         .option("mode", {
             type: "string",
-            default: "development",
+            choices: ["production", "development"],
+            default: "production",
          })
          .option("features", {
             type: "string",
@@ -62,36 +82,51 @@ export function command_serve() {
             default: "./dist/web",
          }),
       handler: async (argv) => {
-         const storage = new StorageFiles(argv.dist)
          const ws = await open_workspace(".", argv.features)
-         await build_workspace(ws, storage, argv.mode, argv.dist, argv.port)
+         const storage = new StorageFiles(ws.name, argv.dist)
+         await build_workspace({
+            ws,
+            storage,
+            mode: argv.mode,
+            port: argv.port,
+         })
       }
    }
 }
 
-export function command_make() {
+export function command_make(): CommandModule<any, {
+   features?: string
+   watch?: boolean
+   pack?: boolean
+   versioned?: string
+   libraries?: string
+   dist?: string
+}> {
    return {
       command: 'make',
       describe: 'Make web library',
       builder: (yargs) => yargs
-         .option("env", {
+         .option("libraries", {
             type: "string",
-            default: "development",
+            default: "*",
+            describe: "List of libraries to select, ex: lib1,lib2,..."
          })
          .option("features", {
             type: "string",
-            default: "",
+            describe: "List of features to select, ex: feature1,feature2,..."
          })
-         .option("port", {
-            type: "number",
-            default: 3000,
+         .option("watch", {
+            type: "boolean",
+            describe: "Watch and rebuild on files change",
+            default: false,
          })
-         .option("deliver", {
+         .option("pack", {
             type: "boolean",
             describe: "Ask to create tarball delivery"
          })
          .option("versioned", {
             type: "string",
+            default: "*",
             describe: "Version applied to delivered package (use * for root package version)"
          })
          .option("dist", {
@@ -99,26 +134,48 @@ export function command_make() {
             default: "./dist",
          }),
       handler: async (argv) => {
-         let version = argv["versioned"]
+         const ws = await open_workspace(".", argv.features)
+
+         let version = argv.versioned
          if (version === "*") {
             version = JSON.parse(Fs.readFileSync("package.json").toString())?.version
             console.log(`> use version: ${version}`)
          }
 
-         const ws = await open_workspace(".", argv.features)
-         for (const lib of ws.libraries) {
-            const lib_path = Path.resolve(argv.dist, make_libname(lib.name))
-            await build_library(ws, lib, {
-               outputDir: lib_path,
-               deliverDir: argv.deliver ? Path.resolve(argv.dist) : null,
-               version: version,
-            })
+         let libraries = ws.libraries
+         if (argv.libraries !== "*") {
+            libraries = []
+            for (const libname of argv.libraries.split(",")) {
+               const lib = ws.get_library(libname)
+               if (lib) libraries.push(lib)
+               else console.error(`> library not found: ${libname}`)
+            }
          }
+
+         const pendings = []
+         for (const lib of libraries) {
+            const lib_path = Path.resolve(argv.dist, make_libname(lib.name))
+            const storage = new StorageFiles(lib.name, lib_path)
+            pendings.push(build_library({
+               lib,
+               storage,
+               mode: BuildMode.Development,
+               packageDir: argv.pack ? Path.resolve(argv.dist) : null,
+               version: version,
+               watch: argv.watch,
+            }))
+         }
+         await Promise.all(pendings)
       }
    }
 }
 
-export function command_publish() {
+export function command_publish(): CommandModule<any, {
+   bucket?: string
+   region?: string
+   features?: string
+   dist?: string
+}> {
    return {
       command: 'publish',
       describe: 'publish resources to AWS S3',

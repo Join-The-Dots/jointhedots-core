@@ -7,7 +7,8 @@
    "componentsContainer": true,
    "exports": {
       ".": "./index.ts",
-      "./react": "./react/index.ts"
+      "./react": "./react/index.ts",
+      "./services": "./services/index.ts"
    },
    "dependencies": {
       "acorn": "^8.11.3",

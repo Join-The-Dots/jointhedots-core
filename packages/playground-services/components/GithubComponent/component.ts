@@ -1,7 +1,9 @@
 import { Octokit } from "@octokit/rest"
-import { ComponentEntry, ComponentManifest, ComponentsRegistry, ServiceInterface, ServiceType } from "@jointhedots/core"
-import { ComponentDriverService } from "@jointhedots/core/services/ComponentDriver"
-import { ChangeSetId, FileKey, StorageChangeLog, StorageChangeSet, StorageChangeStatus, StorageService, StorageStats, StorageTransaction } from "@jointhedots/core/services/Storage"
+import { ComponentEntry, ComponentManifest, ComponentService, ServiceType } from "@jointhedots/core"
+import {
+   ChangeSetId, FileKey, StorageChangeLog, StorageChangeSet,
+   StorageChangeStatus, StorageService, StorageStats, StorageTransaction
+} from "@jointhedots/core/services"
 
 interface CommittedFile {
    path: string
@@ -11,29 +13,26 @@ interface CommittedFile {
    url: string
 }
 
-export const GithubDriverService: ComponentDriverService = {
-   // Component infos
-   getDefinition(): ComponentEntry {
-      return ComponentsRegistry.acquireComponent("jtd:github.service")
-   },
+export const GithubDriverService: ComponentService = {
+
+   // Component runtime
    getAvailableServices(component: ComponentEntry): ServiceType[] {
       return ["storage"]
    },
-
-   // Component runtime
    async getService(component: ComponentEntry, type: ServiceType) {
       if (type === "storage") return component.instance
       return null
    },
 
    // Component management
-   async create(component: ComponentEntry, descriptor: ComponentManifest): Promise<void> {
+   async createComponent(component: ComponentEntry, descriptor: ComponentManifest) {
       component.instance = new GithubService(descriptor)
    },
-   async update(component: ComponentEntry, descriptor: ComponentManifest): Promise<void> {
+   async updateComponent(component: ComponentEntry, descriptor: ComponentManifest) {
       return component.instance.update(descriptor)
    },
-   async check(descriptor: ComponentManifest): Promise<void> {
+   async checkDescriptor(descriptor: ComponentManifest) {
+      return null
    },
 }
 
@@ -60,7 +59,7 @@ export class GithubService implements StorageService {
    }
    getService(type: string) {
       switch (type) {
-         case "salesforce": return this as StorageService
+         case "storage": return this as StorageService
       }
    }
    update(descriptor: ComponentManifest) {

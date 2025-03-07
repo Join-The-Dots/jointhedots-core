@@ -1,6 +1,7 @@
 import { URI } from "vscode-uri"
-import { IContentProvider, IResourceLoader, parseComponentURI } from "../interfaces"
-import { ContentBlob } from "../contents"
+import { ContentBlob } from "../../common/contents"
+import { IContentProvider, IResourceLoader } from "../interfaces"
+import { parseComponentURI } from "../helpers"
 
 export class CommonResourceProvider implements IResourceLoader {
    modules_exports = new Map<string, any>()

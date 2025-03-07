@@ -9,7 +9,7 @@ import "./style.scss"
 import doc_mdx from "../samples/Livedoc4.txt"
 import { useState } from 'react'
 import { DocumentEditable } from '@jointhedots/editors'
-import { parse_document, stringify_document } from '@jointhedots/core/ast'
+import { parse_document, stringify_document } from '@jointhedots/core'
 
 function getDocumentState(id: string) {
    try {

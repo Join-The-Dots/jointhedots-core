@@ -1,3 +1,4 @@
+import React from "react"
 import { AST } from "../ast"
 import { MapLike, ObjectClass } from "../common/types"
 import { IContext, LocalContext } from "./context"
@@ -7,9 +8,9 @@ import { ASTGenerator } from "./generator"
 import { ModelBuilder } from "./builder"
 import { CommonTypes } from "../ast/schema/helpers"
 import { JSONSchema } from "../ast/schema/schema"
-import { ComponentEntry, ComponentsRegistry } from "../library/components"
+import { acquireComponent, ComponentEntry } from "../library/manifold"
 import { copyData } from "../common/datatree"
-import React from "react"
+import { ViewReactKey, ViewReactService, ViewWebComponentKey, ViewWebComponentService } from "../services"
 
 export type ElementClass<T extends DXElement = DXElement> = new (model: DocumentModel) => T
 export type ElementKey = string
@@ -604,7 +605,7 @@ export class DXFunction extends DXElement {
    body: Script = null
    override read(ctx: IContext): any {
       const node = this
-      return function (...args: any[]) {
+      return function (this: any, ...args: any[]) {
          const scope = new LocalContext(ctx, node.thisRelay ? ctx.getThis() : this)
          scope.setArguments(args, node.params)
          node.body.execute(scope)
@@ -719,7 +720,7 @@ export class DXDisplay extends DXElement {
    tag: string
    type: DisplayType
    entry: ComponentEntry
-   component: React.ComponentType | HTMLElement
+   component: ViewReactService | ViewWebComponentService
    props: DXObject
    content: DXElement[]
    dock: DXObject
@@ -746,17 +747,17 @@ export class DXDisplay extends DXElement {
       return this.tag
    }
    async loadComponent(tag: string) {
-      const entry = ComponentsRegistry.acquireComponent(tag)
+      const entry = acquireComponent(tag)
       const manifest = await entry.fetch()
       this.tag = tag
       this.entry = entry
       if (manifest.services["view.react"]) {
          this.type = DisplayType.React
-         this.component = await entry.fetchResource("view.react")
+         this.component = await ViewReactKey.fetch(entry)
       }
       else if (manifest.services["view.web"]) {
          this.type = DisplayType.WebComponent
-         this.component = await entry.fetchResource("view.web")
+         this.component = await ViewWebComponentKey.fetch(entry)
       }
    }
    override exportAST(gen: ASTGenerator) {

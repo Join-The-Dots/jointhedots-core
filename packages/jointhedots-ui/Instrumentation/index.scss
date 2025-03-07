@@ -24,27 +24,6 @@
    overflow: auto;
 }
 
-.LDX-Instrumentation-Error {
-   background-color: rgb(216, 59, 59);
-   padding: 5px;
-   overflow: hidden;
-
-   &>.msg {
-      overflow: hidden;
-   }
-
-   &>.btn {
-      background-color: transparent;
-      border: 1px dashed darkred;
-      border-radius: 5px;
-      cursor: pointer;
-   }
-
-   &>.btn:hover {
-      background-color: rgb(255, 142, 142);
-   }
-}
-
 .LDX-Instrumentation-Placeholder {
    opacity: 0.2;
    background: repeating-linear-gradient(45deg, #fff, #fff 5px, #bbb 5px, #bbb 10px);

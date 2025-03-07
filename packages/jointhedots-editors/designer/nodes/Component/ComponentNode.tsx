@@ -1,9 +1,10 @@
 import {
-    EmptyContext, AST, InvokeView, DXDocumentLayout, createLDXKey, ASTGenerator,
+    EmptyContext, DXDocumentLayout, ASTGenerator,
     ElementJSON, DisplayType, serializeElement,
-    DocumentModel, DXDisplay
+    DXDisplay
 } from '@jointhedots/core'
 import { stringify_document } from '@jointhedots/core/ast/serde/printer'
+import { InvokeView } from '@jointhedots/core/react'
 import { DisplayInfos, ElementBoundingBox, ElementController, InstrumentationLayout, InstrumentationZone } from '@jointhedots/ui/Instrumentation'
 import type { EditorConfig, LexicalEditor, NodeKey, SerializedLexicalNode, Spread } from 'lexical'
 import { $getEditor, DecoratorNode } from 'lexical'
@@ -177,7 +178,7 @@ class ComponentDock extends React.Component<{ node: ComponentNode }> {
         if (element) {
             const params = element.props.read(EmptyContext)
             return <InstrumentationZone controller={node}>
-                <InvokeView origin="safe" descriptor={{
+                <InvokeView origin="safe" view={{
                     name: element.tag,
                     params,
                 }} />

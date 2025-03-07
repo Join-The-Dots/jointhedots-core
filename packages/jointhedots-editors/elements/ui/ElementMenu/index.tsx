@@ -1,7 +1,7 @@
 import React from 'react'
-import { Menu } from '@jointhedots/editors/ui/openContextualMenu'
 import { EditionDriver, EditorMenu, EditorMenuItem, EditionEnvironment, ValueProps } from '../../interfaces'
 import { stringifyDescriptor, convertTextToAST } from '@jointhedots/core'
+import { Menu } from '@jointhedots/ui/openContextualMenu'
 
 export function ValueMenu(props: ValueProps & { menu?: EditorMenu, context: EditionEnvironment, ctl: EditionDriver, onClose: () => void }) {
    const { ctl, context, menu, value, typing, onChange, onClose } = props
@@ -37,7 +37,7 @@ export function ValueMenu(props: ValueProps & { menu?: EditorMenu, context: Edit
          const items = []
          for (const item of section.items) {
             if (item.condition === undefined || item.condition(value, typing, context) === true) {
-               items.push(<Menu.Item key={items.length} title={item.title} icon={item.icon} onClick={onCustom(item)} />)
+               items.push(<Menu.Item key={items.length} name={item.title} icon={item.icon} onClick={onCustom(item)} />)
             }
          }
          if (items.length > 0) {
@@ -55,10 +55,10 @@ export function ValueMenu(props: ValueProps & { menu?: EditorMenu, context: Edit
       {renderMenu(menu)}
       {renderMenu(ctl.editor?.menu)}
       <Menu.Section>
-         <Menu.Item title="Copy" onClick={onCopy} />
-         <Menu.Item title="Paste" onClick={onPaste} />
-         <Menu.Item title="Delete" />
-         <Menu.Item title="See JSON" />
+         <Menu.Item name="Copy" onClick={onCopy} />
+         <Menu.Item name="Paste" onClick={onPaste} />
+         <Menu.Item name="Delete" />
+         <Menu.Item name="See JSON" />
       </Menu.Section>
    </>
 }

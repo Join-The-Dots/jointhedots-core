@@ -1,3 +1,4 @@
+import { ServiceKey } from "../library/interfaces"
 
 export enum LangQuality {
    High,
@@ -29,4 +30,8 @@ export interface LanguageService {
    queryConversation(messages: ChatMessage[], opts?: LangOptions): Promise<ChatMessage>
    queryCompletion(text: LangContent, opts?: LangOptions): Promise<string>
 }
+
+export type LanguageDescriptor = void
+
+export const LanguageDescriptorKey = new ServiceKey<LanguageService, LanguageDescriptor>("language")
 

@@ -162,7 +162,7 @@ function TableOfContentsList({
                   selectedKey === key ? 'selected-heading-wrapper' : ''
                 }`}
                 key={key}>
-                <div
+                <ul
                   onClick={() => scrollToNode(key, index)}
                   role="button"
                   className={indent(tag)}
@@ -176,7 +176,7 @@ function TableOfContentsList({
                       ? text.substring(0, 27) + '...'
                       : text}
                   </li>
-                </div>
+                </ul>
               </div>
             );
           }

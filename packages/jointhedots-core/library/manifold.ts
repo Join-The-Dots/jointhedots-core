@@ -1,11 +1,13 @@
-import { ComponentManifest, ComponentPublication, IComponentProvider, IContentProvider, IResourceLoader } from "./interfaces"
 import { URI, Utils } from "vscode-uri"
+import { ComponentManifest, ComponentPublication, IContentProvider, IResourceLoader } from "./interfaces"
 import { CommonResourceProvider } from "./handlers/CommonResourceProvider"
 import { StaticContentProvider } from "./handlers/StaticContentProvider"
 import { StaticComponentProvider } from "./providers/StaticComponentProvider"
 import { CombinedComponentProvider } from "./providers/CombinedComponentProvider"
-import { ComponentDriverService } from "../services/ComponentDriver"
+import { ComponentServiceKey } from "./service-component"
+import { LocalComponentProvider } from "./providers/LocalComponentProvider"
 
+// Component registry entry
 export class ComponentEntry {
    manifest?: ComponentManifest = undefined
    instance?: any = undefined
@@ -108,6 +110,7 @@ export class ComponentEntry {
    }
 }
 
+// Component resource
 export class ComponentResource {
    entry: any = undefined
    identifier: string = undefined
@@ -151,16 +154,17 @@ export class ComponentResource {
                   this.identifier = identifier
                }
                else if (ref === true) {
-                  const driver = await ComponentsRegistry.acquireComponent(manifest.type).acquireResource("component").fetch<ComponentDriverService>()
+                  const entry = acquireComponent(manifest.type)
+                  const driver = await ComponentServiceKey.fetch(entry)
                   if (component.instance === undefined) {
                      component.instance = null
-                     await driver.create(component, component.manifest)
+                     await driver.createComponent(component, component.manifest)
                   }
                   this.entry = await driver.getService(component, this.resource)
                   this.identifier = null
                }
                else if (ref) {
-                  const factory = await ComponentsRegistry.acquireComponent(ref.type).acquireResource("factory").fetch()
+                  const factory = await acquireComponent(ref.type).acquireResource("factory").fetch()
                   this.entry = await factory(ref.data)
                   this.identifier = null
                }
@@ -230,6 +234,7 @@ export class ComponentsManifold {
    constructor() {
       this.content_provider = new StaticContentProvider()
       this.components_provider.add_provider(new StaticComponentProvider(this.content_provider))
+      this.components_provider.add_provider(new LocalComponentProvider())
       this.resources_loader = new CommonResourceProvider(this.content_provider)
    }
    listen(l: ComponentsListener) {
@@ -239,31 +244,33 @@ export class ComponentsManifold {
    unlisten(l: ComponentsListener) {
       this.listeners.delete(l)
    }
-   acquireComponent(id: string): ComponentEntry {
-      let obj = this.components.get(id) as ComponentEntry
-      if (!obj && typeof id === "string") {
-         obj = new ComponentEntry(id)
-         this.components.set(id, obj)
-      }
-      return obj
+}
+
+export const ComponentsRegistry = new ComponentsManifold()
+
+export function acquireComponent(id: string): ComponentEntry {
+   let obj = ComponentsRegistry.components.get(id) as ComponentEntry
+   if (!obj && typeof id === "string") {
+      obj = new ComponentEntry(id)
+      ComponentsRegistry.components.set(id, obj)
    }
-   acquireResource(ref: string): ComponentResource {
-      const parts = ref.split("#")
-      if (parts.length === 2) {
-         const entry = this.acquireComponent(parts[0])
-         return entry?.acquireResource(parts[1])
-      }
-      return null
+   return obj
+}
+
+export function acquireResource(ref: string): ComponentResource {
+   const parts = ref.split("#")
+   if (parts.length === 2) {
+      const entry = acquireComponent(parts[0])
+      return entry?.acquireResource(parts[1])
    }
-   resolveRelativeComponent(ref: string, from: ComponentEntry): ComponentEntry {
-      if (from && ref.startsWith("/")) {
-         return this.acquireComponent(`${from?.id}${ref}`)
-      }
-      return null
+   return null
+}
+
+export function resolveRelativeComponent(ref: string, from: ComponentEntry): ComponentEntry {
+   if (from && ref.startsWith("/")) {
+      return acquireComponent(`${from?.id}${ref}`)
    }
-   updateComponent(manifest: ComponentManifest): Promise<ComponentEntry> {
-      return null
-   }
+   return null
 }
 
 export async function createNewComponent(manifest: ComponentManifest): Promise<ComponentManifest> {
@@ -284,8 +291,9 @@ export async function updateComponent(manifest: ComponentManifest): Promise<Comp
    if (component && component.loaded) {
       component.manifest = manifest
       if (manifest.type) {
-         const driver = await ComponentsRegistry.acquireComponent(manifest.type).acquireResource("component").fetch<ComponentDriverService>()
-         await driver.update(component, manifest)
+         const entry = acquireComponent(manifest.type)
+         const driver = await ComponentServiceKey.fetch(entry)
+         await driver.updateComponent(component, manifest)
          ComponentsRegistry.listeners.forEach(l => l(component))
       }
    }
@@ -308,5 +316,3 @@ export async function fetchComponentsPublications(components_ids: string[]): Pro
    }
    return results
 }
-
-export const ComponentsRegistry = new ComponentsManifold()

@@ -1,6 +1,6 @@
 {
    "application": {
-      "name": "playground-services",
+      "name": "show",
       "entry": "./startup.tsx",
       "favicon": "../favicon.webp"
    }

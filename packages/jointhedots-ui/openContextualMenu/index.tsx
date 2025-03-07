@@ -22,24 +22,26 @@ type AnchorProps = {
 
 type StyleType = { [key: string]: string }
 
-const stack = []
+export interface StackedOverlay {
+   node: HTMLElement
+   close()
+}
+
+export const overlays_stack: StackedOverlay[] = []
 
 const stopableEvents = ["click", "dbclick", "contextmenu"]
 
-let defaultClassName = "cub8-openContextualMenu"
+let defaultClassName = "jtd-openContextualMenu"
 let defaultStyle: StyleType = {}
 
-function GetMenuIcon(icon: MenuIcon): React.ReactNode {
-   if (typeof icon === "string") {
-      return <Icon name={icon} />
-   }
-   return icon || null
+export function getStackZIndex(stackIndex: number): string {
+   return ((stackIndex + 1) * 1000 + 10000000).toString()
 }
 
 export const Menu = {
    Anchor(props: AnchorProps) {
       const { children, onClick } = props
-      return <div className="cub8-menu-anchor" onClick={onClick}>{children}</div>
+      return <div className="jtd-menu-anchor" onClick={onClick}>{children}</div>
    },
    Item(props: MenuItemProps) {
       let { children, onClick } = props
@@ -61,9 +63,9 @@ export const Menu = {
             }
          }
       }
-      return <div className="cub8-menu-item" onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+      return <li className="jtd-menu-item" onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
          <ItemRowShort {...props}></ItemRowShort>
-      </div>
+      </li>
    },
    LargeItem(props: MenuItemProps) {
       let { children, onClick, onElementRef } = props
@@ -86,7 +88,7 @@ export const Menu = {
          }
       }
       return <div
-         className={"cub8-menu-item-large"}
+         className={"jtd-menu-item-large"}
          onClick={onClick}
          onMouseEnter={onMouseEnter}
          onMouseLeave={onMouseLeave}
@@ -96,11 +98,11 @@ export const Menu = {
       </div>
    },
    Separator() {
-      return <div className="cub8-menu-separator" />
+      return <div className="jtd-menu-separator" />
    },
    Section(props: { title?: string, children?: React.ReactNode }) {
       return <>
-         <div className="cub8-menu-separator">
+         <div className="jtd-menu-separator">
             {props.title}
          </div>
          {props.children}
@@ -110,7 +112,7 @@ export const Menu = {
 
 export function setDefaultMenuStyle(className?: string, style?: StyleType) {
    defaultStyle = style || defaultStyle
-   defaultClassName = `${className || ""} cub8-openContextualMenu`
+   defaultClassName = `${className || ""} jtd-openContextualMenu`
 }
 
 export default function openContextualMenu<T>(
@@ -146,26 +148,26 @@ export default function openContextualMenu<T>(
 
    // Purge top of stack popup
    var stackIndex = 0
-   while (stackIndex < stack.length) {
-      if (!stack[stackIndex].node.contains(tracked)) {
-         stack[stackIndex].close()
+   while (stackIndex < overlays_stack.length) {
+      if (!overlays_stack[stackIndex].node.contains(tracked)) {
+         overlays_stack[stackIndex].close()
          break
       }
       stackIndex++
    }
 
    // Create popup node
-   var node = document.createElement("div")
+   var node = document.createElement("ul")
    node.className = className ? `${className} ${defaultClassName}` : defaultClassName
    Object.assign(node.style, style || defaultStyle)
    node.style.visibility = "hidden"
    node.style.position = "fixed"
-   node.style.zIndex = ((stackIndex + 1) * 1000 + 10000000).toString()
+   node.style.zIndex = getStackZIndex(stackIndex)
 
    function clickOutside(e) {
       if (node && !tracked.contains(e.target)) {
-         for (let i = stackIndex; i < stack.length; i++) {
-            if (stack[i].node.contains(e.target)) return
+         for (let i = stackIndex; i < overlays_stack.length; i++) {
+            if (overlays_stack[i].node.contains(e.target)) return
          }
          close()
       }
@@ -194,10 +196,10 @@ export default function openContextualMenu<T>(
          node = null
 
          // Close sub popup when not the top of stack
-         if (stackIndex < stack.length - 1) {
-            stack[stackIndex + 1].close()
+         if (stackIndex < overlays_stack.length - 1) {
+            overlays_stack[stackIndex + 1].close()
          }
-         stack.pop()
+         overlays_stack.pop()
 
          // Resolve promise
          resolve && resolve(value)
@@ -208,7 +210,7 @@ export default function openContextualMenu<T>(
    document.body.appendChild(node)
    window.addEventListener("mousedown", clickOutside, { capture: true })
    computeEdgeBoxDOM(position, node, tracked, document.body)
-   stack.push({ node, close })
+   overlays_stack.push({ node, close })
 
    // Render popup on node
    const root = ReactDOMClient.createRoot(node)

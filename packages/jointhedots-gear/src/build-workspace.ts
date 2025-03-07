@@ -10,13 +10,15 @@ export enum BuildMode {
    Development = "development",
 }
 
-export async function build_workspace(
-   ws: Workspace,
-   storage: StorageFiles,
-   mode: BuildMode,
-   dist: string,
+export type BuildWorkspaceOptions = {
+   ws: Workspace
+   storage: StorageFiles
+   mode: BuildMode
    port?: number
-): Promise<void> {
+}
+
+export async function build_workspace(opts: BuildWorkspaceOptions): Promise<void> {
+   const { ws, storage, mode, port } = opts
 
    // Prepare overall library
    const lib = ws.merge_libraries(ws.libraries, "workspace")
@@ -42,15 +44,15 @@ export async function build_workspace(
    await emit_library_assets(lib, storage, html_injects)
 
    // Build javascripts assets
-   const context = await create_esbuild_context(lib, storage, Path.resolve(dist), use_dev)
+   const context = await create_esbuild_context(lib, storage, storage.baseDir, use_dev)
    if (use_serve) {
       await serve(port as number, context, storage)
    }
    else {
       await context.rebuild()
+      storage.end()
+      await context.dispose()
    }
-   storage.end()
-   await context.dispose()
 }
 
 async function serve(port: number, context: esbuild.BuildContext, storage: StorageFiles) {
@@ -61,7 +63,7 @@ async function serve(port: number, context: esbuild.BuildContext, storage: Stora
       res.setHeader('Access-Control-Allow-Methods', '*')
       res.setHeader("Access-Control-Allow-Headers", "*")
       next()
-   });
+   })
    app.get('/esbuild', storage.on_changes.route())
    app.get('*', storage.route())
    app.listen(port, () => {

@@ -3,7 +3,7 @@ import { DragDropZone } from "../DragAndDrop"
 import { stopEvent } from "../event.utils"
 import { FeaturesContext, ReactFeaturesContext, PanelInstance } from "../FeaturesLayout"
 import WindowedContainer from "."
-import openContextualMenu, { Menu } from "../openContextualMenu"
+import openContextualMenu, { Menu } from "@jointhedots/ui/openContextualMenu"
 
 export type PanelProps = {
    id: string,
@@ -78,14 +78,14 @@ export default class PanelButton extends Component<PropsType> {
                close()
             }
             return <>
-               <Menu.Item title="Close" onClick={() => {
+               <Menu.Item name="Close" onClick={() => {
                   this.context.unregisterPanel(item)
                   close()
                }} />
                <Menu.Separator />
-               <Menu.Item title="Dock Left" onClick={dockTo("left")} />
-               <Menu.Item title="Dock Right" onClick={dockTo("right")} />
-               <Menu.Item title="Dock Center" onClick={dockTo("center")} />
+               <Menu.Item name="Dock Left" onClick={dockTo("left")} />
+               <Menu.Item name="Dock Right" onClick={dockTo("right")} />
+               <Menu.Item name="Dock Center" onClick={dockTo("center")} />
             </>
          })
       }

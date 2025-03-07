@@ -1,6 +1,5 @@
 import { FeatureDescriptor, FeatureInstance } from '../ui/FeaturesLayout'
 import { SelectionPanel } from './panels/SelectionPanel'
-import { toast } from 'react-toastify'
 import { ElementEditionSelection, ModelEditionSession } from './EditionSession'
 import { DocumentModel } from '@jointhedots/core'
 import "../elements/register"

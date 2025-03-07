@@ -6,11 +6,11 @@ export class IconUrlCollection implements IconCollection {
    constructor(readonly baseUrl: string) {
    }
    draw(props: IconProps, theme: ThemeProvider) {
-      const { name, title, className, onClick } = props
+      const { name, title, className, style, onClick } = props
       return <div
          className={className || ""}
          title={title}
-         style={{ backgroundImage: `url(${this.baseUrl}${name})`, ...styles }}
+         style={{ ...style, backgroundImage: `url(${this.baseUrl}${name})`, ...styles }}
          onClick={onClick}
       />
    }

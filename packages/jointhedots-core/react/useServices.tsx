@@ -1,52 +1,180 @@
-import React, { useEffect, useState } from "react"
-import { ServiceInterface, ServicePoint } from "../library/services"
+import React, { useContext, useEffect, useMemo, useState } from "react"
+import { createServiceGroup, createServicePoint, listenServicePoints, ServicePoint } from "../library/service-points"
 import { useAsyncMemo } from "./useAsyncMemo"
+import { ViewRequirements } from "../services"
 
-type ServicePointsMap = Map<ServicePoint, ServiceInterface[]>
+export type IService = unknown
+export type ServicePointsMap = Map<ServicePoint, IService[]>
 
-const ServicePointsContext: React.Context<ServicePointsMap> = React.createContext(null)
+export interface IServicePointsProvider {
+   getService<IService>(svc: ServicePoint): IService[]
+}
 
-export function useServices<IService extends ServiceInterface>(servicePoint: ServicePoint<IService>): IService[] {
-   const mapping = React.useContext(ServicePointsContext)
-   if (mapping) {
-      return mapping.get(servicePoint) as IService[]
+export interface IServicePointsController {
+   notifyChange(svc: ServicePoint)
+   dispose()
+}
+
+export interface IServicePointsSupport extends IServicePointsProvider {
+   addController(c: IServicePointsController)
+   removeController(c: IServicePointsController)
+}
+
+export class MissingServiceError extends Error {
+   constructor(
+      public missings: ServicePoint[],
+      public requireds?: ServicePoint[],
+   ) {
+      super(`Missing service point: ${missings.map(s => s.id).join(", ")}`)
    }
-   else {
+}
+
+class ServicePointsGlobal implements IServicePointsSupport {
+   consumers = new Set<IServicePointsController>
+   getService<IService>(svc: ServicePoint): IService[] {
+      return svc.services as IService[]
+   }
+   addController(c: IServicePointsController) {
+      this.consumers.add(c)
+   }
+   removeController(c: IServicePointsController) {
+      return this.consumers.delete(c)
+   }
+   onServiceChangeHandler = (svc: ServicePoint) => {
+      for (const c of this.consumers) {
+         c.notifyChange(svc)
+      }
+   }
+}
+
+class ServicePointsProxy implements IServicePointsProvider {
+   constructor(
+      readonly controller: ServicePointsController,
+   ) {
+   }
+   getService<IService>(svc: ServicePoint): IService[] {
+      return this.controller.getService<IService>(svc)
+   }
+}
+
+type NewProviderHanlder = (provider: IServicePointsProvider | MissingServiceError) => void
+
+class ServicePointsController implements IServicePointsController {
+   services: ServicePointsMap = new Map<ServicePoint, IService[]>
+   constructor(
+      public support: IServicePointsSupport,
+      public requireds: ServicePoint[],
+      public requirements: ViewRequirements,
+      public onNewProvider: NewProviderHanlder,
+   ) {
+      support.addController(this)
+   }
+   createProvider() {
+      return new ServicePointsProxy(this)
+   }
+   getService<IService>(svc: ServicePoint): IService[] {
+      let items = this.services.get(svc)
+      if (!items) {
+         items = this.support.getService(svc)
+         this.services.set(svc, this.support.getService(svc))
+      }
+      return svc.services as IService[]
+   }
+   async notifyChange(svc: ServicePoint) {
+      if (this.services.has(svc)) {
+         await this.setup()
+      }
+   }
+   async setup(): Promise<ServicePointsController> {
+      const { requireds, requirements } = this
+      let missings = null
+      if (requireds) {
+         for (const svc of requireds) {
+            const items = svc.ready ? svc.services : await svc.fetch()
+            if (items.length > 0) {
+               this.services.set(svc, items)
+            }
+            else {
+               if (!missings) missings = []
+               missings.push(svc)
+            }
+         }
+      }
+      if (requirements) {
+         const { servicePoints } = requirements
+         for (const id in servicePoints) {
+            const req = servicePoints[id]
+            const svc = req.multiple
+               ? createServiceGroup(id, req.service)
+               : createServicePoint(id, req.service)
+            const items = svc.ready ? svc.services : await svc.fetch()
+            if (items.length > 0) {
+               this.services.set(svc, items)
+            }
+            else {
+               if (!missings) missings = []
+               missings.push(svc)
+            }
+            //TODO
+         }
+      }
+      this.onNewProvider(new ServicePointsProxy(this))
+      return this
+   }
+   dispose() {
+      if (this.support) {
+         this.support.removeController(this)
+         this.support = null
+         this.services = null
+      }
+   }
+}
+
+const globalSupport = new ServicePointsGlobal()
+listenServicePoints(globalSupport.onServiceChangeHandler)
+
+export const ServicePointsSupportContext: React.Context<IServicePointsSupport> = React.createContext(globalSupport)
+export const ServicePointsProviderContext: React.Context<IServicePointsProvider> = React.createContext(globalSupport)
+
+export function useServices<IService>(servicePoint: ServicePoint<IService>): IService[] {
+   const provider = React.useContext(ServicePointsProviderContext)
+   if (!provider) {
       console.error("Wrap in <MountServicePoints> before using service point:", servicePoint.id)
       return null
    }
+   const result = provider.getService<IService>(servicePoint)
+   if (result.length == 0) {
+      throw new MissingServiceError([servicePoint], [servicePoint])
+   }
+   return result
 }
 
-export function useService<IService extends ServiceInterface>(servicePoint: ServicePoint<IService>): IService {
-   return useServices(servicePoint)?.[0]
+export function useService<IService>(servicePoint: ServicePoint<IService>): IService {
+   return useServices(servicePoint)[0]
 }
 
-export function MountServicePoints(props: {
-   services: ServicePoint[]
-   children: React.ReactNode
-}) {
-   const { services, children } = props
-   const [status, forceUpdate] = useState(null)
-   const mapping = useAsyncMemo(async () => {
-      const mapping = new Map<ServicePoint, ServiceInterface[]>()
-      for (const srv of services) {
-         mapping.set(srv, await srv.fetch())
-      }
-      return mapping
-   }, null, [services, status])
+async function createServicesController(
+   support: IServicePointsSupport,
+   requireds: ServicePoint[],
+   requirements: ViewRequirements,
+   onNewProvider: (provider: IServicePointsProvider | MissingServiceError) => void
+): Promise<IServicePointsController> {
+   const ctl = new ServicePointsController(support, requireds, requirements, onNewProvider)
+   await ctl.setup()
+   return ctl
+}
+
+export function useServicesProvider(requireds: ServicePoint[], requirements: ViewRequirements): IServicePointsProvider | MissingServiceError | null {
+   const support = useContext(ServicePointsSupportContext)
+   const [provider, setProvider] = useState<IServicePointsProvider | MissingServiceError>(null)
+
+   const controller = useAsyncMemo(async () => {
+      return createServicesController(support, requireds, requirements, setProvider)
+   }, null, [requireds])
+
    useEffect(() => {
-      const l = () => {
-         forceUpdate({})
-      }
-      services.forEach(s => s.listen(l))
-      return () => services.forEach(s => s.unlisten(l))
-   }, [services])
-   if (mapping) {
-      return <ServicePointsContext.Provider value={mapping}>
-         {children}
-      </ServicePointsContext.Provider>
-   }
-   else {
-      return null
-   }
+      return () => controller?.dispose()
+   }, [controller])
+
+   return provider
 }

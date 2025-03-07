@@ -1,3 +1,4 @@
+import { ServiceKey } from "../library/interfaces"
 
 
 export type NameSpaceId = string
@@ -75,3 +76,8 @@ export interface StorageService {
    getChangeLog(): Promise<StorageChangeLog>
    getFileLog(key: FileKey): Promise<StorageChangeLog>
 }
+
+export type StorageDescriptor = void
+
+export const StorageServiceKey = new ServiceKey<StorageService, StorageDescriptor>("storage")
+

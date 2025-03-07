@@ -1,7 +1,7 @@
 import React from "react"
-import { IconError } from "./IconError"
 import { ThemeContext, ThemeProvider } from "../theme"
 import { IconUrlCollection } from "./IconUrlCollection"
+import { IconBlank, IconError } from "./icons-defaults"
 
 export interface IconCollection {
    draw(props: IconProps, theme: ThemeProvider): React.ReactElement
@@ -19,7 +19,8 @@ export type IconProps = {
 const collections: {
    [namespace: string]: IconCollection
 } = {
-   "default": new IconError()
+   "blank": new IconBlank(),
+   "?": new IconError(),
 }
 
 export function registerIconCollection(namespace: string, collection: IconCollection) {
@@ -27,14 +28,17 @@ export function registerIconCollection(namespace: string, collection: IconCollec
 }
 
 export function getIconCollection(name: string) {
-   const namespace_end = typeof name === "string" ? name.indexOf(":") : -1
-   if (namespace_end > 0) {
-      const namespace = name.slice(0, namespace_end)
-      return collections[namespace] || collections["default"]
+   if (name) {
+      const namespace_end = typeof name === "string" ? name.indexOf(":") : -1
+      if (namespace_end > 0) {
+         const namespace = name.slice(0, namespace_end)
+         return collections[namespace] || collections["?"]
+      }
+      else {
+         return collections[name] || collections["?"]
+      }
    }
-   else {
-      return collections[name] || collections["default"]
-   }
+   return collections["blank"]
 }
 
 registerIconCollection("data", new IconUrlCollection(""))

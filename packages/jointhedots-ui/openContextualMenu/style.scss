@@ -1,4 +1,4 @@
-.cub8-menu-item {
+.jtd-menu-item {
    display: flex;
    flex-direction: row;
    align-items: center;
@@ -29,7 +29,7 @@
 
 }
 
-.cub8-menu-item-large {
+.jtd-menu-item-large {
    display: flex;
    flex-direction: row;
    align-items: center;
@@ -113,7 +113,7 @@
    }
 }
 
-.cub8-menu-separator {
+.jtd-menu-separator {
    border-bottom: 1px solid #999;
    margin: 5px;
    text-align: center;
@@ -121,7 +121,7 @@
    font-size: 80%;
 }
 
-.cub8-openContextualMenu {
+.jtd-openContextualMenu {
    box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1),
      inset 0 0 0 1px rgba(255, 255, 255, 0.5);
    border-radius: 8px;
@@ -132,12 +132,12 @@
    min-width: 150px;
    overflow: auto;
 
-   &> :first-child.cub8-menu-separator {
+   &> :first-child.jtd-menu-separator {
       border: none;
    }
 }
 
-.cub8-menu-anchor {
+.jtd-menu-anchor {
    display: flex;
    flex-direction: row;
    padding: 5px;

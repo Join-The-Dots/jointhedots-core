@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo } from 'react'
-import { ComponentsRegistry, ComponentPublication, IComponentProvider, ComponentManifest, updateComponent, MapLike } from '@jointhedots/core'
+import { ComponentsRegistry, ComponentPublication, IComponentProvider, MapLike, ComponentFilter, createComponentFilter, acquireComponent } from '@jointhedots/core'
 import { useAsyncState } from '@jointhedots/core/react'
 import { Stack } from '@jointhedots/ui/Layouts'
 import { TextInput } from '@jointhedots/ui/utils/TextInput'
-import './index.scss'
 import { ItemProps, ItemRowRich, ItemRowShort } from '../Items'
-import { askData, askQuestion } from '../askDialog'
+import { askQuestion } from '../Dialog'
+import { editComponentManifest } from './ComponentsEditor'
+import './index.scss'
 
 export function getComponentGroupName(id: string) {
    const pos = id.lastIndexOf(":")
@@ -29,40 +30,6 @@ export function groupComponentPublications(items: ComponentPublication[]): MapLi
    return result
 }
 
-/* export function ComponentItem(props: {
-   infos: ComponentPublication
-   onSelect?: (infos: ComponentPublication) => void
-}) {
-   const { infos, onSelect } = props
-
-   const onDragStart = () => {
-      return { "text/plain": infos }
-   }
-
-   const onMenu = React.useCallback((e) => {
-      if (e.button === 2) {
-         openContextualMenu(e, (close) => {
-            return <>
-               <Menu.Item title="Open" />
-            </>
-         })
-         e.stopPropagation()
-      }
-   }, [infos])
-
-   return <DragZone
-      otherProps={{
-         className: "ComponentItem",
-         onMouseDown: onMenu,
-         onClick: () => onSelect(infos),
-      }}
-      onDragStart={onDragStart}
-   >
-      <Icon name={infos.icon || "code:symbol/element"} />
-      <div>{getComponentSmallName(infos.title)}</div>
-   </DragZone >
-} */
-
 export type ComponentItemDisplay = {
    grouped?: boolean
    small?: boolean
@@ -75,8 +42,9 @@ export function ComponentItem(props: {
    selected?: boolean
    display?: ComponentItemDisplay
    onSelect?: (item: ItemProps<ComponentPublication>) => void
+   onActivate?: (item: ItemProps<ComponentPublication>) => void
 }) {
-   const { entry, display, selected, onSelect } = props
+   const { entry, display, selected, onSelect, onActivate } = props
    const ItemRow = display?.small ? ItemRowShort : ItemRowRich
    const tooling = []
    if (entry.type) {
@@ -85,20 +53,8 @@ export function ComponentItem(props: {
          icon: "bi:pencil",
          onActivate: async () => {
             const { component_id } = entry
-            const manifest = await ComponentsRegistry.acquireComponent(component_id).fetch()
-            const driver = await ComponentsRegistry.acquireComponent(manifest.type).fetch()
-
-            const newManifest = await askData(`${driver.title}`, {
-               type: "object",
-               properties: {
-                  name: { type: "string" },
-                  settings: driver["component"].data,
-               }
-            }, manifest)
-
-            if (newManifest && newManifest != manifest) {
-               updateComponent(newManifest)
-            }
+            const manifest = await acquireComponent(component_id).fetch()
+            await editComponentManifest(manifest)
          },
       })
       if (display?.allowDelete) tooling.push({
@@ -112,13 +68,14 @@ export function ComponentItem(props: {
       })
    }
    return <ItemRow
-      onSelect={onSelect}
       data={entry}
       icon={entry.icon || "avatar:" + entry.title}
       name={entry.title || entry.component_id}
       summary={entry.description || entry.type}
       selected={selected}
       tooling={tooling}
+      onSelect={onSelect}
+      onActivate={onActivate}
    />
 }
 
@@ -126,8 +83,9 @@ export function ComponentsList(props: {
    entries: ComponentPublication[]
    display?: ComponentItemDisplay
    onSelect?: (infos: ComponentPublication) => void
+   onActivate?: (infos: ComponentPublication) => void
 }) {
-   const { display, entries, onSelect } = props
+   const { display, entries, onSelect, onActivate } = props
 
    const groupeds = useMemo(() => {
       if (display?.grouped) {
@@ -142,6 +100,10 @@ export function ComponentsList(props: {
       onSelect(entry.data)
    }, [onSelect])
 
+   const activate = useCallback((entry: ItemProps<ComponentPublication>) => {
+      onActivate(entry.data)
+   }, [onActivate])
+
    if (groupeds) {
       return Object.keys(groupeds).map((pack, i) => {
          return <div key={pack}>
@@ -154,6 +116,7 @@ export function ComponentsList(props: {
                   entry={entry}
                   display={display}
                   onSelect={onSelect && select}
+                  onActivate={onActivate && activate}
                />
             })}
          </div>
@@ -167,6 +130,7 @@ export function ComponentsList(props: {
                entry={entry}
                display={display}
                onSelect={onSelect && select}
+               onActivate={onActivate && activate}
             />
          })}
       </div>
@@ -174,55 +138,65 @@ export function ComponentsList(props: {
 }
 
 export function ComponentsFilteredList(props: {
-   filter?: string
-   services?: string[]
+   filter?: ComponentFilter
    provider?: IComponentProvider
    display?: ComponentItemDisplay
-   onChange?: (manifest: ComponentManifest) => void
    onSelect?: (infos: ComponentPublication) => void
+   onActivate?: (infos: ComponentPublication) => void
 }) {
-   const { display, filter, services, onSelect } = props
+   const { display, filter, onSelect, onActivate } = props
    const provider = props.provider || ComponentsRegistry.components_provider
 
    const entries = useAsyncState<ComponentPublication[]>(async () => {
-      return provider.search_component_publications(filter, services)
+      return provider.search_component_publications(filter)
    }, [filter])
 
    return <>
       {entries.waiting((entries) => {
-         return <ComponentsList entries={entries} display={display} onSelect={onSelect} />
+         return <ComponentsList
+            entries={entries}
+            display={display}
+            onSelect={onSelect}
+            onActivate={onActivate}
+         />
       })}
    </>
 }
 
 export function ComponentBrowser(props: {
-   filter?: string
-   services?: string[]
+   filter?: Partial<ComponentFilter>
    provider?: IComponentProvider
    onSelect?: (infos: ComponentPublication) => void
+   onActivate?: (infos: ComponentPublication) => void
 }) {
-   const { provider, services, onSelect } = props
-   const [filter, setFilter] = React.useState(props.filter)
+   const { provider, onSelect, onActivate } = props
+   const [filter, setFilter] = React.useState(() => createComponentFilter(props.filter))
 
    useEffect(() => {
-      if (props.filter !== filter) setFilter(props.filter)
+      if (props.filter !== filter) setFilter(createComponentFilter(props.filter))
    }, [props.filter])
 
    return (<Stack gap={3} padding={10} vertical className="Livedoc-Component-Browser">
       <Stack.FixedDock>
          <Stack gap={3}>
             <Stack.FlexDock>
-               <TextInput label="Search" value={filter} onChange={setFilter} />
+               <TextInput
+                  label="Search"
+                  value={filter.query}
+                  onChange={(query) => {
+                     setFilter(createComponentFilter({ ...filter, query }))
+                  }}
+               />
             </Stack.FlexDock>
          </Stack>
       </Stack.FixedDock>
       <Stack.FlexDock>
          <ComponentsFilteredList
             filter={filter}
-            services={services}
             display={browser_display}
             provider={provider}
             onSelect={onSelect}
+            onActivate={onActivate}
          />
       </Stack.FlexDock>
    </Stack>)

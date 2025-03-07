@@ -107,7 +107,7 @@ export function LabelButton(label: LabelProps) {
 export function ItemIcon(item: LabelProps) {
    let { summary, onActivate } = item
    return <div
-      className="cub8-item-short"
+      className="jtd-item-short"
       title={GetNodeText(summary)}
       onClick={onActivate && (() => onActivate(item))}
    >
@@ -118,8 +118,8 @@ export function ItemIcon(item: LabelProps) {
 export function ItemRowShort(item: ItemProps) {
    let { name, summary, selected, onSelect, onActivate } = item
    if (!onActivate) onActivate = onSelect
-   return <div
-      className="cub8-item-short"
+   return <li
+      className={onSelect ? "jtd-item-short selectable" : "jtd-item-short"}
       title={GetNodeText(summary)}
       onClick={onActivate && ((e) => {
          e.stopPropagation()
@@ -130,7 +130,7 @@ export function ItemRowShort(item: ItemProps) {
       <div className="item-infos">{name}</div>
       {(selected == true) ? <Switch selected={true} onSelect={() => onSelect(item)} /> : null}
       {(selected == false) ? <Switch selected={false} onSelect={() => onSelect(item)} /> : null}
-   </div>
+   </li>
 }
 
 export function ItemRowRich(item: ItemProps) {
@@ -164,10 +164,12 @@ export function ItemRowRich(item: ItemProps) {
          }
       }
    }
-   return <div
-      className={selected === true ? "cub8-item-large selected" : (onSelect || selected === false) ? "cub8-item-large unselected" : "cub8-item-large"}
+   const select = onSelect && ((e) => { e.stopPropagation(); onSelect(item) })
+   const activate = onActivate ? (() => onActivate(item)) : select
+   return <li
+      className={selected === true ? "jtd-item-large selected" : (onSelect || selected === false) ? "jtd-item-large unselected" : "jtd-item-large"}
       title={GetNodeText(summary)}
-      onClick={onClick || onSelect}
+      onClick={onClick || activate}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
    >
@@ -177,7 +179,8 @@ export function ItemRowRich(item: ItemProps) {
          {summary && <div>{summary}</div>}
       </div>
       {DrawToolings(item.tooling)}
-      {(selected == true) ? <Switch selected={true} onSelect={() => onSelect(item)} /> : null}
-      {(selected == false) ? <Switch selected={false} onSelect={() => onSelect(item)} /> : null}
-   </div>
+      {(selected == true) ? <Switch selected={true} onSelect={select} /> : null}
+      {(selected == false) ? <Switch selected={false} onSelect={select} /> : null}
+   </li>
 }
+

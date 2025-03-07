@@ -1,6 +1,6 @@
 import React, { Component } from "react"
-import openContextualMenu, { Menu } from "../openContextualMenu"
 import { FeaturesContext, ReactFeaturesContext } from "../FeaturesLayout"
+import openContextualMenu, { Menu } from "@jointhedots/ui/openContextualMenu"
 
 class FrameMenu extends Component<any> {
    static contextType = ReactFeaturesContext
@@ -42,7 +42,7 @@ class FrameMenu extends Component<any> {
                userOpenable && menuItems.push(<Menu.Item
                   key={menuItems.length}
                   onClick={this.handleClick(feature, name)}
-                  title={defaultTitle || name}
+                  name={defaultTitle || name}
                />)
             }
          }

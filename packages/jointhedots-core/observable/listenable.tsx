@@ -186,7 +186,7 @@ export class Listenable<S = any> {
 
 Listenable.setState = Listenable.prototype.setState
 
-function dispatchStateEvent(key, value) {
+function dispatchStateEvent(this: Listenable, key, value) {
    if (this[key] !== value) {
 
       // Prepare events slot
@@ -205,8 +205,8 @@ function dispatchStateEvent(key, value) {
    }
 }
 
-function event_dispatcher() {
-   let listeners = this[".listeners"]
+function event_dispatcher(this: Listenable) {
+   let listeners = this[".listeners"] as any
    const events = this[".events"]
    const count = listeners ? listeners.length : 0
    this[".events"] = null

@@ -42,7 +42,7 @@ export class StorageFiles implements IStorageStream {
    on_changes = new SourceEventEmitter()
    baseDir: string = ""
    assets: string[] = []
-   constructor(baseDir: string) {
+   constructor(public name: string, baseDir: string) {
       this.baseDir = Path.resolve(baseDir)
    }
    begin(cleanup: boolean) {

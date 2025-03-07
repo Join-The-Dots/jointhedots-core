@@ -20,6 +20,7 @@
     "baseUrl": ".",
     "outDir": "dist/lib",
     "jsx": "react-jsx",
+    "noImplicitThis": true,
     "paths": {
       "@jointhedots/core/*": [
         "./packages/jointhedots-core/*"

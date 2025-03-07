@@ -12,7 +12,6 @@ import {
   LexicalContextMenuPlugin,
   MenuOption,
 } from '@lexical/react/LexicalContextMenuPlugin';
-import { openDialog } from '@jointhedots/editors/ui/openDialog';
 import {
   $getNearestNodeFromDOMNode,
   $getSelection,
@@ -27,6 +26,7 @@ import {useCallback, useMemo} from 'react';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { useDocumentContext } from '../../context/DocumentContext';
+import { openDialog } from '@jointhedots/ui/openDialog'
 
 function ContextMenuItem({
   index,

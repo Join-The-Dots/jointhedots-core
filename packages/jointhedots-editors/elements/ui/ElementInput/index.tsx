@@ -1,12 +1,12 @@
 import React from 'react'
 import { EditionContext, EditionDriver, EditorMenu, ValueProps, sortMatchedControllers } from '../../interfaces'
-import openContextualMenu, { Menu } from '@jointhedots/editors/ui/openContextualMenu'
 import Icon from '@jointhedots/ui/Icon'
 import "./index.scss"
 import { DropZone } from '../../../ui/DragAndDrop'
 import { ValueMenu } from '../ElementMenu'
 import { useAsyncState } from '@jointhedots/core/react/useAsyncState'
 import { ElementsEditors } from '@jointhedots/editors/elements'
+import openContextualMenu, { Menu } from '@jointhedots/ui/openContextualMenu'
 
 export function NoInput(props: ValueProps): JSX.Element {
    if (props.value instanceof Object) return <>Unsupported: {props.value.toString()}</>
@@ -44,7 +44,7 @@ export default function ValueInput(props: ValueProps & {
          }
          for (const ctl of sortMatchedControllers(matchings)) {
             items.push(<Menu.Item
-               title={ctl.name}
+               name={ctl.name}
                icon={ctl.icon}
                onClick={apply(ctl)}
             />)

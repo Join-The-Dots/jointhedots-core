@@ -134,6 +134,9 @@ export class Workspace {
    ) {
       this.features = features?.split(",") || []
    }
+   get_library(name: string) {
+      return this.libraries.find(x => x.name === name)
+   }
    is_enabled_for(features?: FeatureID[]) {
       if (this.features.length > 0 && features) {
          return features.reduce((val, ft) => this.features.includes(ft) || val, false)
@@ -167,10 +170,40 @@ export class Workspace {
 
 const exclude_dirs = ["node_modules"]
 
+async function discover_component(lib: Library, fpath: string) {
+   try {
+      const data = await Fsp.readFile(fpath)
+      const desc = JSON.parse(data.toString()) as ComponentManifest
+      if (lib.is_enabled_for(desc.features)) {
+         const err = checkComponentManifest(desc, fpath)
+         if (err) throw err
+         lib.components.set(fpath, desc as ComponentManifest)
+      }
+   }
+   catch (e) {
+      console.log(`! invalid component at ${fpath}: ${e?.message}`)
+   }
+}
+
+async function discover_declaration(lib: Library, fpath: string) {
+   try {
+      const data = await Fsp.readFile(fpath)
+      const desc = JSON.parse(data.toString()) as DeclarationDescriptor
+      if (lib.is_enabled_for(desc.features)) {
+         lib.declarations.set(fpath, desc as ComponentManifest)
+         console.log(`+ declaration '${lib.name}': ${Path.relative(lib.path, fpath)}`)
+      }
+   }
+   catch (e) {
+      console.log(`! invalid declaration at ${fpath}: ${e?.message}`)
+   }
+}
+
 async function discover_library_components(lib: Library, path: string) {
    const comp_dir_name = "component.json"
    const comp_file_ext = ".component.json"
 
+   // Collect declaration files from library directory
    for (const fname of await Fsp.readdir(path)) {
       const fpath = `${path}/${fname}`
       const fstat = await Fsp.stat(fpath)
@@ -181,27 +214,22 @@ async function discover_library_components(lib: Library, path: string) {
       }
       else if (fstat.isFile()) {
          const is_component = fname === comp_dir_name || fname.endsWith(comp_file_ext)
-         if (fname === "declaration.json" || fname === "publication.json" || is_component) {
-            try {
-               const data = await Fsp.readFile(fpath)
-               const desc = JSON.parse(data.toString()) as (ComponentManifest & DeclarationDescriptor)
-               if (lib.is_enabled_for(desc.features)) {
-                  if (is_component) {
-                     const err = checkComponentManifest(desc, fpath)
-                     if (err) throw err
-                     lib.components.set(fpath, desc as ComponentManifest)
-                     console.log("+ component:", fpath)
-                  }
-                  else {
-                     lib.declarations.set(fpath, desc as ComponentManifest)
-                     console.log("+ declaration:", fpath)
-                  }
-               }
-            }
-            catch (e) {
-               console.log(`! invalid descriptor at ${fpath}: ${e?.message}`)
-            }
+         if (is_component) {
+            await discover_component(lib, fpath)
          }
+         else if (fname === "declaration.json" || fname === "publication.json") {
+            await discover_declaration(lib, fpath)
+         }
+      }
+   }
+
+   // Analyze libary deployment manifest
+   const manifest_path = `${path}/components.manifest.json`
+   if (Fs.existsSync(manifest_path)) {
+      const manifest = JSON.parse(Fs.readFileSync(manifest_path).toString()) as DeploymentManifest
+      for (const id in manifest.components) {
+         const fpath = Path.join(path, manifest.components[id])
+         await discover_component(lib, fpath)
       }
    }
 }
@@ -501,7 +529,7 @@ async function prepare_library(lib: Library) {
          }
          lib.entries[app.name] = app.entry
          lib.applications.push(app)
-         console.log(`+ application: ${app.name} : http://localhost:3000/${app.name}.html`)
+         console.log(`+ application '${lib.name}': ${app.name} : http://localhost:3000/${app.name}.html`)
       }
 
       // Prepare assets descriptor
@@ -513,7 +541,7 @@ async function prepare_library(lib: Library) {
                   to: entry,
                }
                lib.assets.push(assets)
-               console.log(`+ assets: ${assets.from} -> ${assets.to}`)
+               console.log(`+ assets '${lib.name}': ${assets.from} -> ${assets.to}`)
             }
             else {
                const assets = {
@@ -521,7 +549,7 @@ async function prepare_library(lib: Library) {
                   to: entry.to,
                }
                lib.assets.push(assets)
-               console.log(`+ assets: ${assets.from} -> ${assets.to}`)
+               console.log(`+ assets '${lib.name}': ${assets.from} -> ${assets.to}`)
             }
          }
       }
@@ -543,7 +571,7 @@ async function prepare_library(lib: Library) {
          entries: undefined,
       }
       lib.manifests[id] = manifest
-      console.log(`+ component: ${id}`)
+      console.log(`+ component '${lib.name}': ${id} `)
 
       function compile_resource_map(kind: string, entries: MapLike<ResourceEntry>, baseDir: string) {
          const catalog: MapLike<ResourceEntry> = {}
@@ -558,7 +586,7 @@ async function prepare_library(lib: Library) {
                   lib.entries[ref] = file
                }
                catalog[name] = `./${ref}.js#${parts[1] || "default"}`
-               if (debug_trace) console.log(`+ ${kind}: ${id}#${name} -> ${catalog[name]}`)
+               if (debug_trace) console.log(`+ ${kind} '${lib.name}': ${id}#${name} -> ${catalog[name]}`)
             }
             else {
                catalog[name] = link
@@ -580,7 +608,7 @@ async function prepare_library(lib: Library) {
    for (const [path, desc] of lib.declarations) {
       for (const name in desc.collections) {
          const file = `${Path.dirname(path)}/${name}.ts`
-         console.log("+ update:", file)
+         console.log(`+ update '${lib.name}': ${file}`)
          const code = await generate_collection(name, Path.dirname(path), desc.collections[name], lib)
          await Fsp.writeFile(file, code)
       }

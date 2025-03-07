@@ -3,9 +3,9 @@ import DropDown, { DropDownItem } from '../../ui/DropDown';
 import { InsertImageDialog } from '../../nodes/Images/ImagesPlugin';
 import { InsertInlineImageDialog } from '../../nodes/InlineImage/InlineImagePlugin';
 import { InsertTableDialog } from '../../nodes/Table/TablePlugin';
-import { openDialog } from '@jointhedots/editors/ui/openDialog';
 import { ComponentViewDialog } from '@jointhedots/editors/designer/nodes/Component/ComponentViewDialog'
 import { useDocumentContext } from '../../context/DocumentContext';
+import { openDialog } from '@jointhedots/ui/openDialog'
 
 export function InsertToolbox(props: { activeEditor: LexicalEditor, editor: LexicalEditor, isEditable: boolean, showModal: any }) {
   const { activeEditor, isEditable, showModal } = props

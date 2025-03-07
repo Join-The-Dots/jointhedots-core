@@ -1,6 +1,6 @@
 import React from "react"
 
-export class AsyncState<T>{
+export class AsyncState<T> {
    private promise: Promise<T> = null
    private dispatch: (x: T) => void = null
    private updateTimer: any = null

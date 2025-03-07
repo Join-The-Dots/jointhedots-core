@@ -6,8 +6,9 @@
    "license": "MIT",
    "componentsContainer": true,
    "exports": {
-      "./askDialog": "./askDialog",
+      "./ApplicationBoard": "./ApplicationBoard",
       "./ComponentsLibrary": "./ComponentsLibrary",
+      "./Dialog": "./Dialog",
       "./Icon": "./Icon",
       "./Instrumentation": "./Instrumentation",
       "./Items": "./Items",
@@ -18,8 +19,6 @@
       "./theme": "./theme"
    },
    "dependencies": {
-      "react-router-dom": "~6.3.0",
-      "react-bootstrap": "^2.10.5",
       "@salesforce-ux/design-system": "^2.21.1",
       "@rjsf/core": "^5.23.2",
       "@rjsf/utils": "^5.23.2",
@@ -27,7 +26,8 @@
    },
    "peerDependencies": {
       "@jointhedots/core": "*",
-      "react": "^18.2.0",
-      "react-dom": "^18.2.0"
+      "react": ">=18.2.0",
+      "react-dom": ">=18.2.0",
+      "monaco-editor": ">=0.52.2"
    }
 }

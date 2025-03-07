@@ -12,14 +12,14 @@ export class IconSVGCollection implements IconCollection {
       this.darks[name] = `url(${dark_icon})`
    }
    draw(props: IconProps, theme: ThemeProvider) {
-      const { name, title, className, onClick } = props
+      const { name, title, className, style, onClick } = props
       const icon = theme.lighting === ThemeLighting.Light
          ? this.lights[name] || this.lights[this.defaultIcon]
          : this.darks[name] || this.darks[this.defaultIcon]
       return <div
          className={className || ""}
          title={title}
-         style={{ backgroundImage: icon, ...styles }}
+         style={{ ...style, backgroundImage: icon, ...styles }}
          onClick={onClick}
       />
    }

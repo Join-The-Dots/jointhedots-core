@@ -1,9 +1,7 @@
 import React from "react"
 import ReactDOMClient from 'react-dom/client'
+import { getStackZIndex, overlays_stack } from "../openContextualMenu"
 import "./style.scss"
-import { Button } from "react-bootstrap"
-
-const modalStack = []
 
 export class PopupCancel extends Error {
 }
@@ -14,14 +12,14 @@ export function openDialog<T>(renderer: (resolve: (data: T) => void) => React.Re
       node.style.position = "absolute"
       node.style.left = "0px"
       node.style.top = "0px"
-      node.style.zIndex = (modalStack.length * 1000 + 1000).toString()
+      node.style.zIndex = getStackZIndex(overlays_stack.length)
       if (height) {
-         node.style.setProperty("--poly-Popup-min-height", height)
-         node.style.setProperty("--poly-Popup-max-height", height)
+         node.style.setProperty("--jtd-Popup-min-height", height)
+         node.style.setProperty("--jtd-Popup-max-height", height)
       }
       else {
-         node.style.setProperty("--poly-Popup-min-height", "0")
-         node.style.setProperty("--poly-Popup-max-height", "90%")
+         node.style.setProperty("--jtd-Popup-min-height", "0")
+         node.style.setProperty("--jtd-Popup-max-height", "90%")
       }
       document.body.appendChild(node)
 
@@ -42,7 +40,7 @@ export function openDialog<T>(renderer: (resolve: (data: T) => void) => React.Re
 
       // Render popup on node
       const root = ReactDOMClient.createRoot(node)
-      root.render(<div className="poly-Popup-modal-group">
+      root.render(<div className="jtd-Popup-modal-group">
          <div />
          <div onMouseDown={handleReject}>
             <div onMouseDown={handleStopPropagation}>

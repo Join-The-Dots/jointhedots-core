@@ -6,11 +6,10 @@ import { EditionDriver, EditionContext, ValueProps } from '../../interfaces'
 import { Stack } from '@jointhedots/ui/Layouts'
 import "./index.scss"
 import Button from '@jointhedots/editors/ui/ButtonIcon'
-import openContextualMenu from '@jointhedots/editors/ui/openContextualMenu'
 import { ValueMenu } from '../ElementMenu'
-import { useAsyncState } from '@jointhedots/core/react/useAsyncState'
 import { JSXInput } from '../../../ui/InputCode'
 import { ElementsEditors } from '@jointhedots/editors/elements'
+import openContextualMenu from '@jointhedots/ui/openContextualMenu'
 
 function ValueHeading(props: ValueProps & {
    ctl: EditionDriver

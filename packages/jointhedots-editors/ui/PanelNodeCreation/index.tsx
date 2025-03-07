@@ -1,6 +1,7 @@
 import {
    AST, CommonTypes, ElementJSON, JSONSchema, TemplateSchema,
-   ComponentPublication, ComponentEntry, ComponentManifest, ComponentsRegistry
+   ComponentPublication, ComponentEntry, ComponentManifest, ComponentsRegistry,
+   acquireComponent
 } from "@jointhedots/core"
 import { useCallback, useEffect, useState } from "react"
 import { ComponentBrowser } from "@jointhedots/ui/ComponentsLibrary/ComponentsBrowser"
@@ -66,7 +67,7 @@ export function PanelNodeCreation(props: {
    }, [component])
 
    const select = useCallback(async (pub?: ComponentPublication) => {
-      setComponent(ComponentsRegistry.acquireComponent(pub.component_id))
+      setComponent(acquireComponent(pub.component_id))
    }, [])
 
    const complete = useCallback(async (params?: ElementJSON) => {
@@ -75,7 +76,7 @@ export function PanelNodeCreation(props: {
 
    if (!selected) {
       return <ComponentBrowser
-         services={[service]}
+         filter={{ services: [service] }}
          onSelect={select}
       />
    }

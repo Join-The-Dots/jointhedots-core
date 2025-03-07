@@ -132,7 +132,6 @@ export type JSONSchemaCustom = {
    args?: JSONSchema[]
    placeholder?: boolean // require a placeholder structure when empty
    resources?: MapLike<ResourceEntry> // Resources catalog with undefined interface
-   services?: MapLike<ResourceEntry> // Resources providing specific services interfaces
    security?: SecurityGuard
    "allow-origin"?: string
 

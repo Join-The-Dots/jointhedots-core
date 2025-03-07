@@ -1,9 +1,13 @@
-.cub8-item-short {
+.jtd-item-short {
    display: flex;
    flex-direction: row;
    align-items: center;
    cursor: pointer;
    font-size: 14px;
+
+   &.selectable:hover {
+      background-color: rgba(50, 100, 200, 0.2);
+   }
 
    &>.item-icon {
       display: flex;
@@ -28,7 +32,7 @@
 
 }
 
-.cub8-item-large {
+.jtd-item-large {
    display: flex;
    flex-direction: row;
    align-items: center;

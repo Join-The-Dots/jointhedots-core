@@ -1,4 +1,4 @@
-.poly-Popup-modal-group {
+.jtd-Popup-modal-group {
 
    &>:first-child {
       opacity: 0.8;
@@ -25,8 +25,8 @@
          width: calc(min(90%, 800px));
          min-width: calc(min(90%, 800px));
          max-width: 90%;
-         min-height: var(--poly-Popup-min-height);
-         max-height: var(--poly-Popup-max-height);
+         min-height: var(--jtd-Popup-min-height);
+         max-height: var(--jtd-Popup-max-height);
          box-shadow: 0 2px 5px #000;
          z-index: 999;
          background-color: var(--app-background);
@@ -37,7 +37,6 @@
          &>* {
             flex: 1;
             height: 100%;
-            padding: 5px;
          }
       }
    }

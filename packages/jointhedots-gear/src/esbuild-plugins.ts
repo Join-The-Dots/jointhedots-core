@@ -208,12 +208,12 @@ export function StoragePlugin(storage: StorageFiles): esbuild.Plugin {
                }
                const removed = storage.files.size - files.size - changes.added.length
                if (removed !== 0 || changes.added.length !== 0 || changes.updated.length !== 0) {
-                  console.log(`[output] update ${changes.added.length + changes.updated.length} files(s)`)
+                  console.log(`[output] ${storage.name}: update ${changes.added.length + changes.updated.length} files(s)`)
                   storage.files = files
                   storage.on_changes.sendEventsToAll("change", changes)
                }
                else {
-                  console.log(`[output] no changes`)
+                  console.log(`[output] ${storage.name}: no changes`)
                }
             }
             return null

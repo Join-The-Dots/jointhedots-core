@@ -1,5 +1,5 @@
-import { ComponentID, ComponentManifest, ComponentPublication, IComponentProvider, makeComponentPublication } from "../interfaces"
-import { is_component_base_content, make_search_regexp } from "./InMemComponentProvider"
+import { createComponentPublication, matchComponentFilter } from "../helpers"
+import { ComponentFilter, ComponentID, ComponentManifest, ComponentPublication, IComponentProvider } from "../interfaces"
 
 function openComponentDatabase(): Promise<IDBDatabase> {
    return new Promise((resolve, reject) => {
@@ -53,7 +53,6 @@ function getComponentManifest(db: IDBDatabase, component_id: string): Promise<Co
       const components_store = transaction.objectStore("components_manifests")
       const components_req = components_store.getAll(component_id)
       components_req.onsuccess = () => {
-         console.log("getComponentManifest", results)
          resolve(components_req.result?.[0]?.manifest)
       }
       components_req.onerror = (e) => {
@@ -128,15 +127,14 @@ function findComponentsByService(db: IDBDatabase, services: string[], results: S
    return Promise.all(pendings)
 }
 
-async function searchComponents(db: IDBDatabase, pattern?: string, services?: string[]): Promise<ComponentPublication[]> {
-   const filter = make_search_regexp(pattern)
+async function searchComponents(db: IDBDatabase, filter: ComponentFilter): Promise<ComponentPublication[]> {
+   const { services } = filter
    if (services) {
       const results = []
       const found_ids = new Set<ComponentID>()
       await findComponentsByService(db, services, found_ids)
-      console.log("findComponentsByService", found_ids)
       for (const entry of await getComponentsPublications(db, Array.from(found_ids))) {
-         if (is_component_base_content(entry.title, filter)) {
+         if (matchComponentFilter(entry, filter)) {
             results.push(entry)
          }
       }
@@ -144,14 +142,14 @@ async function searchComponents(db: IDBDatabase, pattern?: string, services?: st
    }
    else {
       return filterComponentsPublications(db, (entry) => {
-         return is_component_base_content(entry.title, filter)
+         return matchComponentFilter(entry, filter)
       })
    }
 }
 
 function storeComponent(db: IDBDatabase, manifest: ComponentManifest): Promise<ComponentPublication> {
    return new Promise((resolve, reject) => {
-      const entry = makeComponentPublication(manifest)
+      const entry = createComponentPublication(manifest)
       const db_T = db.transaction(["components", "components_services", "components_manifests"], "readwrite")
 
       const components_store = db_T.objectStore("components")
@@ -186,8 +184,8 @@ export class LocalComponentProvider implements IComponentProvider {
       const results = await getComponentsPublications(await this.db, [id])
       return results[0]
    }
-   async search_component_publications(pattern?: string, services?: string[]): Promise<ComponentPublication[]> {
-      return searchComponents(await this.db, pattern, services)
+   async search_component_publications(filter: ComponentFilter): Promise<ComponentPublication[]> {
+      return searchComponents(await this.db, filter)
    }
    async get_component_manifest(id: string): Promise<ComponentManifest> {
       return getComponentManifest(await this.db, id)

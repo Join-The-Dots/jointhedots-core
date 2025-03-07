@@ -9,11 +9,11 @@ export class IconFontCollection implements IconCollection {
    ) {
    }
    draw(props: IconProps, theme: ThemeProvider) {
-      const { name, title, className, onClick } = props
+      const { name, title, className, style, onClick } = props
       return <div
          className={className || ""}
          title={title}
-         style={styles}
+         style={style ? { ...style, ...styles } : styles}
          onClick={onClick}
       >
          <i className={name.replace(this.namePrefix, this.classPrefix)} />

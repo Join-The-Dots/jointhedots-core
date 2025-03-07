@@ -3,12 +3,19 @@ import Process from 'process'
 import Path from 'path'
 import ChildProcess from 'child_process'
 import { createRequire } from "module"
+import { CommandModule } from "yargs"
 
 const restart_always_on_change = true
 
-const require = createRequire(import.meta.url);
+const require = createRequire(import.meta.url)
 
-export function command_run() {
+export function command_run(): CommandModule<any, {
+  dir?: string
+  entry?: string
+  inspect?: number
+  break?: boolean
+  "--"?: string[]
+}> {
   return {
     command: 'run',
     describe: 'Command to execute a program',
@@ -34,13 +41,7 @@ export function command_run() {
       .parserConfiguration({
         'populate--': true,
       }),
-    handler: async (argv: {
-      dir: string
-      entry: string
-      inspect: number
-      break: boolean
-      "--": string[]
-    }) => {
+    handler: async (argv) => {
       let current: any = null
       let currentRestart_timer: any = undefined
       const entry_path = Path.resolve(argv.dir, argv.entry)

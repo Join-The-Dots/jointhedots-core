@@ -1,9 +1,8 @@
-import { Button, Modal, ModalBody } from "react-bootstrap"
 import { openDialog } from "../openDialog"
 import Form from '@rjsf/core'
 import validator from '@rjsf/validator-ajv8'
 import { JSONSchema } from "@jointhedots/core"
-import { ModalContent, ModalHeader } from "react-lightning-design-system"
+import { Button, Modal, ModalContent, ModalHeader } from "react-lightning-design-system"
 
 export function askQuestion(question: string): Promise<boolean> {
    return openDialog((resolve) => {
@@ -17,9 +16,9 @@ export function askQuestion(question: string): Promise<boolean> {
 
 export function askData(question: string, schema: JSONSchema, data?: any): Promise<any> {
    return openDialog((resolve) => {
-      return <ModalContent>
+      return <Modal>
          <ModalHeader title={question} />
-         <ModalBody>
+         <ModalContent>
             <Form
                formData={data}
                schema={schema as any}
@@ -27,7 +26,7 @@ export function askData(question: string, schema: JSONSchema, data?: any): Promi
                onSubmit={(result) => resolve(result.formData)}
                onError={() => resolve(data)}
             />
-         </ModalBody>
-      </ModalContent>
+         </ModalContent>
+      </Modal>
    })
 }

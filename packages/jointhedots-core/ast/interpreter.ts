@@ -188,7 +188,7 @@ export function evaluateExpression<C>(node: AST.Any, scope: InterpreterScope<C>)
 
       case 'FunctionExpression': {
          const funcNode = node as AST.FunctionExpression
-         return function (...args: any[]) {
+         return function (this: any, ...args: any[]) {
             const localScope = new LocalScope(scope, this)
             localScope.setArguments(args, funcNode.params)
             return evaluateExpression(funcNode.body, localScope)

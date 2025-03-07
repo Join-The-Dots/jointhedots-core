@@ -18,10 +18,10 @@ export async function publish_aws_s3(
    region: string,
    outputDir: string
 ) {
-   const storage = new StorageFiles(outputDir)
+   const storage = new StorageFiles(ws.name, outputDir)
 
    console.time("build")
-   await build_workspace(ws, storage, BuildMode.Production, outputDir)
+   await build_workspace({ ws, storage, mode: BuildMode.Production })
    console.timeEnd("build")
 
    console.time("load-files")

@@ -4,20 +4,28 @@ import { create_esbuild_context } from "./esbuild-plugins.js"
 import DtsGenerator from "./dts-generator.js"
 import Fs from "fs"
 import ChildProcess from "child_process"
+import { BuildMode } from "./build-workspace.js"
 
-type BuildLibraryOptions = {
-   outputDir: string
-   deliverDir?: string
-   version?: string
+export type BuildLibraryOptions = {
+   lib: Library
+   storage: StorageFiles
+   mode: BuildMode
+   packageDir?: string
+   version: string
+   watch: boolean
 }
 
-export async function build_library(ws: Workspace, lib: Library, opts: BuildLibraryOptions) {
-   const { outputDir } = opts
-   console.log(`> Build library: ${lib.name} -> ${outputDir}`)
+export async function build_library(opts: BuildLibraryOptions) {
+   const { lib, storage } = opts
+   console.log(`> Build library: ${lib.name}`)
+
+   // Parse options
+   const use_dev = opts.mode === BuildMode.Development
+   if (use_dev) console.log("Use devmode.")
+   const use_watch = opts.watch === true
 
    // Prepare storage
-   const storage = new StorageFiles(outputDir)
-   storage.begin(true)
+   storage.begin(use_watch === false)
 
    // Emit package.json
    let package_json = { ...lib.delivered }
@@ -43,14 +51,14 @@ export async function build_library(ws: Workspace, lib: Library, opts: BuildLibr
    }
 
    // Build javascripts assets
-   const context = await create_esbuild_context(lib, storage, outputDir, true, [
+   const context = await create_esbuild_context(lib, storage, storage.baseDir, use_dev, [
       {
          name: "externals",
          setup(build) {
             build.onResolve({ filter: /.*/ }, ({ path }) => {
                if (!path.startsWith(lib.name)) {
                   if (!path.startsWith(".") || path.startsWith("react")) {
-                     console.log("exclude", path)
+                     //console.log("> exclude:", path)
                      return { external: true }
                   }
                }
@@ -58,12 +66,21 @@ export async function build_library(ws: Workspace, lib: Library, opts: BuildLibr
          }
       },
    ])
-   await context.rebuild()
-   storage.end()
-   context.dispose()
-
-   if (opts.deliverDir) {
-      ChildProcess.execSync("npm pack --pack-destination " + opts.deliverDir, { cwd: opts.outputDir })
+   
+   // Manage output assets
+   if (use_watch) {
+      await context.watch()
+      return new Promise((resolve) => {
+         process.on('SIGQUIT', () => resolve(null))
+      })
+   }
+   else {
+      await context.rebuild()
+      storage.end()
+      context.dispose()
+      if (opts.packageDir) {
+         ChildProcess.execSync("npm pack --pack-destination " + opts.packageDir, { cwd: storage.baseDir })
+      }
    }
 }
 

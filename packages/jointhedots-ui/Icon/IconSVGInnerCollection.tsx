@@ -16,13 +16,13 @@ export class IconSVGInnerCollection implements IconCollection {
       this.darkRef = `${dark_url}#`
    }
    draw(props: IconProps, theme: ThemeProvider) {
-      const { name, title, className, onClick } = props
+      const { name, title, className, style, onClick } = props
       const baseRef = (theme.lighting === ThemeLighting.Light) ? this.lightRef : this.darkRef
       const icon = name.replace(this.namePrefix, baseRef)
       return <svg
          aria-hidden="true"
          className={className || "slds-button__icon"}
-         style={styles}
+         style={style ? { ...style, ...styles } : styles}
          onClick={onClick}
       >
          <use xlinkHref={icon}></use>

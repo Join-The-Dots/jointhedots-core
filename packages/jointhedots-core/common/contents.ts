@@ -1,6 +1,4 @@
 
-export type ContentUID = string
-
 export const ContentBlob = {
    object: {
       async read<T = any>(content: Blob): Promise<T> {

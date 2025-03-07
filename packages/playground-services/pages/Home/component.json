@@ -1,0 +1,16 @@
+{
+   "$id": "test.board.home",
+   "title": "Home - test",
+   "view": {
+      "requirements": {
+         "servicePoints": {
+            "Source Orgs": {
+               "service": "storage"
+            }
+         }
+      }
+   },
+   "services": {
+      "view.react": "."
+   }
+}

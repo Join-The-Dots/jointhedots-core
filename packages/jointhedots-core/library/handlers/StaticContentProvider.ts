@@ -1,6 +1,6 @@
 import { URI } from "vscode-uri"
 import { IContentProvider } from "../interfaces"
-import { b64_blob, b64_format, blob_b64 } from "../contents"
+import { b64_blob, b64_format, blob_b64 } from "../../common/contents"
 
 export class StaticContentProvider implements IContentProvider {
    async check_url_content(ref: string): Promise<string> {

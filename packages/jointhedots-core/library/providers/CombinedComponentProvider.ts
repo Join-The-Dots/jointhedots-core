@@ -1,4 +1,4 @@
-import { ComponentManifest, ComponentPublication, IComponentProvider } from "../interfaces"
+import { ComponentFilter, ComponentManifest, ComponentPublication, IComponentProvider } from "../interfaces"
 
 export class CombinedComponentProvider implements IComponentProvider {
    constructor(readonly providers: IComponentProvider[] = []) {
@@ -13,10 +13,10 @@ export class CombinedComponentProvider implements IComponentProvider {
       }
       return null
    }
-   async search_component_publications(pattern?: string, services?: string[]): Promise<ComponentPublication[]> {
+   async search_component_publications(filter: ComponentFilter): Promise<ComponentPublication[]> {
       const result = []
       for (const provider of this.providers) {
-         const founds = await provider.search_component_publications(pattern, services)
+         const founds = await provider.search_component_publications(filter)
          if (founds) result.push(...founds)
       }
       return result
