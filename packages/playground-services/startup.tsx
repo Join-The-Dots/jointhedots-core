@@ -10,6 +10,7 @@ import "./components/icons-fontawesome"
 import "./components/icons-bootstrap"
 import "./components/register-local-components"
 import { ApplicationSelector } from "@jointhedots/ui/ApplicationBoard"
+import "./components/services"
 
 function ApplicationRoot(props: { children: React.ReactNode }) {
    return <React.StrictMode>

@@ -35,9 +35,15 @@ export class CommonResourceProvider implements IResourceLoader {
    }
    async import_module_esm(ref: string, uri: URI): Promise<any> {
       const link = uri.toString()
-      const data = await import(link)
-      this.modules_exports.set(ref, data)
-      return data
+      try {
+         const data = await import(link)
+         this.modules_exports.set(ref, data)
+         return data
+      }
+      catch (e) {
+         e.message = `Cannot import '${link}': ${e.message}`
+         throw e
+      }
    }
 }
 

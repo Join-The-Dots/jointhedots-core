@@ -1,4 +1,4 @@
-import { createServicePoint, getViewReferenceFrom, getViewInfosFrom, gotoURLView, MapLike, ServicePoint, ViewInfos, createComponentFilter, ComponentPublication } from "@jointhedots/core"
+import { getViewReferenceFrom, getViewInfosFrom, gotoURLView, MapLike, ServicePoint, ViewInfos, createComponentFilter, ComponentPublication, acquireServicePoint } from "@jointhedots/core"
 import { NavBar } from './NavBar'
 import { Button } from 'react-lightning-design-system'
 import { Box, Grid, NavigationBeacon, SLDSPage } from './Utils'
@@ -95,8 +95,7 @@ export function ApplicationBoard(props: {
    const services = useAsyncMemo(async () => {
       const services = [] as ServicePoint[]
       for (const id in requirements?.servicePoints) {
-         const svc_desc = requirements?.servicePoints[id]
-         services.push(createServicePoint(id, svc_desc.service))
+         services.push(acquireServicePoint(id))
       }
       return services
    }, [], [requirements])
@@ -136,7 +135,7 @@ export function ApplicationSelector() {
       <div className="slds-box">
          <div style={{ fontSize: "130%", paddingLeft: 5, marginBottom: 10, borderBottom: "solid thin #0005" }}>
             <span>Choose an application</span>
-           {/*  <LabelButton icon="bi:person-gear" name="Configuration" onActivate={() => {
+            {/*  <LabelButton icon="bi:person-gear" name="Configuration" onActivate={() => {
                gotoURLView({ name: "settings" }, origin)
             }} /> */}
          </div>

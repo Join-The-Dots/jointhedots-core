@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useMemo, useState } from "react"
-import { createServiceGroup, createServicePoint, listenServicePoints, ServicePoint } from "../library/service-points"
+import React, { useContext, useEffect, useState } from "react"
+import { acquireServicePoint, listenServicePoints, ServicePoint } from "../library/service-points"
 import { useAsyncMemo } from "./useAsyncMemo"
 import { ViewRequirements } from "../services"
 
@@ -103,10 +103,7 @@ class ServicePointsController implements IServicePointsController {
       if (requirements) {
          const { servicePoints } = requirements
          for (const id in servicePoints) {
-            const req = servicePoints[id]
-            const svc = req.multiple
-               ? createServiceGroup(id, req.service)
-               : createServicePoint(id, req.service)
+            const svc = acquireServicePoint(id)
             const items = svc.ready ? svc.services : await svc.fetch()
             if (items.length > 0) {
                this.services.set(svc, items)

@@ -1,4 +1,4 @@
-import { ServiceKey } from "../library/interfaces"
+import { ServiceEntry } from "../library/interfaces"
 
 
 export type NameSpaceId = string
@@ -79,5 +79,5 @@ export interface StorageService {
 
 export type StorageDescriptor = void
 
-export const StorageServiceKey = new ServiceKey<StorageService, StorageDescriptor>("storage")
+export const StorageServiceKey = new ServiceEntry<StorageService, StorageDescriptor>("storage")
 

@@ -1,6 +1,6 @@
 import { JSONSchema } from "../ast/schema/schema"
 import { MapLike } from "../common/types"
-import { ServiceKey } from "../library/interfaces"
+import { ServiceEntry } from "../library/interfaces"
 
 // Service "webapi"
 export interface WebAPIService {
@@ -13,4 +13,4 @@ export type WebAPIDescriptor = {
    swagger: MapLike<JSONSchema> // TODO with swagger types
 }
 
-export const WebAPIServiceKey = new ServiceKey<WebAPIService, WebAPIDescriptor>("webapi")
+export const WebAPIServiceKey = new ServiceEntry<WebAPIService, WebAPIDescriptor>("webapi")

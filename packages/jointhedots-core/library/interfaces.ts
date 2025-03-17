@@ -9,12 +9,12 @@ import { ComponentEntry } from './manifold'
 
 export type ServiceType = string
 
-export class ServiceKey<T extends any, T_desc extends any> {
+export class ServiceEntry<S extends any, D extends any> {
    constructor(public resource: string) { }
-   get(entry: ComponentEntry): T { return entry.getResource(this.resource)?.get<T>() }
-   fetch(entry: ComponentEntry): Promise<T> { return entry.fetchResource<T>(this.resource) }
-   descriptor(entry: ComponentEntry): T_desc { return entry.acquireResource(this.resource)?.descriptor as T_desc }
-   subservice<T extends any>(name: string) { return new ServiceKey<T, T_desc>(`${this.resource}.${name}`) }
+   get(entry: ComponentEntry): S { return entry.getResource(this.resource)?.get<S>() }
+   fetch(entry: ComponentEntry): Promise<S> { return entry.fetchResource<S>(this.resource) }
+   descriptor(entry: ComponentEntry): D { return entry.acquireResource(this.resource)?.descriptor as D }
+   subservice<T extends any>(name: string) { return new ServiceEntry<T, D>(`${this.resource}.${name}`) }
 }
 
 //-------------------------------------------------------------

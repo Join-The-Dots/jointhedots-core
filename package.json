@@ -32,10 +32,13 @@
    },
    "scripts": {
       "watch": "tspc --watch --noEmit",
-      "serve": "jointhedots-gear serve --mode development",
+      "serve": "jointhedots-gear serve --mode development --port 3001",
       "build": "jointhedots-gear make --libraries @jointhedots/core,@jointhedots/ui --pack --dist ./dist",
       "make": "jointhedots-gear make --watch --libraries @jointhedots/core,@jointhedots/ui --dist ../sf-explorer-app/dist",
       "test": "mocha"
    },
-   "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"
+   "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447",
+   "dependencies": {
+      "@mui/material": "^6.4.7"
+   }
 }
