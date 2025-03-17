@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { createComponentFilter, ComponentPublication, getViewReferenceFrom, gotoURLView, ViewInfos, getServicePoint, createServicePoint } from "@jointhedots/core"
+import { createComponentFilter, ComponentPublication, getViewReferenceFrom, gotoURLView, ViewInfos, getServicePoint, acquireServicePoint } from "@jointhedots/core"
 import { ItemRowShort, LabelButton } from '@jointhedots/ui/Items'
 import { AppDescriptor, AppPage, AppTooling } from '.'
 import { ComponentsFilteredList } from '../ComponentsLibrary'
@@ -211,10 +211,7 @@ function ApplicationTooling(props: {
                 return null
             }
             if (desc.type === "servicePoint") {
-                let scv = getServicePoint(desc.id)
-                if (!scv && desc.service) {
-                    scv = createServicePoint(desc.id, desc.service)
-                }
+                let scv = acquireServicePoint(desc.id)
                 if (scv) {
                     return <ServicePointStatus key={key} servicePoint={scv} />
                 }

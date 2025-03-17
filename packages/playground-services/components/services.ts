@@ -1,11 +1,25 @@
-import { createServiceGroup, createServicePoint } from "@jointhedots/core"
-import { LanguageService, StorageService } from "@jointhedots/core/services"
+import { createServicePoint } from "@jointhedots/core"
+import { LanguageServiceKey, StorageServiceKey } from "@jointhedots/core/services"
 
-export const LanguageLLM = createServicePoint<LanguageService>("Language LLM", "language")
-export const CodeLLM = createServicePoint<LanguageService>("Code LLM", "language")
+export const LanguageLLM = createServicePoint(LanguageServiceKey, "standard", {
+    title: "Language LLM",
+})
 
-export const CodeStorage = createServicePoint<StorageService>("Code Storage", "storage")
+export const CodeLLM = createServicePoint(LanguageServiceKey, "code", {
+    title: "Code LLM",
+    alternative: LanguageLLM.id,
+})
+
+export const CodeStorage = createServicePoint(StorageServiceKey, "code", {
+    title: "Code Storage",
+})
 
 
-export const DeliveryOrgsPoint = createServiceGroup<StorageService>("Delivery Orgs", "storage")
-export const SourceOrgsPoint = createServiceGroup<StorageService>("Source Orgs", "storage")
+export const DeliveryOrgsPoint = createServicePoint(StorageServiceKey, "orgs-delivery", {
+    title: "Orgs code delivery target",
+})
+
+export const SourceOrgsPoint = createServicePoint(StorageServiceKey, "sources", {
+    title: "Orgs code source",
+    multiple: true,
+})

@@ -1,4 +1,4 @@
-import { ServiceKey } from "../library/interfaces"
+import { ServiceEntry } from "../library/interfaces"
 
 export enum LangQuality {
    High,
@@ -33,5 +33,5 @@ export interface LanguageService {
 
 export type LanguageDescriptor = void
 
-export const LanguageDescriptorKey = new ServiceKey<LanguageService, LanguageDescriptor>("language")
+export const LanguageServiceKey = new ServiceEntry<LanguageService, LanguageDescriptor>("language")
 

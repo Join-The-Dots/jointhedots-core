@@ -1,6 +1,6 @@
 import React from "react"
 import { JSONSchema } from "../ast"
-import { ServiceKey } from "../library/interfaces"
+import { ServiceEntry } from "../library/interfaces"
 import { MapLike } from "../common/types"
 
 export type ViewServicePoint = {
@@ -17,7 +17,7 @@ export type ViewDescriptor = JSONSchema & {
 }
 
 // Manifest descriptor "view"
-export const ViewServiceKey = new ServiceKey<unknown, ViewDescriptor>("view")
+export const ViewServiceKey = new ServiceEntry<unknown, ViewDescriptor>("view")
 
 // Service "view.react"
 export type ViewReactService<T = any> = React.ComponentType<T>

@@ -1,15 +1,35 @@
-import { ComponentFilter, createComponentFilter, acquireComponent, ComponentPublication, createComponentPublication } from "@jointhedots/core"
-import { ComponentBrowser, ComponentsFilteredList } from "./ComponentsBrowser"
+import { ComponentFilter, createComponentFilter, acquireComponent, ComponentPublication, createComponentPublication, ComponentsRegistry } from "@jointhedots/core"
+import { ComponentBrowser, ComponentsFilteredList, ComponentsList } from "./ComponentsBrowser"
 import { LabelButton } from "../Items"
 import { createComponentManifest } from "./ComponentsEditor"
-import Icon from "../Icon"
+import { useAsyncState } from "@jointhedots/core/react"
+
 
 export function CreateComponentSelector(props: {
+   entries?: ComponentPublication[]
    service?: string
    onCreate?: (pub: ComponentPublication) => void
 }) {
    const { service } = props
-   const filter = createComponentFilter({ services: ["component"], tags: service && ["component." + service] })
+
+   const entries = useAsyncState<ComponentPublication[]>(async () => {
+      let { entries } = props
+      if (!entries) {
+         const provider = ComponentsRegistry.components_provider
+         const filter = createComponentFilter({ services: ["component"], tags: service && ["component." + service] })
+         entries = await provider.search_component_publications(filter)
+      }
+      return entries
+   }, [service, props.entries])
+
+   const create = async function (pub: ComponentPublication) {
+      const driver = acquireComponent(pub.component_id)
+      const manif = await createComponentManifest(driver, service)
+      if (manif && props.onCreate) {
+         props.onCreate(createComponentPublication(manif))
+      }
+   }
+
    return <>
       <div style={{
          display: "flex",
@@ -20,22 +40,16 @@ export function CreateComponentSelector(props: {
          fontSize: "110%",
          gap: 8,
          color: "grey",
-         borderBottom: "solid thin #bbb",
       }}>
-         <Icon name="bi:plus-circle" style={{ fontSize: "120%" }} />
          {"New"}
       </div>
-      <ComponentsFilteredList
-         filter={filter}
-         display={{ grouped: false, small: true }}
-         onSelect={async function (def) {
-            const driver = acquireComponent(def.component_id)
-            const manif = await createComponentManifest(driver, service)
-            if (manif && props.onCreate) {
-               props.onCreate(createComponentPublication(manif))
-            }
-         }}
-      />
+      {entries.waiting((entries) => {
+         return <ComponentsList
+            entries={entries}
+            display={{ grouped: false, small: true }}
+            onSelect={create}
+         />
+      })}
    </>
 }
 

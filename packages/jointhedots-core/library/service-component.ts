@@ -1,7 +1,7 @@
 import { JSONSchema } from "../ast/schema/schema"
 import { MapLike } from 'typescript'
 import { ComponentEntry } from './manifold'
-import { ComponentManifest, ServiceKey, ServiceType } from "./interfaces"
+import { ComponentManifest, ServiceEntry, ServiceType } from "./interfaces"
 
 export interface ComponentManifestIssue {
    level: "error" | "warn" | "info"
@@ -38,7 +38,7 @@ export type ComponentDescriptor = {
    readonly attributes: MapLike<JSONSchema>
 }
 
-export const ComponentServiceKey = new ServiceKey<ComponentService, ComponentDescriptor>("component")
+export const ComponentServiceKey = new ServiceEntry<ComponentService, ComponentDescriptor>("component")
 
 export type ComponentEditorProps<T extends ComponentManifest = ComponentManifest> = {
    descriptor: ComponentDescriptor

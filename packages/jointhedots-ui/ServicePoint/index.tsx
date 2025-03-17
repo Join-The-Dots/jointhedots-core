@@ -1,17 +1,22 @@
 import React, { useCallback, useEffect, useState } from "react"
 import openContextualMenu from "../openContextualMenu"
 import {
-   ServicePointDescriptor, ServicePoint, getServicePoint,
+   ServicePointDescriptor, ServicePoint,
    ComponentPublication, ComponentsRegistry, fetchComponentsPublications,
    createComponentFilter, ServiceSettings, dispatchServicePointSetting,
    listenServicePoints, unlistenServicePoints, dispatchServicesSettings,
    listenServiceSettings, unlistenServiceSettings,
 } from "@jointhedots/core"
-import { ItemIcon, ItemRowShort } from "../Items"
+import { ItemIcon, ItemRowShort, LabelDecoration } from "../Items"
 import { Button, ModalContent, ModalHeader, Spinner } from "react-lightning-design-system"
 import { MissingServiceError, registerErrorDisplayer, ServicePointsProviderContext, useAsyncMemo, useAsyncState, useServicesProvider } from "@jointhedots/core/react"
 import { AddComponentButton, ComponentItem, ComponentItemDisplay, CreateComponentSelector } from "../ComponentsLibrary"
 import { ViewRequirements } from "@jointhedots/core/services"
+
+import { blue, cyan, deepOrange, green, pink, purple, deepPurple, orange } from '@mui/material/colors'
+import { IconButton } from "../Icon"
+
+export const DefaultColorsMap = [green, pink, blue, cyan, deepOrange, purple, deepPurple, orange].map(x => x["A700"])
 
 const service_display: ComponentItemDisplay = {
    grouped: false,
@@ -37,10 +42,9 @@ function ServiceConnexionItem(props: {
    />
 }
 
-function switchServiceConnexion(service: ServicePointDescriptor, id: string): ServicePointDescriptor {
-   const servicePoint = getServicePoint(service.id)
+function switchServiceConnexion(service: ServicePointDescriptor, multiple: boolean, id: string): ServicePointDescriptor {
    let connexions = [...service.connexions]
-   if (servicePoint?.multiple) {
+   if (multiple) {
       let index = connexions.indexOf(id)
       if (index < 0) {
          connexions.push(id)
@@ -63,10 +67,9 @@ function switchServiceConnexion(service: ServicePointDescriptor, id: string): Se
    })
 }
 
-function selectServiceConnexion(service: ServicePointDescriptor, id: string): ServicePointDescriptor {
-   const servicePoint = getServicePoint(service.id)
+function selectServiceConnexion(service: ServicePointDescriptor, multiple: boolean, id: string): ServicePointDescriptor {
    let connexions = [...service.connexions]
-   if (servicePoint?.multiple) {
+   if (multiple) {
       let index = connexions.indexOf(id)
       if (index >= 0) {
          connexions.splice(index, 1)
@@ -84,22 +87,25 @@ function selectServiceConnexion(service: ServicePointDescriptor, id: string): Se
 
 function ServiceConnexionSelector(props: {
    servicePoint: ServicePointDescriptor
+   multiple: boolean
    selectable?: boolean
+   colormap?: any[]
    onChange: (service: ServicePointDescriptor) => void
 }) {
-   const { servicePoint, selectable, onChange } = props
+   const { servicePoint, selectable, multiple, colormap, onChange } = props
 
    const status = useAsyncState<{
       connections: ComponentPublication[]
       remains: ComponentPublication[]
    }>(async () => {
+      const [service, _name] = servicePoint.id.split("/")
       const provider = ComponentsRegistry.components_provider
-      const filter = createComponentFilter({ services: [servicePoint.service] })
+      const filter = createComponentFilter({ services: [service] })
       const connections = await provider.search_component_publications(filter)
 
       const remains = []
       for (const cnx of connections) {
-         if (cnx && !servicePoint.connexions.includes(cnx.component_id) && cnx.services.includes(servicePoint.service)) {
+         if (cnx && !servicePoint.connexions.includes(cnx.component_id) && cnx.services.includes(service)) {
             remains.push(cnx)
          }
       }
@@ -108,16 +114,16 @@ function ServiceConnexionSelector(props: {
    }, [servicePoint], null)
 
    const onSwitch = (data: ComponentPublication) => {
-      onChange(switchServiceConnexion(servicePoint, data.component_id))
+      onChange(switchServiceConnexion(servicePoint, multiple, data.component_id))
    }
 
    const onActivate = (data: ComponentPublication) => {
-      onChange(selectServiceConnexion(servicePoint, data.component_id))
+      onChange(selectServiceConnexion(servicePoint, multiple, data.component_id))
    }
 
    return <div>
       {status.waiting(({ connections, remains }) => {
-         const { service } = servicePoint
+         const [service, _name] = servicePoint.id.split("/")
          if (connections.length === 0 && remains.length === 0) {
             return <CreateComponentSelector
                service={service}
@@ -131,24 +137,28 @@ function ServiceConnexionSelector(props: {
                </div>
                {servicePoint.connexions.map((id, i) => {
                   const cnx = connections.find(cnx => cnx.component_id === id)
-                  return cnx && <ServiceConnexionItem
-                     key={i}
-                     cnx={cnx}
-                     selectable={selectable}
-                     selected={true}
-                     onSelect={onSwitch}
-                     onActivate={onActivate}
-                  />
+                  return cnx && <div key={i}
+                     style={colormap && { "--item-shape-color": colormap[i] || "red" } as any}
+                  >
+                     <ServiceConnexionItem
+                        cnx={cnx}
+                        selectable={selectable}
+                        selected={true}
+                        onSelect={onSwitch}
+                        onActivate={onActivate}
+                     />
+                  </div>
                })}
                {remains.map((cnx, i) => {
-                  return <ServiceConnexionItem
-                     key={i}
-                     cnx={cnx}
-                     selectable={selectable}
-                     selected={false}
-                     onSelect={onSwitch}
-                     onActivate={onActivate}
-                  />
+                  return <div key={i}>
+                     <ServiceConnexionItem
+                        cnx={cnx}
+                        selectable={selectable}
+                        selected={false}
+                        onSelect={onSwitch}
+                        onActivate={onActivate}
+                     />
+                  </div>
                })}
             </>
          }
@@ -159,21 +169,23 @@ function ServiceConnexionSelector(props: {
 function ServicePointEditable(props: {
    servicePoint: ServicePointDescriptor
    connexions: ComponentPublication[]
+   colormap?: any[]
    compact?: boolean
    onChange: (service: ServicePointDescriptor) => void
 }) {
-   const { servicePoint, compact, connexions, onChange } = props
+   const { servicePoint, compact, connexions, colormap, onChange } = props
+   const multiple = true//servicePoint?.multiple
 
    const onClick = useCallback((e) => {
       openContextualMenu(e, (close) => {
-         return <>
-            <ServiceConnexionSelector
-               servicePoint={servicePoint}
-               onChange={(data) => close(onChange(data))}
-            />
-         </>
+         return <ServiceConnexionSelector
+            servicePoint={servicePoint}
+            multiple={multiple}
+            colormap={colormap}
+            onChange={(data) => close(onChange(data))}
+         />
       })
-   }, [servicePoint])
+   }, [servicePoint, colormap])
 
    if (!servicePoint) {
       return <Button type="destructive">
@@ -185,18 +197,14 @@ function ServicePointEditable(props: {
          Connect
       </Button>
    }
-   else if (compact) {
-      return <Button onClick={onClick}>
-         {connexions.map((cnx) => {
-            return <ItemIcon key={cnx.component_id} name={cnx.title} icon={cnx.icon} />
-         })}
-      </Button>
-   }
    else {
+      const ItemComp = compact ? ItemIcon : ItemRowShort
       return <Button onClick={onClick}>
-         {connexions.map((cnx) => {
-            return <ItemRowShort key={cnx.component_id} name={cnx.title} icon={cnx.icon} />
+         {connexions.map((cnx, i) => {
+            const deco: LabelDecoration[] = colormap && [{ type: "shape", color: colormap[i] }]
+            return <ItemComp key={cnx.component_id} name={cnx.title} icon={cnx.icon} decorations={deco} />
          })}
+         {multiple && !compact && <IconButton name="bi:plus-circle" onClick={onClick} />}
       </Button>
    }
 }
@@ -231,6 +239,7 @@ export function ServicePointStatus(props: {
    }
 
    return <ServicePointEditable compact
+      colormap={connexions.length > 1 ? DefaultColorsMap : undefined}
       servicePoint={descriptor}
       connexions={connexions}
       onChange={onChange}

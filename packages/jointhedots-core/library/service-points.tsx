@@ -1,14 +1,19 @@
 import { MapLike } from "../common/types"
 import { acquireComponent, ComponentsRegistry } from "./manifold"
-import { ComponentID, ServiceType } from "./interfaces"
+import { ComponentID, ServiceEntry, ServiceType } from "./interfaces"
 
 const servicepoints_storekey = "settings://service-points"
 
 export type ServicePointID = string
 
-export type ServicePointDescriptor = {
+export type ServicePointProperties = {
+   title?: string
+   multiple?: boolean
+   alternative?: ServicePointID
+}
+
+export type ServicePointDescriptor = ServicePointProperties & {
    id: ServicePointID
-   service: ServiceType
    connexions: ComponentID[]
 }
 
@@ -26,16 +31,23 @@ export type SettingsChangeHandler = (settings: SettingsDescriptor) => void
 const SettingsChangeHandlers = new Set<SettingsChangeHandler>()
 
 export class ServicePoint<IService = unknown> {
+   service: ServiceType = ""
+   name: string = ""
    services: IService[] = []
    loading: Promise<IService[]> = null
    ready: boolean = false
    constructor(
       public descriptor: ServicePointDescriptor,
-      public multiple: boolean,
    ) {
+      const [service, name] = descriptor.id.split("/")
+      this.service = service
+      this.name = name
    }
    get id(): string {
       return this.descriptor.id
+   }
+   get multiple(): boolean {
+      return this.descriptor.multiple || false
    }
    async fetch(): Promise<IService[]> {
       if (this.ready) {
@@ -44,8 +56,8 @@ export class ServicePoint<IService = unknown> {
       if (!this.loading) {
          this.loading = new Promise(async (resolve) => {
             const { descriptor } = this
-            const { id, service, connexions } = this.descriptor
-            const services = await fetchComponentsService<IService>(connexions, service, id)
+            const { connexions } = this.descriptor
+            const services = await fetchComponentsService<IService>(connexions, this.service, this.id)
             if (descriptor === this.descriptor) {
                this.services = services
                this.ready = true
@@ -178,37 +190,39 @@ function initServicesSettings(): SettingsDescriptor {
    }
 }
 
-export function acquireServicePointDescriptor(id: string, service: string): ServicePointDescriptor {
+export function acquireServicePointDescriptor(id: string): ServicePointDescriptor {
    let desc = ServiceSettings.servicePoints[id]
-   if (desc) {
-      if (typeof desc.service !== "string") desc = null
-   }
    if (!desc) {
-      if (typeof service !== "string") throw new Error()
-      desc = ServiceSettings.servicePoints[id] = {
-         id,
-         service,
-         connexions: [],
-      }
+      desc = { id, connexions: [] }
+      ServiceSettings.servicePoints[id] = desc
    }
    return desc
 }
 
-export function createServicePoint<IService>(id: string, service: string): ServicePoint<IService> {
+export function acquireServicePoint<IService>(id: string): ServicePoint<IService> {
    let svc = ServicePoints.get(id) as ServicePoint<IService>
    if (!svc) {
-      svc = new ServicePoint<IService>(acquireServicePointDescriptor(id, service), false)
+      svc = new ServicePoint<IService>(acquireServicePointDescriptor(id))
       ServicePoints.set(svc.id, svc)
    }
    return svc
 }
 
-export function createServiceGroup<IService>(id: string, service: string): ServicePoint<IService> {
-   let svc = ServicePoints.get(id) as ServicePoint<IService>
+export function updateServicePointDescriptor(id: string, properties: ServicePointProperties): ServicePointDescriptor {
+   let desc = ServiceSettings.servicePoints[id]
+   if (!desc) {
+      desc = { id, connexions: [] }
+      ServiceSettings.servicePoints[id] = desc
+   }
+   return desc
+}
+
+export function createServicePoint<S extends any, D extends any>(service: ServiceEntry<S, D>, name: ServicePointID, properties?: ServicePointProperties): ServicePoint<S> {
+   const id = service.resource + "/" + name
+   let svc = ServicePoints.get(id) as ServicePoint<S>
    if (!svc) {
-      if (typeof service !== "string") return null
-      svc = new ServicePoint<IService>(acquireServicePointDescriptor(id, service), true)
-      ServicePoints.set(svc.id, svc)
+      svc = new ServicePoint<S>(updateServicePointDescriptor(id, properties))
+      ServicePoints.set(id, svc)
    }
    return svc
 }
