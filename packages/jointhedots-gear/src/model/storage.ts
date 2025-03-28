@@ -41,7 +41,6 @@ export class StorageFiles implements IStorageStream {
    files = new Map<string, esbuild.OutputFile>()
    on_changes = new SourceEventEmitter()
    baseDir: string = ""
-   assets: string[] = []
    constructor(public name: string, baseDir: string) {
       this.baseDir = Path.resolve(baseDir)
    }
@@ -51,7 +50,6 @@ export class StorageFiles implements IStorageStream {
    commitContent(contentData: Uint8Array | string, contentType?: string): string {
       const key = createContentKey(contentData, contentType)
       this.commitFile(key, contentData, contentType)
-      this.assets.push(`./${key}`)
       return key
    }
    commitFile(key: string, contentData: Uint8Array | string, contentType?: string) {
@@ -60,7 +58,6 @@ export class StorageFiles implements IStorageStream {
       Fs.writeFileSync(fpath, contentData)
    }
    end() {
-      this.commitFile("publication.json", JSON.stringify({ assets: this.assets }))
    }
    route(): (req, res) => void {
       return (req, res) => {
@@ -71,7 +68,7 @@ export class StorageFiles implements IStorageStream {
             res.send(Buffer.from(file.contents))
          }
          else {
-            res.sendFile(fpath, (err) => { if (err) res.status(500).send(err.message) })
+            res.sendFile(fpath, (err) => { if (err) res.status(404).send(err.message) })
          }
       }
    }

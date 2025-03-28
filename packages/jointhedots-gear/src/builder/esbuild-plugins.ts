@@ -3,23 +3,22 @@ import Path from 'node:path'
 import Url from "node:url"
 import postcss from 'postcss'
 import { sassPlugin } from 'esbuild-sass-plugin'
-import { IStorageStream, Library, MapLike, Workspace } from "./workspace.js"
+import { IStorageStream } from "../model/workspace.js"
 import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill"
-import { createContentCID, StorageFiles } from "./storage.js"
+import { StorageFiles } from "../model/storage.js"
 import * as esbuild from 'esbuild'
-import { fileURLToPath } from 'url'
 import MIME from 'mime'
-
-const __dirname__ = Path.dirname(fileURLToPath(import.meta.url))
+import { MapLike, PackageRootDir } from "../utils/helpers.js"
+import { BuildTarget } from "./build-target.js"
 
 export async function create_esbuild_context(
-   lib: Library,
+   target: BuildTarget,
    storage: StorageFiles,
    outdir: string,
    use_dev: boolean,
    plugins: esbuild.Plugin[] = [],
 ): Promise<esbuild.BuildContext> {
-   const ws = lib.workspace
+   const ws = target.workspace
 
    // Define modules mapping
    const modules_mapping = {
@@ -27,8 +26,8 @@ export async function create_esbuild_context(
          "@mui/icons-material/": "@mui/icons-material/esm/"
       },
       replaceds: {
-         "buffer": Path.resolve(__dirname__, "../browser-modules/buffer.js"),
-         "process": Path.resolve(__dirname__, "../browser-modules/process.js"),
+         "buffer": Path.resolve(PackageRootDir, "./browser-modules/buffer.js"),
+         "process": Path.resolve(PackageRootDir, "./browser-modules/process.js"),
       }
    }
 
@@ -41,7 +40,7 @@ export async function create_esbuild_context(
    }, {})
 
    const options: esbuild.BuildOptions = {
-      entryPoints: lib.entries,
+      entryPoints: target.esmodules.entries,
       outdir,
       format: 'esm',
       target: 'es2022',

@@ -2,9 +2,9 @@ import Fs from "node:fs"
 import Path from "node:path"
 import * as AWS from "@aws-sdk/client-s3"
 import MIME from "mime"
-import { StorageFiles } from "./storage.js"
-import { build_workspace, BuildMode } from "./build-workspace.js"
-import { Workspace } from "./workspace.js"
+import { StorageFiles } from "../model/storage.js"
+import { build_application } from "../builder/build-application.js"
+import { Workspace } from "../model/workspace.js"
 
 export type WebFile = {
    key: string
@@ -13,15 +13,23 @@ export type WebFile = {
 }
 
 export async function publish_aws_s3(
+   appname: string,
    ws: Workspace,
    bucket: string,
    region: string,
    outputDir: string
 ) {
    const storage = new StorageFiles(ws.name, outputDir)
+   const app = ws.get_application(appname)
+   if (!app) throw new Error(`Application '${appname}' not exists`)
 
    console.time("build")
-   await build_workspace({ ws, storage, mode: BuildMode.Production })
+   await build_application({
+      app,
+      storage,
+      version: "aws_s3",
+      devmode: false,
+   })
    console.timeEnd("build")
 
    console.time("load-files")

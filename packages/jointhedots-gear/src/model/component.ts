@@ -1,4 +1,4 @@
-import { FeatureID, MapLike } from "./workspace"
+import { MapLike } from "../utils/helpers"
 
 export type ResourceEntry<ResourceInterface = any> = ResourceLink<ResourceInterface> | {
    type: ResourceLink<ResourceFactory<ResourceInterface>>
@@ -15,7 +15,6 @@ export type ComponentManifest = {
    $id: string
    type?: string
    name?: string
-   features?: FeatureID[]
    resources?: MapLike<ResourceEntry> // Resources catalog with undefined interface
    services?: MapLike<ResourceEntry> // Resources providing specific services interfaces
 } & MapLike<any>
@@ -29,6 +28,15 @@ export interface ComponentPublication {
    description?: string
    keywords?: string[]
    tags?: string[]
+}
+
+export type ComponentCatalogID = string // Identifier of catalog
+
+export type ComponentCatalogsDescriptor = {
+   name: string
+   baseline: string
+   components: { [id: ComponentID]: string }
+   catalogs: { [id: ComponentCatalogID]: string }
 }
 
 export function checkComponentManifest(manif: ComponentManifest, path: string): Error {

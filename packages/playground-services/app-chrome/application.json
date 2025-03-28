@@ -1,0 +1,59 @@
+{
+  "type": "chrome",
+  "name": "playground:app-chrome",
+  "title": "Playground for JTD",
+  "icon": "../../../logo.png",
+  "webviews": {
+    "popup.html": {
+      "entry": "./startup.tsx",
+      "favicon": "../favicon.webp"
+    },
+    "panel.html": {
+      "entry": "./startup.tsx",
+      "favicon": "../favicon.webp"
+    }
+  },
+  "modules": {
+    "background.js": "./background",
+    "injected.js": "./injected"
+  },
+  "manifest": {
+    "short_name": "MyExtJDT",
+    "description": "Shows how to get MyExtJDT.",
+    "action": {
+      "default_popup": "popup.html"
+    },
+    "commands": {
+      "open-panel": {
+        "description": "Open Panel",
+        "suggested_key": {
+          "default": "Ctrl+Shift+X"
+        }
+      }
+    },
+    "content_scripts": [
+      {
+        "matches": [
+          "http://*/*",
+          "https://*/*"
+        ],
+        "all_frames": true,
+        "css": [],
+        "js": [
+          "injected.js"
+        ]
+      }
+    ],
+    "side_panel": {
+      "default_path": "panel.html"
+    },
+    "background": {
+      "service_worker": "background.js",
+      "type": "module"
+    },
+    "permissions": [
+      "sidePanel",
+      "contextMenus"
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 import Fs from 'fs'
-import Glob from 'glob'
+import * as Glob from 'glob'
 import Os from 'os'
 import Path from 'path'
 import Ts from 'typescript'

@@ -1,0 +1,26 @@
+import { CommandModule } from "yargs"
+import { directory, file } from "../utils/file.js";
+import Fs from 'node:fs'
+
+export function command_init(): CommandModule<any, {
+}> {
+   return {
+      command: 'init',
+      describe: 'Init project settings',
+      builder: (yargs) => yargs,
+      handler: async () => {
+         const settings = file.read.json(".vscode/settings.json")
+         file.write.json(".vscode/settings.json", {
+            ...settings,
+            "json.schemas": [
+               {
+                  "fileMatch": [
+                     "application.json"
+                  ],
+                  "url": "./node_modules/@jointhedots/gear/schemas/application.schema.json"
+               }
+            ]
+         })
+      }
+   }
+}

@@ -1,0 +1,13 @@
+{
+   "type": "web",
+   "name": "playground:app-web",
+   "title": "Playground for JTD",
+   "icon": "../../../logo.png",
+   "webviews": {
+      "show.html": {
+         "title": "Show room",
+         "entry": "./startup.tsx"
+      }
+   },
+   "manifest": {"background_color": ""}
+}

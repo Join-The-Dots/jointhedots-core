@@ -2,5 +2,13 @@
   "window.title": "JTD.Core",
   "terminal.integrated.env.windows": {
     "Path": "${env:PATH};node_modules/.bin"
- },
+  },
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "application.json"
+      ],
+      "url": "./node_modules/@jointhedots/gear/schemas/application.schema.json"
+    }
+  ]
 }

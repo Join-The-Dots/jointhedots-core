@@ -1,7 +1,0 @@
-{
-   "application": {
-      "name": "show",
-      "entry": "./startup.tsx",
-      "favicon": "../favicon.webp"
-   }
-}
