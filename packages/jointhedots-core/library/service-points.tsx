@@ -1,6 +1,7 @@
 import { MapLike } from "../common/types"
 import { acquireComponent, ComponentsRegistry } from "./manifold"
 import { ComponentID, ServiceEntry, ServiceType } from "./interfaces"
+import { ILog, notifyError } from "../logging"
 
 const servicepoints_storekey = "settings://service-points"
 
@@ -30,12 +31,13 @@ const ServiceChangeHandlers = new Set<ServiceChangeHandler>()
 export type SettingsChangeHandler = (settings: SettingsDescriptor) => void
 const SettingsChangeHandlers = new Set<SettingsChangeHandler>()
 
-export class ServicePoint<IService = unknown> {
+export class ServicePoint<IService = unknown> implements ILog {
    service: ServiceType = ""
    name: string = ""
    services: IService[] = []
    loading: Promise<IService[]> = null
    ready: boolean = false
+   failure: Error = null
    constructor(
       public descriptor: ServicePointDescriptor,
    ) {
@@ -57,7 +59,7 @@ export class ServicePoint<IService = unknown> {
          this.loading = new Promise(async (resolve) => {
             const { descriptor } = this
             const { connexions } = this.descriptor
-            const services = await fetchComponentsService<IService>(connexions, this.service, this.id)
+            const services = await fetchComponentsService<IService>(connexions, this.service, this.id, this)
             if (descriptor === this.descriptor) {
                this.services = services
                this.ready = true
@@ -71,14 +73,22 @@ export class ServicePoint<IService = unknown> {
       }
       return this.loading
    }
-   reset(descriptor: ServicePointDescriptor) {
+   async reset(descriptor: ServicePointDescriptor) {
       if (this.descriptor !== descriptor) {
          this.descriptor = descriptor
-         this.loading = null
-         this.ready = false
+         if (this.loading || this.ready || this.failure) {
+            this.failure = null
+            this.loading = null
+            this.ready = false
+            await this.fetch()
+         }
          ServiceChangeHandlers.forEach(l => l(this))
       }
       return this
+   }
+   notifyError(error: Error) {
+      this.failure = error
+      notifyError(error)
    }
 }
 
@@ -89,10 +99,6 @@ export function listenServicePoints(handler: ServiceChangeHandler) {
 
 export function unlistenServicePoints(handler: ServiceChangeHandler) {
    ServiceChangeHandlers.delete(handler)
-}
-
-export function getServicePoint<IService>(id: string): ServicePoint<IService> {
-   return ServicePoints.get(id) as ServicePoint<IService>
 }
 
 export function dispatchServicePointSetting(id: string, descriptor: ServicePointDescriptor) {
@@ -127,21 +133,22 @@ ComponentsRegistry.listen((component) => {
    }
 })
 
-async function fetchComponentsService<IService>(components_ids: string[], service: string, servicepoint: string): Promise<IService[]> {
+async function fetchComponentsService<IService>(components_ids: string[], service: string, servicepoint: string, log: ILog): Promise<IService[]> {
    const services = []
    if (Array.isArray(components_ids) && components_ids.length > 0) {
       for (const component_id of components_ids) {
-         const srv = await acquireComponent(component_id).acquireResource(service).fetch()
-         if (srv) {
+         const component = acquireComponent(component_id)
+         if (await component.fetch()) {
+            const srv = await component.acquireResource(service).fetch()
             if (srv) {
                services.push(srv)
             }
             else {
-               console.error(`ServicePoint '${servicepoint}' component '${component_id}' not implement ${service}`)
+               log.notifyError(new Error(`ServicePoint '${servicepoint}' component '${component_id}' not implement service '${service}'`))
             }
          }
          else {
-            console.error(`ServicePoint '${servicepoint}' component '${component_id}' not found`)
+            log.notifyError(new Error(`ServicePoint '${servicepoint}' component '${component_id}' not found`))
          }
       }
    }
@@ -192,11 +199,32 @@ function initServicesSettings(): SettingsDescriptor {
 
 export function acquireServicePointDescriptor(id: string): ServicePointDescriptor {
    let desc = ServiceSettings.servicePoints[id]
-   if (!desc) {
-      desc = { id, connexions: [] }
+   if (!desc) desc = { id, connexions: [] }
+   return desc
+}
+
+export function updateServicePointDescriptor(id: string, properties: ServicePointProperties): ServicePointDescriptor {
+   let desc = ServiceSettings.servicePoints[id]
+   if (desc) {
+      let hasChanged = false
+      for (const key in properties) {
+         const value = properties[key]
+         if (value !== undefined && desc[key] != value) {
+            desc[key] = value
+            hasChanged = true
+         }
+      }
+      hasChanged && dispatchServicePointSetting(id, desc)
+   }
+   else {
+      desc = { ...properties, id, connexions: [] }
       ServiceSettings.servicePoints[id] = desc
    }
    return desc
+}
+
+export function getServicePoint<IService>(id: string): ServicePoint<IService> {
+   return ServicePoints.get(id) as ServicePoint<IService>
 }
 
 export function acquireServicePoint<IService>(id: string): ServicePoint<IService> {
@@ -208,22 +236,9 @@ export function acquireServicePoint<IService>(id: string): ServicePoint<IService
    return svc
 }
 
-export function updateServicePointDescriptor(id: string, properties: ServicePointProperties): ServicePointDescriptor {
-   let desc = ServiceSettings.servicePoints[id]
-   if (!desc) {
-      desc = { id, connexions: [] }
-      ServiceSettings.servicePoints[id] = desc
-   }
-   return desc
-}
-
 export function createServicePoint<S extends any, D extends any>(service: ServiceEntry<S, D>, name: ServicePointID, properties?: ServicePointProperties): ServicePoint<S> {
    const id = service.resource + "/" + name
-   let svc = ServicePoints.get(id) as ServicePoint<S>
-   if (!svc) {
-      svc = new ServicePoint<S>(updateServicePointDescriptor(id, properties))
-      ServicePoints.set(id, svc)
-   }
-   return svc
+   updateServicePointDescriptor(id, properties)
+   return acquireServicePoint(id)
 }
 

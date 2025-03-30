@@ -3,7 +3,7 @@ import { toast } from 'react-toastify'
 import { createNewComponent, ComponentManifest, ComponentDescriptor, JSONSchema, ComponentEntry, updateComponent, acquireComponent, acquireResource, ComponentService, ComponentServiceKey, ComponentEditorKey, ComponentEditor, ComponentEditorProps, ComponentChecking } from "@jointhedots/core"
 import { ModalContent, ModalFooter, Tab, Tabs, Button, Alert, Modal } from "react-lightning-design-system"
 import { openDialog } from "../openDialog"
-import Icon from "../Icon"
+import Icon, { IconButton } from "../Icon"
 import Form from "@rjsf/core"
 import validator from '@rjsf/validator-ajv8'
 import { CodeEditorHOC, StandardLanguageProvider } from "../CodeEditor"
@@ -48,7 +48,14 @@ export async function createComponentManifest(driver: ComponentEntry, service?: 
    manifest = result?.fixed || manifest
 
    const newManifest = await openDialog<ComponentManifest>((resolve) => {
-      return <ComponentManifestEditor driver={driver} handler={handler} editor={editor} manifest={manifest} onValidate={resolve} />
+      return <ComponentManifestEditor
+         created={true}
+         driver={driver}
+         handler={handler}
+         editor={editor}
+         manifest={manifest}
+         onValidate={resolve}
+      />
    })
 
    if (newManifest) {
@@ -69,7 +76,14 @@ export async function editComponentManifest(manifest: ComponentManifest) {
    await driver.fetch()
 
    const newManifest = await openDialog<ComponentManifest>((resolve) => {
-      return <ComponentManifestEditor driver={driver} handler={handler} editor={editor} manifest={manifest} onValidate={resolve} />
+      return <ComponentManifestEditor
+         created={false}
+         driver={driver}
+         handler={handler}
+         editor={editor}
+         manifest={manifest}
+         onValidate={resolve}
+      />
    })
 
    if (newManifest) {
@@ -77,31 +91,24 @@ export async function editComponentManifest(manifest: ComponentManifest) {
    }
 }
 
-const DefaultEditor: ComponentEditor = {
-   panels: {
-      "Form": {
-         view: (props: ComponentEditorProps) => {
-            const { descriptor, schema, manifest, onChange } = props
-            const form_ref = useRef<Form>()
-            return <Form
-               ref={form_ref}
-               schema={schema}
-               validator={validator}
-               formData={manifest}
-               templates={{ ButtonTemplates: { SubmitButton: () => <></> } }}
-               //onSubmit={(e) => onChange(e.formData)}
-               onChange={(e) => onChange(e.formData)}
-            />
-         }
-      },
-      "JSON": {
-         view: (props: ComponentEditorProps) => {
-            const { descriptor, schema, manifest, onChange } = props
-            const value = useMemo(() => JSON.stringify(manifest, null, 2), [manifest])
-            return <JSONEditor value={value} adjustHeightMax={300} />
-         }
-      }
-   },
+const DefaultEditor = (props: ComponentEditorProps) => {
+   const { descriptor, schema, manifest, onChange } = props
+   const form_ref = useRef<Form>()
+   return <Form
+      ref={form_ref}
+      schema={schema}
+      validator={validator}
+      formData={manifest}
+      templates={{ ButtonTemplates: { SubmitButton: () => <></> } }}
+      //onSubmit={(e) => onChange(e.formData)}
+      onChange={(e) => onChange(e.formData)}
+   />
+}
+
+const JSONManifestEditor = (props: ComponentEditorProps) => {
+   const { descriptor, schema, manifest, onChange } = props
+   const value = useMemo(() => JSON.stringify(manifest, null, 2), [manifest])
+   return <JSONEditor value={value} adjustHeightMax={300} />
 }
 
 export function ComponentManifestEditor(props: {
@@ -109,20 +116,23 @@ export function ComponentManifestEditor(props: {
    handler: ComponentService
    editor?: ComponentEditor
    manifest: ComponentManifest
+   created: boolean
    onValidate: (manifest: ComponentManifest) => void
 }) {
-   const { driver, handler, editor, onValidate } = props
+   const { driver, handler, editor, created, onValidate } = props
    const [manifest, setManifest] = useState(props.manifest)
    const descriptor = ComponentServiceKey.descriptor(driver)
    const driver_manifest = driver.manifest
    const [result, setResult] = useState<ComponentChecking>(null)
+   const [codeMode, setCodeMode] = useState(false)
 
-   const apply = async () => {
+   const applyManifest = async (manifest) => {
       const result = await handler.checkDescriptor(manifest)
       if (!result || (!result.issues?.length && !result.fixed)) {
          onValidate(manifest)
       }
       else {
+         setManifest(manifest)
          setResult(result)
       }
    }
@@ -136,36 +146,32 @@ export function ComponentManifestEditor(props: {
       required: ["name", ...Object.keys(descriptor.attributes)],
    }), [descriptor])
 
-   const panels: ComponentEditor["panels"] = {
-      ...editor?.panels,
-      ...DefaultEditor.panels,
-   }
-
-   const tabs = []
-   let defaultActiveKey = null
-   for (const key in panels) {
-      const View = panels[key].view
-      tabs.push(<Tab key={key} title={key} eventKey={key} >
-         <View manifest={manifest} descriptor={descriptor} schema={schema} onChange={setManifest} />
-      </Tab>)
-      if (defaultActiveKey === null) defaultActiveKey = key
-   }
+   let Editor = (created ? editor.creator || editor.editor : editor.editor) || DefaultEditor
+   if (codeMode) Editor = JSONManifestEditor
 
    return <div>
-      <h1 style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 10, paddingTop: 12, fontSize: "200%" }}>
-         <Icon name={driver_manifest.icon || "blank"} style={{ fontSize: "150%" }} />
-         {driver_manifest.title || driver_manifest.$id}
-      </h1>
+      <div style={{ position: "relative" }}>
+         <h1 style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 10, paddingTop: 12, fontSize: "200%" }}>
+            <Icon name={driver_manifest.icon || "blank"} style={{ fontSize: "150%" }} />
+            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+               <div style={{ fontSize: "80%" }}>{driver_manifest.title || driver_manifest.$id} </div>
+               <div style={{ fontSize: "50%" }}>{manifest.title || "(no title)"}</div>
+            </div>
+         </h1>
+         <div style={{ position: "absolute", top: 10, right: 10 }}>
+            <IconButton name="bi:code" onClick={() => setCodeMode(!codeMode)} />
+         </div>
+      </div>
       <ModalContent className="slds-p-horizontal_small">
-         <Tabs
-            defaultActiveKey={defaultActiveKey}
-            onSelect={function noRefCheck() { }}
-            type="default"
-         >
-            {tabs}
-         </Tabs>
-      </ModalContent>
-      <ModalFooter>
+         <Editor
+            created={created}
+            manifest={manifest}
+            descriptor={descriptor}
+            schema={schema}
+            onChange={setManifest}
+            onValidate={applyManifest}
+            onCancel={() => onValidate(null)}
+         />
          {result?.issues?.length && <div className='JDT-ErrorBoundary'>
             {result.issues.map(issue => {
                return <div>
@@ -173,8 +179,14 @@ export function ComponentManifestEditor(props: {
                </div>
             })}
          </div>}
-         <Button type="brand" onClick={apply}>Apply</Button>
-         <Button type="neutral" onClick={() => onValidate(null)}>Cancel</Button>
-      </ModalFooter>
+      </ModalContent>
+      <div style={lightReliefStyle}>{manifest.$id}</div>
    </div>
 }
+const lightReliefStyle = {
+   position: "absolute",
+   float: "right",
+   color: "white",
+   textShadow: '1px 1px 0 rgba(0, 0, 0, 0.5)',
+   fontSize: "80%",
+} as any

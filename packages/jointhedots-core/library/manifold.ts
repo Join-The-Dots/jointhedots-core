@@ -275,17 +275,15 @@ export function resolveRelativeComponent(ref: string, from: ComponentEntry): Com
 
 export async function createNewComponent(manifest: ComponentManifest): Promise<ComponentManifest> {
    console.log("createNewComponent", manifest)
-   const { providers } = ComponentsRegistry.components_provider
-   const local = providers[providers.length - 1] as any
-   await local.add_component(manifest)
+   const provider = ComponentsRegistry.components_provider
+   await provider.add_component(manifest)
    return manifest
 }
 
 export async function updateComponent(manifest: ComponentManifest): Promise<ComponentManifest> {
    console.log("updateComponent", manifest)
-   const { providers } = ComponentsRegistry.components_provider
-   const local = providers[providers.length - 1] as any
-   await local.add_component(manifest)
+   const provider = ComponentsRegistry.components_provider
+   await provider.add_component(manifest)
 
    const component = ComponentsRegistry.components.get(manifest.$id)
    if (component && component.loaded) {
@@ -297,7 +295,21 @@ export async function updateComponent(manifest: ComponentManifest): Promise<Comp
          ComponentsRegistry.listeners.forEach(l => l(component))
       }
    }
+
    return manifest
+}
+
+export async function deleteComponent(id: string): Promise<void> {
+   console.log("deleteComponent", id)
+   const provider = ComponentsRegistry.components_provider
+   if (await provider.delete_component(id)) {
+      const component = ComponentsRegistry.components.get(id)
+      if (component) {
+         component.failure = new Error(`Component deleted`)
+         ComponentsRegistry.listeners.forEach(l => l(component))
+         ComponentsRegistry.components.delete(id)
+      }
+   }
 }
 
 export async function fetchComponentsPublications(components_ids: string[]): Promise<ComponentPublication[]> {
@@ -308,11 +320,15 @@ export async function fetchComponentsPublications(components_ids: string[]): Pro
          results.push(cnx)
       }
       else {
-         results.push({
-            component_id: id,
-            title: "! Not found: " + id,
-         })
+         results.push(failedComponentPublication(id))
       }
    }
    return results
+}
+
+export function failedComponentPublication(id: string, title?: string): ComponentPublication {
+   return {
+      component_id: id,
+      title: title ? title : "! Not found: " + id,
+   }
 }

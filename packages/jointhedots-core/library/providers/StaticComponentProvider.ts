@@ -62,4 +62,10 @@ export class StaticComponentProvider implements IComponentProvider {
    async set_component_manifest(component_id: string, manifest: ComponentManifest): Promise<boolean> {
       return false
    }
+   async add_component(manifest: ComponentManifest): Promise<ComponentPublication> {
+      return null
+   }
+   async delete_component(component_id: string): Promise<boolean> {
+      return false
+   }
 }

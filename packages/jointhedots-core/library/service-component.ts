@@ -44,14 +44,15 @@ export type ComponentEditorProps<T extends ComponentManifest = ComponentManifest
    descriptor: ComponentDescriptor
    schema: JSONSchema
    manifest: T
-   onChange?: (manifest: T) => void
+   created?: boolean
+   onChange: (manifest: T) => void
+   onValidate: (manifest: T) => void
+   onCancel: () => void
 }
 
 export type ComponentEditor<T extends ComponentManifest = ComponentManifest> = {
-   panels?: MapLike<{
-      icon?: string
-      view: React.ComponentType<ComponentEditorProps<T>>
-   }>
+   creator: React.ComponentType<ComponentEditorProps<T>>
+   editor: React.ComponentType<ComponentEditorProps<T>>
 }
 
 export const ComponentEditorKey = ComponentServiceKey.subservice<ComponentEditor>("editor")

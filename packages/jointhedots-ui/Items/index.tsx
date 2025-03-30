@@ -1,5 +1,5 @@
 import React from "react"
-import openContextualMenu from "../openContextualMenu"
+import openContextualMenu, { Menu } from "../openContextualMenu"
 import Icon, { IconButton } from "@jointhedots/ui/Icon"
 import { toast } from 'react-toastify'
 import "./style.scss"
@@ -19,12 +19,16 @@ export type LabelProps<T = any> = {
    name: string // Object name
    icon?: string // Object icon
    decorations?: LabelDecoration[]
-   tooling?: LabelProps[] // Object tooling list
+   tooling?: ToolingProps[] // Object tooling list
    summary?: React.ReactNode // Object short description
    tooltip?: DisplayProps // Object tooltip
    content?: DisplayProps // Object content
    data?: T // Object custom data
    onActivate?: (label: LabelProps) => void // On Object activation
+}
+
+export type ToolingProps = LabelProps & {
+   optional?: boolean
 }
 
 export type ItemProps<T = any> = LabelProps<T> & {
@@ -85,9 +89,42 @@ function DifferDisplay(label: LabelProps, display: DisplayProps): (props: LabelP
    }
 }
 
-function DrawToolings(tooling: LabelProps[]): React.ReactNode {
+function DrawToolingMenu(tooling: ToolingProps[], onClose: () => void): React.ReactNode {
+   return <>
+      {...tooling.map((label, i) => (label && <Menu.Item
+         key={i}
+         name={label.name}
+         icon={label.icon}
+         onClick={() => {
+            onClose()
+            label.onActivate(label)
+         }}
+      />))}
+   </>
+}
+
+function DrawToolingWidgets(tooling: ToolingProps[]): React.ReactNode {
    if (tooling) {
-      return <>{...tooling.map(label => label && React.createElement(LabelButton, label))}</>
+      let onToolMenu = null
+      const buttons = []
+      for (const label of tooling) {
+         if (label) {
+            if (!label.optional) {
+               buttons.push(React.createElement(LabelButton, label))
+            }
+            else if (!onToolMenu) {
+               onToolMenu = (e) => {
+                  openContextualMenu(e, (close) => {
+                     return DrawToolingMenu(tooling, close)
+                  })
+               }
+            }
+         }
+      }
+      return <>
+         {...buttons}
+         {onToolMenu && <IconButton name="bi:three-dots-vertical" onClick={onToolMenu} />}
+      </>
    }
    return null
 }
@@ -97,9 +134,7 @@ function Switch(props: {
    onSelect?: (event: React.SyntheticEvent) => void
 }) {
    const { selected, onSelect } = props
-   return <div className="item-selector" onClick={onSelect}>
-      <Icon name={selected ? "bi:dash-square-dotted" : "bi:plus-square"} />
-   </div>
+   return <IconButton name={selected ? "bi:dash-square-dotted" : "bi:plus-square"} onClick={onSelect} />
 }
 
 export function LabelButton(label: LabelProps) {
@@ -194,14 +229,14 @@ export function ItemRowRich(item: ItemProps) {
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
    >
+      {(selected == true) ? <Switch selected={true} onSelect={select} /> : null}
+      {(selected == false) ? <Switch selected={false} onSelect={select} /> : null}
       <div className="item-icon">{DrawLabelIcon(item)}</div>
       <div className="item-infos">
          <div>{name}</div>
          {summary && <div>{summary}</div>}
       </div>
-      {DrawToolings(item.tooling)}
-      {(selected == true) ? <Switch selected={true} onSelect={select} /> : null}
-      {(selected == false) ? <Switch selected={false} onSelect={select} /> : null}
+      {DrawToolingWidgets(item.tooling)}
    </li>
 }
 

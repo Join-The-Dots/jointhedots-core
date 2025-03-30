@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from 'react'
-import { ComponentsRegistry, ComponentPublication, IComponentProvider, MapLike, ComponentFilter, createComponentFilter, acquireComponent } from '@jointhedots/core'
+import { ComponentsRegistry, ComponentPublication, IComponentProvider, MapLike, ComponentFilter, createComponentFilter, acquireComponent, deleteComponent } from '@jointhedots/core'
 import { useAsyncState } from '@jointhedots/core/react'
 import { Stack } from '@jointhedots/ui/Layouts'
 import { TextInput } from '@jointhedots/ui/utils/TextInput'
@@ -41,8 +41,8 @@ export function ComponentItem(props: {
    entry: ComponentPublication
    selected?: boolean
    display?: ComponentItemDisplay
-   onSelect?: (item: ItemProps<ComponentPublication>) => void
-   onActivate?: (item: ItemProps<ComponentPublication>) => void
+   onSelect?: (item: ComponentPublication) => void
+   onActivate?: (item: ComponentPublication) => void
 }) {
    const { entry, display, selected, onSelect, onActivate } = props
    const ItemRow = display?.small ? ItemRowShort : ItemRowRich
@@ -51,6 +51,7 @@ export function ComponentItem(props: {
       if (display?.allowEdit) tooling.push({
          name: "edit",
          icon: "bi:pencil",
+         optional: true,
          onActivate: async () => {
             const { component_id } = entry
             const manifest = await acquireComponent(component_id).fetch()
@@ -60,9 +61,11 @@ export function ComponentItem(props: {
       if (display?.allowDelete) tooling.push({
          name: "delete",
          icon: "bi:trash",
+         optional: true,
          onActivate: async () => {
-            if (await askQuestion("Do you want to delete connexion ?")) {
-               //ComponentsRegistry.deleteComponent(entry.component_id)
+            if (await askQuestion(`Do you want to delete '${entry.title}' ?`)) {
+               if (selected) onSelect(entry)
+               deleteComponent(entry.component_id)
             }
          }
       })
@@ -74,8 +77,8 @@ export function ComponentItem(props: {
       summary={entry.description || entry.type}
       selected={selected}
       tooling={tooling}
-      onSelect={onSelect}
-      onActivate={onActivate}
+      onSelect={onSelect && ((item) => onSelect(item.data))}
+      onActivate={onActivate && ((item) => onActivate(item.data))}
    />
 }
 
@@ -96,12 +99,12 @@ export function ComponentsList(props: {
       }
    }, [entries, display?.grouped])
 
-   const select = useCallback((entry: ItemProps<ComponentPublication>) => {
-      onSelect(entry.data)
+   const select = useCallback((entry: ComponentPublication) => {
+      onSelect(entry)
    }, [onSelect])
 
-   const activate = useCallback((entry: ItemProps<ComponentPublication>) => {
-      onActivate(entry.data)
+   const activate = useCallback((entry: ComponentPublication) => {
+      onActivate(entry)
    }, [onActivate])
 
    if (groupeds) {
@@ -206,5 +209,5 @@ const browser_display: ComponentItemDisplay = {
    grouped: true,
    small: false,
    allowEdit: true,
-   allowDelete: false,
+   allowDelete: true,
 }

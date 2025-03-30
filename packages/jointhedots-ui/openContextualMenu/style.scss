@@ -11,14 +11,6 @@
    }
 
    &>:first-child {
-      display: flex;
-      flex-direction: row;
-      flex: 0;
-      min-width: 32px;
-      align-items: center;
-      justify-content: center;
-      padding: 3px 0;
-      font-size: 200%;
    }
 
    &>:last-child {

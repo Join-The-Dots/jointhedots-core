@@ -1,4 +1,4 @@
-import { print } from "../common/console"
+import { print } from "../logging/console"
 import { Observable } from "./observable"
 import { HttpStatusAttribute } from "./attributes"
 

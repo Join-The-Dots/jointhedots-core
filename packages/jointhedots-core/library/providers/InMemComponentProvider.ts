@@ -24,10 +24,16 @@ export class InMemComponentPublisher implements IComponentPublisher {
 
 export class InMemComponentProvider extends InMemComponentPublisher implements IComponentProvider {
    manifests = new Map<string, ComponentManifest>()
-   add_component(manifest: ComponentManifest) {
+   async add_component(manifest: ComponentManifest): Promise<ComponentPublication> {
       const entry = createComponentPublication(manifest)
       this.manifests.set(entry.component_id, manifest)
       this.pubs.set(entry.component_id, entry)
+      return entry
+   }
+   async delete_component(component_id: string): Promise<boolean> {
+      this.manifests.delete(component_id)
+      this.pubs.delete(component_id)
+      return true
    }
    async get_component_manifest(component_id: string): Promise<ComponentManifest> {
       return this.manifests.get(component_id)

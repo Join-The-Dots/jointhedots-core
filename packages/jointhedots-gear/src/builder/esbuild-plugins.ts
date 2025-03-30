@@ -15,7 +15,7 @@ export async function create_esbuild_context(
    target: BuildTarget,
    storage: StorageFiles,
    outdir: string,
-   use_dev: boolean,
+   devmode: boolean,
    plugins: esbuild.Plugin[] = [],
 ): Promise<esbuild.BuildContext> {
    const ws = target.workspace
@@ -45,8 +45,8 @@ export async function create_esbuild_context(
       format: 'esm',
       target: 'es2022',
       platform: "browser",
-      sourcemap: use_dev ? "linked" : false,
-      minify: use_dev ? false : true,
+      sourcemap: devmode ? "linked" : false,
+      minify: devmode ? false : true,
       bundle: true,
       splitting: true,
       treeShaking: true,
@@ -58,6 +58,7 @@ export async function create_esbuild_context(
       define: {
          //'globalThis': 'window',
          "process.browser": "true",
+         "process.env.NODE_ENV": JSON.stringify(devmode ? "development" : "production"),
          ...workspace_constants,
       },
       plugins: [

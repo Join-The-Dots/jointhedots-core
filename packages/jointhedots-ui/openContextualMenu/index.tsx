@@ -63,9 +63,9 @@ export const Menu = {
             }
          }
       }
-      return <li className="jtd-menu-item" onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-         <ItemRowShort {...props}></ItemRowShort>
-      </li>
+      return <div className="jtd-menu-item" onClick={onClick} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+         <ItemRowShort {...props} />
+      </div>
    },
    LargeItem(props: MenuItemProps) {
       let { children, onClick, onElementRef } = props

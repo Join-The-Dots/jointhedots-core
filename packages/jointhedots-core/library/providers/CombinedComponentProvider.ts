@@ -35,4 +35,18 @@ export class CombinedComponentProvider implements IComponentProvider {
       }
       return false
    }
+   async add_component(manifest: ComponentManifest): Promise<ComponentPublication> {
+      for (const provider of this.providers) {
+         const done = await provider.add_component(manifest)
+         if (done) return done
+      }
+      return null
+   }
+   async delete_component(component_id: string): Promise<boolean> {
+      for (const provider of this.providers) {
+         const done = await provider.delete_component(component_id)
+         if (done) return true
+      }
+      return false
+   }
 }

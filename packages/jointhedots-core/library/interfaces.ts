@@ -84,6 +84,8 @@ export interface IComponentPublisher {
 export interface IComponentProvider extends IComponentPublisher {
    get_component_manifest(component_id: string): Promise<ComponentManifest>
    set_component_manifest(component_id: string, manifest: ComponentManifest): Promise<boolean>
+   add_component(manifest: ComponentManifest): Promise<ComponentPublication>
+   delete_component(component_id: string): Promise<boolean>
 }
 
 export interface IContentProvider {

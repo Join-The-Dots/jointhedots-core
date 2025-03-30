@@ -1,6 +1,8 @@
 export * from "./common/types"
 export * from "./common/handlers"
 
+export * from "./logging"
+
 export * from "./ast"
 
 export * from "./observable/attributes"

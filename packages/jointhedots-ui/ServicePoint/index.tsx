@@ -6,10 +6,13 @@ import {
    createComponentFilter, ServiceSettings, dispatchServicePointSetting,
    listenServicePoints, unlistenServicePoints, dispatchServicesSettings,
    listenServiceSettings, unlistenServiceSettings,
+   failedComponentPublication,
+   ServicePoints,
+   getServicePoint,
 } from "@jointhedots/core"
 import { ItemIcon, ItemRowShort, LabelDecoration } from "../Items"
 import { Button, ModalContent, ModalHeader, Spinner } from "react-lightning-design-system"
-import { MissingServiceError, registerErrorDisplayer, ServicePointsProviderContext, useAsyncMemo, useAsyncState, useServicesProvider } from "@jointhedots/core/react"
+import { ErrorDisplayer, MissingServiceError, registerErrorDisplayer, ServicePointsProviderContext, useAsyncMemo, useAsyncState, useServicesProvider } from "@jointhedots/core/react"
 import { AddComponentButton, ComponentItem, ComponentItemDisplay, CreateComponentSelector } from "../ComponentsLibrary"
 import { ViewRequirements } from "@jointhedots/core/services"
 
@@ -22,7 +25,7 @@ const service_display: ComponentItemDisplay = {
    grouped: false,
    small: false,
    allowEdit: true,
-   allowDelete: false,
+   allowDelete: true,
 }
 
 function ServiceConnexionItem(props: {
@@ -107,6 +110,12 @@ function ServiceConnexionSelector(props: {
       for (const cnx of connections) {
          if (cnx && !servicePoint.connexions.includes(cnx.component_id) && cnx.services.includes(service)) {
             remains.push(cnx)
+         }
+      }
+
+      for (const cnx_id of servicePoint.connexions) {
+         if (!connections.find(cnx => cnx.component_id === cnx_id)) {
+            connections.push(failedComponentPublication(cnx_id))
          }
       }
 
@@ -257,6 +266,7 @@ export function ServicePointInput(props: {
    onChange: (value: ServicePointDescriptor) => void
 }) {
    const { label, value, onChange } = props
+   const failure = getServicePoint(value.id)?.failure
 
    const connexions = useAsyncMemo(
       () => fetchComponentsPublications(value.connexions)
@@ -274,31 +284,54 @@ export function ServicePointInput(props: {
                connexions={connexions}
                onChange={onChange}
             />
+            {failure && <ErrorDisplayer error={failure} />}
          </div>
       </div>
    </div>
 }
 
-export function ServicePointsConfigurator() {
-   const [servicePoints, setServicePoints] = useState(ServiceSettings.servicePoints)
+export function ServicePointsConfigurator(props: {
+   showAll?: boolean
+}) {
+   const [_, setServicePoints] = useState(ServiceSettings.servicePoints)
+   const { servicePoints } = ServiceSettings
+   const list = []
+
    useEffect(() => {
       const handler = listenServiceSettings((settings) => {
          setServicePoints(settings.servicePoints)
       })
       return () => unlistenServiceSettings(handler)
    }, [])
-   const list = []
-   for (const id in ServiceSettings.servicePoints) {
-      const descriptor = ServiceSettings.servicePoints[id]
-      const onChange = (descriptor: ServicePointDescriptor) => {
-         dispatchServicePointSetting(id, descriptor)
+
+   const onChange = (id: string) => (descriptor: ServicePointDescriptor) => {
+      dispatchServicePointSetting(id, descriptor)
+   }
+
+   // Render active service points
+   for (const id of ServicePoints.keys()) {
+      const descriptor = servicePoints[id]
+      if (descriptor) {
+         list.push(<ServicePointInput
+            key={id}
+            label={descriptor.title || id}
+            value={descriptor}
+            onChange={onChange(id)}
+         />)
       }
-      list.push(<ServicePointInput
-         key={id}
-         label={id}
-         value={descriptor}
-         onChange={onChange}
-      />)
+   }
+
+   // Render stored service points
+   for (const id in servicePoints) {
+      if (ServicePoints.has(id) === false) {
+         const descriptor = servicePoints[id]
+         list.push(<ServicePointInput
+            key={id}
+            label={descriptor.title || id}
+            value={descriptor}
+            onChange={onChange(id)}
+         />)
+      }
    }
    return <>
       {list}
@@ -350,7 +383,7 @@ function DefaultServiceConfigurator(props: {
       }
       list.push(<ServicePointInput
          key={id}
-         label={id}
+         label={descriptor.title || id}
          value={descriptor}
          onChange={onChange}
       />)

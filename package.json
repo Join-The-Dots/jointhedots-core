@@ -1,6 +1,6 @@
 {
    "name": "jointhedots",
-   "version": "2.0.9",
+   "version": "2.0.10",
    "type": "module",
    "private": true,
    "license": "MIT",
@@ -36,7 +36,7 @@
       "build": "jointhedots-gear make --libs @jointhedots/core,@jointhedots/ui --pack --dist ./dist",
       "build:pwa": "jointhedots-gear make --watch --apps playground:app-web --dist ./dist",
       "build:ext": "jointhedots-gear make --watch --apps playground:app-chrome --dist ./dist",
-      "make": "jointhedots-gear make --watch --libs @jointhedots/core,@jointhedots/ui --dist ../sf-explorer-app/dist",
+      "make": "jointhedots-gear make --watch --libs @jointhedots/core,@jointhedots/ui --devmode --dist ../sf-explorer-app/dist",
       "test": "mocha"
    },
    "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447",

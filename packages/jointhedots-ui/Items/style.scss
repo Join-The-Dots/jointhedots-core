@@ -52,7 +52,6 @@ body {
    align-items: center;
    cursor: pointer;
    position: relative;
-   font-size: 14px;
    min-height: 32px;
 
    &:hover {
@@ -116,6 +115,7 @@ body {
       flex: 1;
       padding: 0 20px 0 3px;
       padding: 5px;
+      font-size: 14px;
 
       &>:first-child {
          text-transform: capitalize;

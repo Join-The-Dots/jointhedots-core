@@ -61,13 +61,27 @@ function getComponentManifest(db: IDBDatabase, component_id: string): Promise<Co
    })
 }
 
+function getComponentPublication(db: IDBDatabase, components_id: string): Promise<ComponentPublication> {
+   const transaction = db.transaction(["components", "components_services"], "readonly")
+   const components_store = transaction.objectStore("components")
+   return new Promise((resolve, reject) => {
+      const components_req = components_store.get(components_id)
+      components_req.onsuccess = () => {
+         resolve(components_req.result)
+      }
+      components_req.onerror = (e) => {
+         reject(e.target["error"])
+      }
+   })
+}
+
 function getComponentsPublications(db: IDBDatabase, components_ids: string[]): Promise<ComponentPublication[]> {
    const transaction = db.transaction(["components", "components_services"], "readonly")
    const components_store = transaction.objectStore("components")
    const pendings = []
-   for (const id of components_ids) {
+   for (const components_id of components_ids) {
       pendings.push(new Promise((resolve, reject) => {
-         const components_req = components_store.get(id)
+         const components_req = components_store.get(components_id)
          components_req.onsuccess = () => {
             resolve(components_req.result)
          }
@@ -175,11 +189,35 @@ function storeComponent(db: IDBDatabase, manifest: ComponentManifest): Promise<C
    })
 }
 
+function deleteComponent(db: IDBDatabase, component_id: string): Promise<boolean> {
+   return new Promise(async (resolve, reject) => {
+      const entry = await getComponentPublication(db, component_id)
+      if (entry) {
+         const db_T = db.transaction(["components", "components_services", "components_manifests"], "readwrite")
+
+         const components_store = db_T.objectStore("components")
+         components_store.delete(component_id)
+
+         const components_services = db_T.objectStore("components_services")
+         for (const srv of entry.services) {
+            components_services.delete([component_id, srv])
+         }
+
+         const components_manifests = db_T.objectStore("components_manifests")
+         components_manifests.delete(component_id)
+
+         db_T.onerror = (e) => reject(e.target["error"])
+         db_T.oncomplete = () => resolve(true)
+         db_T.commit()
+      }
+      else {
+         resolve(false)
+      }
+   })
+}
+
 export class LocalComponentProvider implements IComponentProvider {
    db = openComponentDatabase()
-   async add_component(manifest: ComponentManifest): Promise<ComponentPublication> {
-      return storeComponent(await this.db, manifest)
-   }
    async get_component_publication(id: string): Promise<ComponentPublication> {
       const results = await getComponentsPublications(await this.db, [id])
       return results[0]
@@ -192,5 +230,11 @@ export class LocalComponentProvider implements IComponentProvider {
    }
    async set_component_manifest(component_id: string, manifest: ComponentManifest): Promise<boolean> {
       return false
+   }
+   async add_component(manifest: ComponentManifest): Promise<ComponentPublication> {
+      return storeComponent(await this.db, manifest)
+   }
+   async delete_component(component_id: string): Promise<boolean> {
+      return deleteComponent(await this.db, component_id)
    }
 }

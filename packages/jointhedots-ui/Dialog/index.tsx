@@ -6,10 +6,10 @@ import { Button, Modal, ModalContent, ModalHeader } from "react-lightning-design
 
 export function askQuestion(question: string): Promise<boolean> {
    return openDialog((resolve) => {
-      return <div>
-         <div>{question}</div>
-         <Button onClick={() => resolve(true)} children="Yes" />
-         <Button onClick={() => resolve(false)} children="No" />
+      return <div className="slds-m-around_small">
+         <div className="slds-m-vertical_small">{question}</div>
+         <Button type="brand" onClick={() => resolve(true)} children="Yes" />
+         <Button type="neutral" onClick={() => resolve(false)} children="No" />
       </div>
    })
 }
