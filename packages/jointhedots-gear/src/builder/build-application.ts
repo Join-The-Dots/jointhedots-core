@@ -172,7 +172,7 @@ class ChromePackageTask extends BuildTask {
       // Create manifest
       const manifest: ChromeAppManifest = {
          ...infos,
-         name: desc.name,
+         name: infos?.name || desc.name,
          version: this.version,
          manifest_version: 3,
          description: infos.description || desc.description,
