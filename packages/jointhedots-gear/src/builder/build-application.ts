@@ -24,7 +24,7 @@ export function create_application_target(opts: {
    watch: boolean
 }): BuildTarget {
    const { app, version } = opts
-   const { type, name, webviews, modules } = app.descriptor
+   const { type, name, webviews, modules, assets } = app.descriptor
    const ws = app.library.workspace
    const target = new BuildTarget(name, opts.storage, ws, opts.devmode == true, opts.watch == true)
 
@@ -78,6 +78,13 @@ export function create_application_target(opts: {
       }
       else {
          target.error(`Invalid module name '${name}' in ${name}`)
+      }
+   }
+
+   // Add application static assets
+   if (Array.isArray(assets)) {
+      for (const asset of assets) {
+         target.assets.add_entry(asset, app.baseDir, app.library)
       }
    }
 

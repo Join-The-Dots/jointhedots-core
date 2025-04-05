@@ -121,26 +121,30 @@ export class ComponentCatalogsTask extends BuildTask {
    }
 }
 
+export type AssetMapping = {
+   from: string
+   to: string
+}
+
 export class AssetsTask extends BuildTask {
-   assets: AssetsEntry[] = []
+   assets: AssetMapping[] = []
    statics: MapLike<string> = {}
    add_entry(entry: AssetsEntry, baseDir: string, library: Library) {
+      let asset: AssetMapping = null
+
       if (typeof entry === "string") {
-         const assets = {
-            from: resolve_entry_path(library, entry, baseDir),
-            to: entry,
-         }
-         this.assets.push(assets)
-         console.log(`+ assets '${library.name}': ${assets.from} -> ${assets.to}`)
+         const from = resolve_entry_path(library, entry, baseDir)
+         if (!from) throw new Error(`In '${baseDir}', cannot found asset from: '${entry}'`)
+         asset = { from, to: Path.basename(entry) }
       }
       else {
-         const assets = {
-            from: resolve_entry_path(library, entry.from, baseDir),
-            to: entry.to,
-         }
-         this.assets.push(assets)
-         console.log(`+ assets '${library.name}': ${assets.from} -> ${assets.to}`)
+         const from = resolve_entry_path(library, entry.from, baseDir)
+         if (!from) throw new Error(`In '${baseDir}', cannot found asset from: '${entry.from}'`)
+         asset = { from, to: entry.to }
       }
+
+      console.log(`+ assets '${library.name}': ${asset.from} -> ${asset.to}`)
+      this.assets.push(asset)
    }
    add_static_text(name: string, data: string) {
       this.statics[name] = data
@@ -285,16 +289,16 @@ export class BuildTarget {
 }
 
 export function resolve_entry_path(lib: Library, entryId: string, baseDir: string): string {
-   if (entryId.startsWith(".")) {
-      return make_relative_path(Process.cwd(), Path.resolve(baseDir, entryId))
-   }
-   else {
-      const parts = entryId.split("/")
-      for (const search_path of lib.search_directories) {
-         if (Fs.existsSync(search_path + "/" + parts[0])) {
-            return make_relative_path(Process.cwd(), search_path + "/" + entryId)
-         }
+   const fpath = make_relative_path(Process.cwd(), Path.resolve(baseDir, entryId))
+   if (entryId.startsWith(".")) return fpath
+
+   const parts = entryId.split("/")
+   for (const search_path of lib.search_directories) {
+      if (Fs.existsSync(search_path + "/" + parts[0])) {
+         return make_relative_path(Process.cwd(), search_path + "/" + entryId)
       }
-      return null
    }
+
+   if (Fs.existsSync(fpath)) return fpath
+   return null
 }
