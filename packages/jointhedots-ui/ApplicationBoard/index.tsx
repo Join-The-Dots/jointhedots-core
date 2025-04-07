@@ -2,10 +2,9 @@ import { getViewReferenceFrom, getViewInfosFrom, gotoURLView, MapLike, ServicePo
 import { NavBar } from './NavBar'
 import { Button } from 'react-lightning-design-system'
 import { Box, Grid, NavigationBeacon, SLDSPage } from './Utils'
-import { InvokeView, useAsyncMemo, useCurrentView } from '@jointhedots/core/react'
+import { InvokeView, useAsyncMemo, useCurrentView, UseServicePoints } from '@jointhedots/core/react'
 import "@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.min.css"
 import { ApplicationSettings } from "./Settings"
-import { UseServicePoints } from "../ServicePoint"
 import { ViewRequirements } from "@jointhedots/core/services"
 import { useMemo } from "react"
 import { ComponentsFilteredList } from "../ComponentsLibrary"
@@ -110,14 +109,14 @@ export function ApplicationBoard(props: {
    else {
       content = <NavigationBeacon component_id={displayed.name}>
          <Box sx={{ backgroundColor: 'white', minHeight: '90vh', mt: 1 }}>
-            <UseServicePoints requirements={requirements}>
+            <UseServicePoints requirements={requirements} configurator={null}>
                <InvokeView view={displayed} />
             </UseServicePoints>
          </Box>
       </NavigationBeacon>
    }
 
-   return (<UseServicePoints requireds={services}>
+   return (<UseServicePoints requireds={services} configurator={null}>
       <NavBar descriptor={props.descriptor} active={active} origin={origin} />
       {content}
    </UseServicePoints>)

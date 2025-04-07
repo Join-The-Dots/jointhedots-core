@@ -1,7 +1,9 @@
 import React, { useContext, useEffect, useState } from "react"
+import { Spinner } from "react-lightning-design-system"
 import { acquireServicePoint, listenServicePoints, ServicePoint } from "../library/service-points"
 import { useAsyncMemo } from "./useAsyncMemo"
 import { ViewRequirements } from "../services"
+import { ErrorDisplayer } from "./ErrorBoundary"
 
 export type IService = unknown
 export type ServicePointsMap = Map<ServicePoint, IService[]>
@@ -174,4 +176,36 @@ export function useServicesProvider(requireds: ServicePoint[], requirements: Vie
    }, [controller])
 
    return provider
+}
+
+export type ServiceConfiguratorComponent = React.ComponentType<{
+   services: ServicePoint[]
+}>
+
+export function OverrideServicePoints(props: {
+}){
+   
+}
+
+export function UseServicePoints(props: {
+   requireds?: ServicePoint[]
+   requirements?: ViewRequirements
+   configurator: ServiceConfiguratorComponent
+   children: any
+}) {
+   const { requireds, requirements, children } = props
+   const result = useServicesProvider(requireds, requirements)
+   if (!result) {
+      return <Spinner />
+   }
+   else if (result instanceof MissingServiceError) {
+      const ServiceConfigurator = props.configurator
+      if (ServiceConfigurator) return <ServiceConfigurator services={result.missings} />
+      else return <ErrorDisplayer error={result} />
+   }
+   else {
+      return <ServicePointsProviderContext.Provider value={result}>
+         {children}
+      </ServicePointsProviderContext.Provider>
+   }
 }

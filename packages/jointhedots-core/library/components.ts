@@ -18,22 +18,7 @@ export class ServiceEntry<S extends any, D extends any> {
 }
 
 //-------------------------------------------------------------
-// Resource: programming resource
-//-------------------------------------------------------------
-
-export interface ResourceContent {
-   component_id: ComponentID
-   name: string
-   format: string
-   content?: Blob
-}
-
-export interface IResourceLoader {
-   load_resource(uri: string): Promise<any>
-}
-
-//-------------------------------------------------------------
-// Component: distribuable unit providing services
+// Component model: distribuable unit providing services
 //-------------------------------------------------------------
 
 export type ComponentID = string
@@ -67,6 +52,68 @@ export type ComponentManifest = {
 
 } & MapLike<any>
 
+//-------------------------------------------------------------
+// Component controller: Component manifest entry "component"
+//-------------------------------------------------------------
+
+// Component manifest schema
+export type ComponentSchema = {
+   readonly name: ServiceType
+   readonly title: string
+   readonly icon: string
+   readonly services: string[]
+   readonly attributes: MapLike<JSONSchema>
+}
+
+export interface ComponentManifestIssue {
+   level: "error" | "warn" | "info"
+   message: string
+   fix?(descriptor: ComponentManifest): Promise<ComponentManifest>
+}
+
+export interface ComponentChecking {
+   fixed?: ComponentManifest
+   issues?: ComponentManifestIssue[]
+}
+
+// Component service "component"
+export interface ComponentController {
+
+   // Component runtime
+   getAvailableServices(component: ComponentEntry): ServiceType[]
+   getService<IService>(component: ComponentEntry, type: ServiceType): Promise<IService>
+
+   // Component management
+   createComponent(component: ComponentEntry, descriptor: ComponentManifest): Promise<void>
+   updateComponent(component: ComponentEntry, descriptor: ComponentManifest): Promise<void>
+
+   // Descriptor management
+   checkDescriptor(descriptor: ComponentManifest): Promise<ComponentChecking>
+}
+
+export const ComponentServiceKey = new ServiceEntry<ComponentController, ComponentSchema>("component")
+
+export type ComponentEditorProps<T extends ComponentManifest = ComponentManifest> = {
+   descriptor: ComponentSchema
+   schema: JSONSchema
+   manifest: T
+   created?: boolean
+   onChange: (manifest: T) => void
+   onValidate: (manifest: T) => void
+   onCancel: () => void
+}
+
+export type ComponentEditor<T extends ComponentManifest = ComponentManifest> = {
+   creator: React.ComponentType<ComponentEditorProps<T>>
+   editor: React.ComponentType<ComponentEditorProps<T>>
+}
+
+export const ComponentEditorKey = ComponentServiceKey.subservice<ComponentEditor>("editor")
+
+//-------------------------------------------------------------
+// Component providers
+//-------------------------------------------------------------
+
 export type ComponentFilter = {
    query: string
    pattern: RegExp
@@ -74,6 +121,10 @@ export type ComponentFilter = {
    tags: string[]
    types: string[]
    services: string[]
+}
+
+export interface IResourceLoader {
+   load_resource(uri: string): Promise<any>
 }
 
 export interface IComponentPublisher {

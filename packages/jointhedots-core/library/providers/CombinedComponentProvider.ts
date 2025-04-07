@@ -1,4 +1,4 @@
-import { ComponentFilter, ComponentManifest, ComponentPublication, IComponentProvider } from "../interfaces"
+import { ComponentFilter, ComponentManifest, ComponentPublication, IComponentProvider } from "../components"
 
 export class CombinedComponentProvider implements IComponentProvider {
    constructor(readonly providers: IComponentProvider[] = []) {

@@ -1,0 +1,121 @@
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import { ServicePointSetting, ServicePoint } from "@jointhedots/core"
+import { Button, ModalContent, ModalHeader } from "react-lightning-design-system"
+import { MissingServiceError, registerErrorDisplayer } from "@jointhedots/core/react"
+import { openDialog } from "../openDialog"
+import { ServicePointInput } from "./configurator"
+import Icon from "../Icon"
+import { getSettings } from "@jointhedots/core/library/settings"
+
+
+function DefaultServiceConfigurator(props: {
+   services: ServicePoint[]
+   onApply?: () => void
+}) {
+   const settings = getSettings()
+   const { services, onApply } = props
+   const [descriptors, setDescriptors] = useState(() => {
+      return services.reduce((prev, svc) => {
+         prev[svc.id] = svc.descriptor
+         return prev
+      }, {})
+   })
+
+   const list = []
+   for (const id in descriptors) {
+      const descriptor = descriptors[id]
+      const onChange = (descriptor: ServicePointSetting) => {
+         setDescriptors({ ...descriptors, [id]: descriptor })
+      }
+      list.push(<ServicePointInput
+         key={id}
+         label={descriptor.title || id}
+         value={descriptor}
+         onChange={onChange}
+      />)
+   }
+
+   const apply = useCallback(async () => {
+      for (const scv of services) {
+         settings.set("service_points", scv.id, descriptors[scv.id])
+      }
+      for (const scv of services) {
+         await scv.fetch()
+      }
+      onApply?.()
+   }, [onApply, descriptors])
+
+   return <div style={{ padding: 10, maxWidth: 400, margin: "auto" }}>
+      <ModalHeader title="Following services are required" />
+      <ModalContent className="slds-p-around_large">
+         {list}
+      </ModalContent>
+      <Button type="brand" onClick={apply}>
+         {"Apply"}
+      </Button>
+   </div>
+}
+
+function FlexibleServiceConfigurator(props: {
+   services: ServicePoint[]
+   onApply?: () => void
+}) {
+   const divRef = useRef<HTMLDivElement>()
+   const [sizing, setSizing] = useState(0)
+   useEffect(() => {
+      const div = divRef.current
+      const sizer = new ResizeObserver(() => {
+         if (div.clientWidth < 800 && div.clientHeight < 500) setSizing(1)
+         else setSizing(2)
+      })
+      sizer.observe(div)
+      return () => sizer.unobserve(div)
+   }, [divRef])
+   const onSettings = () => {
+      openDialog<void>((resolve) => {
+         return <DefaultServiceConfigurator {...props} onApply={resolve} />
+      }).then(props.onApply)
+   }
+   return <div ref={divRef} style={{ overflow: "hidden" }}>
+      {sizing == 2
+         ? <DefaultServiceConfigurator {...props} />
+         : sizing == 1
+            ? <div style={{ maxWidth: 400, padding: 5, margin: "auto" }}> <Button type="destructive" onClick={onSettings} >
+               <Icon name="bi:exclamation-diamond" style={{ margin: 5 }} />{" Settings"}
+            </Button>
+            </div>
+            : null
+      }
+   </div>
+}
+
+export class ServiceRequirementBoundary extends React.Component<{
+   children: React.ReactNode
+}> {
+   state: { error?: MissingServiceError } = {}
+   componentDidCatch(error: Error) {
+      if (error instanceof MissingServiceError) this.setState({ error })
+      else throw error
+   }
+   render() {
+      const { error } = this.state
+      if (error) {
+         return <FlexibleServiceConfigurator
+            services={error.missings}
+            onApply={() => this.setState({ error: undefined })}
+         />
+      } else {
+         return <>{this.props.children}</>
+      }
+   }
+}
+
+export function registerMissingServiceDisplayer() {
+   registerErrorDisplayer(MissingServiceError, (props) => {
+      const { error, onRetry } = props
+      return <FlexibleServiceConfigurator
+         services={error.missings}
+         onApply={onRetry}
+      />
+   })
+}

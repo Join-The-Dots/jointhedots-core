@@ -4,7 +4,7 @@ import { ErrorDisplayer } from "@jointhedots/core/react/ErrorBoundary"
 import { evaluateViewInfos, getViewInfosFrom, ViewInfos } from "@jointhedots/core/library/view-url"
 import { useLocationHash } from "@jointhedots/core/react/useLocation"
 import { ViewReactKey, ViewServiceKey } from "../services"
-import { UseServicePoints } from "@jointhedots/ui/ServicePoint"
+import { UseServicePoints } from "./useServices"
 
 const ViewStackContext = React.createContext<ViewInfos>(null)
 
@@ -23,7 +23,7 @@ async function renderViewDescriptor(infos: ViewInfos, origin?: string, fallback?
 
          // Wrap view with service providing
          if (schema?.requirements) {
-            content = <UseServicePoints requirements={schema?.requirements} >
+            content = <UseServicePoints requirements={schema?.requirements} configurator={null}>
                {content}
             </UseServicePoints>
          }

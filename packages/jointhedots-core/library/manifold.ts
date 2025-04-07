@@ -1,10 +1,9 @@
 import { URI, Utils } from "vscode-uri"
-import { ComponentManifest, ComponentPublication, IContentProvider, IResourceLoader } from "./interfaces"
+import { ComponentFilter, ComponentManifest, ComponentPublication, ComponentServiceKey, IContentProvider, IResourceLoader } from "./components"
 import { CommonResourceProvider } from "./handlers/CommonResourceProvider"
 import { StaticContentProvider } from "./handlers/StaticContentProvider"
 import { StaticComponentProvider } from "./providers/StaticComponentProvider"
 import { CombinedComponentProvider } from "./providers/CombinedComponentProvider"
-import { ComponentServiceKey } from "./service-component"
 import { LocalComponentProvider } from "./providers/LocalComponentProvider"
 
 // Component registry entry
@@ -274,14 +273,14 @@ export function resolveRelativeComponent(ref: string, from: ComponentEntry): Com
 }
 
 export async function createNewComponent(manifest: ComponentManifest): Promise<ComponentManifest> {
-   console.log("createNewComponent", manifest)
+   console.log("[New Component]", manifest?.$id)
    const provider = ComponentsRegistry.components_provider
    await provider.add_component(manifest)
    return manifest
 }
 
 export async function updateComponent(manifest: ComponentManifest): Promise<ComponentManifest> {
-   console.log("updateComponent", manifest)
+   console.log("[Update Component]", manifest?.$id)
    const provider = ComponentsRegistry.components_provider
    await provider.add_component(manifest)
 
@@ -310,6 +309,10 @@ export async function deleteComponent(id: string): Promise<void> {
          ComponentsRegistry.components.delete(id)
       }
    }
+}
+
+export async function searchComponentsPublications(filter: ComponentFilter): Promise<ComponentPublication[]> {
+   return ComponentsRegistry.components_provider.search_component_publications(filter)
 }
 
 export async function fetchComponentsPublications(components_ids: string[]): Promise<ComponentPublication[]> {

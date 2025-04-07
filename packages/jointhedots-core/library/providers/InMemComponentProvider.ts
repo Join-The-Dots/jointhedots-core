@@ -1,4 +1,4 @@
-import { ComponentFilter, ComponentManifest, ComponentPublication, IComponentProvider, IComponentPublisher } from "../interfaces"
+import { ComponentFilter, ComponentManifest, ComponentPublication, IComponentProvider, IComponentPublisher } from "../components"
 import { createComponentPublication, matchComponentFilter } from "../helpers"
 
 export class InMemComponentPublisher implements IComponentPublisher {

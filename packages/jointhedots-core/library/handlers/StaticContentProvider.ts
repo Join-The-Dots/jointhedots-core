@@ -1,5 +1,5 @@
 import { URI } from "vscode-uri"
-import { IContentProvider } from "../interfaces"
+import { IContentProvider } from "../components"
 import { b64_blob, b64_format, blob_b64 } from "../../common/contents"
 
 export class StaticContentProvider implements IContentProvider {

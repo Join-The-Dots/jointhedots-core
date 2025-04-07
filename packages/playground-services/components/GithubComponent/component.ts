@@ -1,5 +1,5 @@
 import { Octokit } from "@octokit/rest"
-import { ComponentEntry, ComponentManifest, ComponentService, ServiceType } from "@jointhedots/core"
+import { ComponentEntry, ComponentManifest, ComponentController, ServiceType } from "@jointhedots/core"
 import {
    ChangeSetId, FileKey, StorageChangeLog, StorageChangeSet,
    StorageChangeStatus, StorageService, StorageStats, StorageTransaction
@@ -13,7 +13,7 @@ interface CommittedFile {
    url: string
 }
 
-export const GithubDriverService: ComponentService = {
+export const GithubDriverService: ComponentController = {
 
    // Component runtime
    getAvailableServices(component: ComponentEntry): ServiceType[] {

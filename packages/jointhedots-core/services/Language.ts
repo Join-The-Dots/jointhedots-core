@@ -1,4 +1,4 @@
-import { ServiceEntry } from "../library/interfaces"
+import { ServiceEntry } from "../library/components"
 
 export enum LangQuality {
    High,

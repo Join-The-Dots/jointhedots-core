@@ -1,4 +1,4 @@
-import { ComponentFilter, ComponentManifest, ComponentPublication, IComponentProvider, IContentProvider } from "../interfaces"
+import { ComponentFilter, ComponentManifest, ComponentPublication, IComponentProvider, IContentProvider } from "../components"
 import { InMemComponentPublisher } from "./InMemComponentProvider"
 import { MapLike } from "../../common/types"
 import { ContentBlob } from "../../common/contents"

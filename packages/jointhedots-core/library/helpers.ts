@@ -1,5 +1,5 @@
 import { URI } from 'vscode-uri'
-import { ComponentFilter, ComponentManifest, ComponentPublication } from './interfaces'
+import { ComponentFilter, ComponentManifest, ComponentPublication } from './components'
 
 export function parseComponentURI(ref: string): URI {
    if (ref.startsWith("./")) {

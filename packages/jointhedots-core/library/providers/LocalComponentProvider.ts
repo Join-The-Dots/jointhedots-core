@@ -1,5 +1,5 @@
 import { createComponentPublication, matchComponentFilter } from "../helpers"
-import { ComponentFilter, ComponentID, ComponentManifest, ComponentPublication, IComponentProvider } from "../interfaces"
+import { ComponentFilter, ComponentID, ComponentManifest, ComponentPublication, IComponentProvider } from "../components"
 
 function openComponentDatabase(): Promise<IDBDatabase> {
    return new Promise((resolve, reject) => {

@@ -1,9 +1,10 @@
 import { MapLike } from "../common/types"
 import { acquireComponent, ComponentsRegistry } from "./manifold"
-import { ComponentID, ServiceEntry, ServiceType } from "./interfaces"
+import { ComponentID, ServiceEntry, ServiceType } from "./components"
 import { ILog, notifyError } from "../logging"
+import { getSettings, listenSettings, WriteMode } from "./settings"
 
-const servicepoints_storekey = "settings://service-points"
+export const ServicePoints: Map<string, ServicePoint> = new Map()
 
 export type ServicePointID = string
 
@@ -13,23 +14,14 @@ export type ServicePointProperties = {
    alternative?: ServicePointID
 }
 
-export type ServicePointDescriptor = ServicePointProperties & {
+export type ServicePointSetting = {
    id: ServicePointID
-   connexions: ComponentID[]
+   providers: ComponentID[]
+   properties: ServicePointProperties
 }
-
-export type SettingsDescriptor = {
-   servicePoints: MapLike<ServicePointDescriptor>
-}
-
-export const ServiceSettings: SettingsDescriptor = initServicesSettings()
-export const ServicePoints: Map<string, ServicePoint> = new Map()
 
 export type ServiceChangeHandler = (service: ServicePoint) => void
 const ServiceChangeHandlers = new Set<ServiceChangeHandler>()
-
-export type SettingsChangeHandler = (settings: SettingsDescriptor) => void
-const SettingsChangeHandlers = new Set<SettingsChangeHandler>()
 
 export class ServicePoint<IService = unknown> implements ILog {
    service: ServiceType = ""
@@ -39,7 +31,7 @@ export class ServicePoint<IService = unknown> implements ILog {
    ready: boolean = false
    failure: Error = null
    constructor(
-      public descriptor: ServicePointDescriptor,
+      public descriptor: ServicePointSetting,
    ) {
       const [service, name] = descriptor.id.split("/")
       this.service = service
@@ -49,7 +41,7 @@ export class ServicePoint<IService = unknown> implements ILog {
       return this.descriptor.id
    }
    get multiple(): boolean {
-      return this.descriptor.multiple || false
+      return this.descriptor?.properties?.multiple || false
    }
    async fetch(): Promise<IService[]> {
       if (this.ready) {
@@ -58,8 +50,8 @@ export class ServicePoint<IService = unknown> implements ILog {
       if (!this.loading) {
          this.loading = new Promise(async (resolve) => {
             const { descriptor } = this
-            const { connexions } = this.descriptor
-            const services = await fetchComponentsService<IService>(connexions, this.service, this.id, this)
+            const { providers } = this.descriptor
+            const services = await fetchComponentsService<IService>(providers, this.service, this.id, this)
             if (descriptor === this.descriptor) {
                this.services = services
                this.ready = true
@@ -73,7 +65,7 @@ export class ServicePoint<IService = unknown> implements ILog {
       }
       return this.loading
    }
-   async reset(descriptor: ServicePointDescriptor) {
+   async reset(descriptor: ServicePointSetting) {
       if (this.descriptor !== descriptor) {
          this.descriptor = descriptor
          if (this.loading || this.ready || this.failure) {
@@ -85,6 +77,11 @@ export class ServicePoint<IService = unknown> implements ILog {
          ServiceChangeHandlers.forEach(l => l(this))
       }
       return this
+   }
+   override(providers: ComponentID[]) {
+      const settings = getSettings()
+      const descriptor = settings.get("service_points", this.id)
+      settings.set("service_points", this.id, { ...descriptor, providers }, WriteMode.Temporary)
    }
    notifyError(error: Error) {
       this.failure = error
@@ -101,33 +98,9 @@ export function unlistenServicePoints(handler: ServiceChangeHandler) {
    ServiceChangeHandlers.delete(handler)
 }
 
-export function dispatchServicePointSetting(id: string, descriptor: ServicePointDescriptor) {
-   dispatchServicesSettings({
-      ...ServiceSettings,
-      servicePoints: {
-         ...ServiceSettings?.servicePoints,
-         [id]: descriptor,
-      }
-   })
-}
-
-export function dispatchServicesSettings(newSettings: SettingsDescriptor) {
-   updateServicesSettings(newSettings)
-   localStorage.setItem(servicepoints_storekey, JSON.stringify(newSettings))
-}
-
-export function listenServiceSettings(handler: SettingsChangeHandler) {
-   SettingsChangeHandlers.add(handler)
-   return handler
-}
-
-export function unlistenServiceSettings(handler: SettingsChangeHandler) {
-   SettingsChangeHandlers.delete(handler)
-}
-
 ComponentsRegistry.listen((component) => {
    for (const service of ServicePoints.values()) {
-      if (service.descriptor.connexions?.includes(component.id)) {
+      if (service.descriptor.providers?.includes(component.id)) {
          ServiceChangeHandlers.forEach(l => l(service))
       }
    }
@@ -155,56 +128,16 @@ async function fetchComponentsService<IService>(components_ids: string[], servic
    return services
 }
 
-function updateServicesSettings(newSettings: SettingsDescriptor) {
-   const newServices = newSettings.servicePoints
-   const prevServices = ServiceSettings.servicePoints
-   const services = ServiceSettings.servicePoints = {}
-   for (const id in newServices) {
-      const prevSvc = prevServices[id]
-      const newSvc = newServices[id]
-      if (JSON.stringify(prevSvc) !== JSON.stringify(newSvc)) {
-         const svc = ServicePoints.get(id)
-         services[id] = newSvc
-         if (svc) {
-            svc.reset(newSvc)
-            console.log("Update service point:", id)
-         }
-      }
-      else {
-         services[id] = prevSvc
-      }
-   }
-   SettingsChangeHandlers.forEach(l => l(newSettings))
-}
-
-function initServicesSettings(): SettingsDescriptor {
-   window.addEventListener("storage", (evt) => {
-      const { key, newValue } = evt
-      if (key === servicepoints_storekey) {
-         updateServicesSettings(JSON.parse(newValue))
-      }
-   })
-   try {
-      const bytes = localStorage.getItem(servicepoints_storekey)
-      const data = JSON.parse(bytes) as SettingsDescriptor
-      if (false === data.servicePoints instanceof Object) throw null
-      return data
-   }
-   catch (_) {
-      return {
-         servicePoints: {},
-      }
-   }
-}
-
-export function acquireServicePointDescriptor(id: string): ServicePointDescriptor {
-   let desc = ServiceSettings.servicePoints[id]
-   if (!desc) desc = { id, connexions: [] }
+export function acquireServicePointDescriptor(id: string): ServicePointSetting {
+   const settings = getSettings()
+   let desc = settings.get("service_points", id)
+   if (!desc) desc = { id, providers: [], properties: {} }
    return desc
 }
 
-export function updateServicePointDescriptor(id: string, properties: ServicePointProperties): ServicePointDescriptor {
-   let desc = ServiceSettings.servicePoints[id]
+export function updateServicePointDescriptor(id: string, properties: ServicePointProperties): ServicePointSetting {
+   const settings = getSettings()
+   let desc = settings.get("service_points", id)
    if (desc) {
       let hasChanged = false
       for (const key in properties) {
@@ -214,14 +147,25 @@ export function updateServicePointDescriptor(id: string, properties: ServicePoin
             hasChanged = true
          }
       }
-      hasChanged && dispatchServicePointSetting(id, desc)
+      hasChanged && settings.set("service_points", id, desc)
    }
    else {
-      desc = { ...properties, id, connexions: [] }
-      ServiceSettings.servicePoints[id] = desc
+      desc = { id, providers: [], properties }
+      settings.set("service_points", id, desc)
    }
    return desc
 }
+
+listenSettings((group, id) => {
+   if (group === "service_points") {
+      const svc = ServicePoints.get(id)
+      if (svc) {
+         const desc = getSettings().get<ServicePointSetting>("service_points", id)
+         svc.reset(desc)
+         console.log("[Update Service Point]", id)
+      }
+   }
+})
 
 export function getServicePoint<IService>(id: string): ServicePoint<IService> {
    return ServicePoints.get(id) as ServicePoint<IService>

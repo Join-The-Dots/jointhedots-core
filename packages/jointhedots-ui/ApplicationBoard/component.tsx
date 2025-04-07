@@ -1,10 +1,10 @@
-import { ComponentEntry, ComponentManifest, ServiceType, ComponentService } from "@jointhedots/core"
+import { ComponentEntry, ComponentManifest, ServiceType, ComponentController } from "@jointhedots/core"
 import { ViewReactService } from "@jointhedots/core/services"
 import { AppDescriptor, ApplicationBoard } from "."
 
 export type ApplicationBoardManifest = ComponentManifest & AppDescriptor
 
-export const ApplicationBoardDriver: ComponentService = {
+export const ApplicationBoardDriver: ComponentController = {
 
    // Component runtime
    getAvailableServices(component: ComponentEntry): ServiceType[] {

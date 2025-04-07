@@ -1,6 +1,6 @@
 import { JSONSchema } from "../ast/schema/schema"
 import { MapLike } from "../common/types"
-import { ServiceEntry } from "../library/interfaces"
+import { ServiceEntry } from "../library/components"
 
 // Service "webapi"
 export interface WebAPIService {

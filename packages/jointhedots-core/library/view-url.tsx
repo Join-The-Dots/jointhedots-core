@@ -2,7 +2,7 @@
 import { MapLike } from "typescript"
 import { JSONSchema, SecurityRule, SecurityGuard } from "../ast/schema/schema"
 import { acquireComponent, acquireResource, ComponentEntry } from "./manifold"
-import { ComponentManifest } from "./interfaces"
+import { ComponentManifest } from "./components"
 import { ViewServiceKey } from "../services"
 import qs from 'query-string'
 

@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react"
 import { toast } from 'react-toastify'
-import { createNewComponent, ComponentManifest, ComponentDescriptor, JSONSchema, ComponentEntry, updateComponent, acquireComponent, acquireResource, ComponentService, ComponentServiceKey, ComponentEditorKey, ComponentEditor, ComponentEditorProps, ComponentChecking } from "@jointhedots/core"
+import { createNewComponent, ComponentManifest, ComponentSchema, JSONSchema, ComponentEntry, updateComponent, acquireComponent, acquireResource, ComponentController, ComponentServiceKey, ComponentEditorKey, ComponentEditor, ComponentEditorProps, ComponentChecking } from "@jointhedots/core"
 import { ModalContent, ModalFooter, Tab, Tabs, Button, Alert, Modal } from "react-lightning-design-system"
 import { openDialog } from "../openDialog"
 import Icon, { IconButton } from "../Icon"
@@ -92,17 +92,19 @@ export async function editComponentManifest(manifest: ComponentManifest) {
 }
 
 const DefaultEditor = (props: ComponentEditorProps) => {
-   const { descriptor, schema, manifest, onChange } = props
+   const { descriptor, schema, manifest, onChange, onValidate, onCancel } = props
    const form_ref = useRef<Form>()
-   return <Form
+   return <><Form
       ref={form_ref}
       schema={schema}
       validator={validator}
       formData={manifest}
       templates={{ ButtonTemplates: { SubmitButton: () => <></> } }}
-      //onSubmit={(e) => onChange(e.formData)}
       onChange={(e) => onChange(e.formData)}
    />
+      <Button type="brand" onClick={() => onValidate(manifest)}>Apply</Button>
+      <Button type="neutral" onClick={onCancel}>Cancel</Button>
+   </>
 }
 
 const JSONManifestEditor = (props: ComponentEditorProps) => {
@@ -113,7 +115,7 @@ const JSONManifestEditor = (props: ComponentEditorProps) => {
 
 export function ComponentManifestEditor(props: {
    driver: ComponentEntry
-   handler: ComponentService
+   handler: ComponentController
    editor?: ComponentEditor
    manifest: ComponentManifest
    created: boolean
@@ -140,13 +142,13 @@ export function ComponentManifestEditor(props: {
    const schema = useMemo<JSONSchema>(() => ({
       type: "object",
       properties: {
-         name: { type: "string" },
+         title: { type: "string" },
          ...descriptor.attributes,
       },
       required: ["name", ...Object.keys(descriptor.attributes)],
    }), [descriptor])
 
-   let Editor = (created ? editor.creator || editor.editor : editor.editor) || DefaultEditor
+   let Editor = (created ? editor?.creator || editor?.editor : editor?.editor) || DefaultEditor
    if (codeMode) Editor = JSONManifestEditor
 
    return <div>
