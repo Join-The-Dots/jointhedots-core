@@ -10,7 +10,7 @@ export async function insertComponentDialog(activeEditor: LexicalEditor, compone
   const component = await acquireComponent(component_id)
   const manifest = await component.fetch()
   if (!props) {
-    props = createValueFromTyping(manifest["view"])
+    props = createValueFromTyping(manifest.specs.view)
   }
   if (component.hasResource("view.react") || component.hasResource("view.web")) {
     activeEditor.dispatchCommand(INSERT_COMPONENT_COMMAND, {

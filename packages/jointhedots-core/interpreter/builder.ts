@@ -305,7 +305,7 @@ export async function buildLDXElement(builder: ModelBuilder, node: AST.JSXElemen
 
    await xpr.loadComponent(tag)
    xpr.typing = typing
-   xpr.props = xpr.New(DXObject, xpr.entry.manifest["view"])
+   xpr.props = xpr.New(DXObject, xpr.entry.manifest.specs.view)
    xpr.dock = xpr.New(DXObject)
    if (attributes) {
       for (const attr of attributes) {

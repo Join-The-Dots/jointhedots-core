@@ -1,10 +1,15 @@
 import { URI, Utils } from "vscode-uri"
-import { ComponentFilter, ComponentManifest, ComponentPublication, ComponentServiceKey, IContentProvider, IResourceLoader } from "./components"
+import { ComponentFilter, ComponentManifest, ComponentPublication, ComponentControllerKey, IContentProvider, IResourceLoader } from "./components"
 import { CommonResourceProvider } from "./handlers/CommonResourceProvider"
 import { StaticContentProvider } from "./handlers/StaticContentProvider"
 import { StaticComponentProvider } from "./providers/StaticComponentProvider"
 import { CombinedComponentProvider } from "./providers/CombinedComponentProvider"
 import { LocalComponentProvider } from "./providers/LocalComponentProvider"
+import { Log, LogObject, queryLogInfos, queryLogObjects, QueryLogResult } from "../logging"
+
+type ComponentErrorManifest = ComponentManifest & {
+   error: Error
+}
 
 // Component registry entry
 export class ComponentEntry {
@@ -35,27 +40,30 @@ export class ComponentEntry {
    get loaded(): boolean {
       return this.manifest !== undefined
    }
-   get(): ComponentManifest {
-      if (this.manifest === undefined) {
-         throw new Error(`Cannot get manifest of not loaded module`)
-      }
-      return this.manifest
-   }
-   set(manifest: ComponentManifest) {
-      this.manifest = manifest
-      return this
+   get installed(): boolean {
+      return this.instance !== undefined
    }
    setError(error: Error) {
-      this.manifest = {
+      this.failure = error
+      this.set<ComponentErrorManifest>({
          $id: this.id,
          error,
          services: {}
-      }
-      this.failure = error
-      console.error(error)
+      })
+      Log.error(error, this)
       return this
    }
-   fetch(): Promise<ComponentManifest> {
+   get<Manifest extends ComponentManifest = ComponentManifest>(): Manifest {
+      if (this.manifest === undefined) {
+         throw new Error(`Cannot get manifest of not loaded module`)
+      }
+      return this.manifest as Manifest
+   }
+   set<Manifest extends ComponentManifest = ComponentManifest>(manifest: Manifest) {
+      this.manifest = manifest
+      return this
+   }
+   fetch<Manifest extends ComponentManifest = ComponentManifest>(): Promise<Manifest> {
       let loading = ComponentsRegistry.loadings.get(this)
       if (loading) return loading
 
@@ -75,6 +83,41 @@ export class ComponentEntry {
 
       ComponentsRegistry.loadings.set(this, loading)
       return loading
+   }
+   async install(): Promise<ComponentEntry> {
+      let installing = ComponentsRegistry.installings.get(this)
+      if (installing) return installing
+
+      if (this.instance === undefined) {
+         this.instance = null
+         installing = new Promise(async (resolve) => {
+            if (this.loaded === false) {
+               await this.fetch()
+            }
+
+            const type = this.manifest?.type
+            if (type) {
+               const entry = acquireComponent(type)
+               const controller = await ComponentControllerKey.fetch(entry)
+               await controller.createComponent(this, this.manifest)
+            }
+
+            if (this.instance instanceof Object) {
+               ComponentsRegistry.datamap.set(this.instance, this)
+            }
+            else {
+               this.instance = null
+            }
+
+            resolve(this)
+         })
+      }
+      else {
+         installing = Promise.resolve(this)
+      }
+
+      ComponentsRegistry.installings.set(this, installing)
+      return installing
    }
    acquireResource(identifier: string): ComponentResource {
       const ref = `${this.id}#${identifier}`
@@ -107,6 +150,12 @@ export class ComponentEntry {
       if (this.manifest === undefined) await this.fetch()
       return this.getResource(identifier)?.fetch<T>()
    }
+   getLogStats() {
+      return queryLogInfos(this.id)
+   }
+   getLogs(count: number): QueryLogResult {
+      return queryLogObjects(count, this.id)
+   }
 }
 
 // Component resource
@@ -134,8 +183,8 @@ export class ComponentResource {
             try {
                // Fetch manifest with resource catalog
                const { component } = this
-               if (component.loaded === false) {
-                  await component.fetch()
+               if (component.installed === false) {
+                  await component.install()
                }
 
                // Fetch resource data
@@ -153,13 +202,8 @@ export class ComponentResource {
                   this.identifier = identifier
                }
                else if (ref === true) {
-                  const entry = acquireComponent(manifest.type)
-                  const driver = await ComponentServiceKey.fetch(entry)
-                  if (component.instance === undefined) {
-                     component.instance = null
-                     await driver.createComponent(component, component.manifest)
-                  }
-                  this.entry = await driver.getService(component, this.resource)
+                  const controller = ComponentControllerKey.get(acquireComponent(manifest.type))
+                  this.entry = await controller.getService(component, this.resource)
                   this.identifier = null
                }
                else if (ref) {
@@ -171,6 +215,7 @@ export class ComponentResource {
                   this.entry = null
                   this.identifier = null
                }
+               ComponentsRegistry.datamap.set(this.get(), this)
             }
             catch (e) {
                console.error(e)
@@ -203,9 +248,9 @@ export class ComponentResource {
       this.entry = data
       this.identifier = null
    }
-   get descriptor() {
-      const kind = this.resource.split(".")[0]
-      return this.component.manifest?.[kind]
+   get spec() {
+      const norm = this.resource.split(".")[0]
+      return this.component.manifest?.specs?.[norm]
    }
    get url(): string {
       const ref = this.component.manifest?.services?.[this.resource]
@@ -223,7 +268,10 @@ export type ComponentsListener = (target: ComponentEntry) => void
 export class ComponentsManifold {
    components = new Map<string, ComponentEntry>()
    resources = new Map<string, ComponentResource>()
+   datamap = new WeakMap<any, ComponentResource | ComponentEntry>()
+
    loadings = new Map<any, Promise<any>>()
+   installings = new Map<any, Promise<ComponentEntry>>()
    listeners = new Set<ComponentsListener>()
 
    components_provider = new CombinedComponentProvider([])
@@ -242,6 +290,9 @@ export class ComponentsManifold {
    }
    unlisten(l: ComponentsListener) {
       this.listeners.delete(l)
+   }
+   notifyError(subject: ComponentEntry, error: Error) {
+
    }
 }
 
@@ -287,10 +338,12 @@ export async function updateComponent(manifest: ComponentManifest): Promise<Comp
    const component = ComponentsRegistry.components.get(manifest.$id)
    if (component && component.loaded) {
       component.manifest = manifest
-      if (manifest.type) {
-         const entry = acquireComponent(manifest.type)
-         const driver = await ComponentServiceKey.fetch(entry)
-         await driver.updateComponent(component, manifest)
+      if (manifest.type && component.installed) {
+         const controller = ComponentControllerKey.get(acquireComponent(manifest.type))
+         await controller.updateComponent(component, manifest)
+         if (component.instance instanceof Object) {
+            ComponentsRegistry.datamap.set(component.instance, component)
+         }
          ComponentsRegistry.listeners.forEach(l => l(component))
       }
    }

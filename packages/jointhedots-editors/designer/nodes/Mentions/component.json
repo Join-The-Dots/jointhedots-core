@@ -2,10 +2,12 @@
    "$id": "mensions",
    "description": "Mensions to someone",
    "icon": "bi:at",
-   "view": {
-      "properties": {
-         "mentionName": {
-            "type": "string"
+   "specs": {
+      "view": {
+         "properties": {
+            "mentionName": {
+               "type": "string"
+            }
          }
       }
    },

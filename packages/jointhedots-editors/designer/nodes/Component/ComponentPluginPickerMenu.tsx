@@ -15,8 +15,8 @@ import { PanelNodeCreation } from '@jointhedots/editors/ui/PanelNodeCreation'
 import { createComponentFilter, acquireComponent } from '@jointhedots/core'
 import { useDocumentContext } from '../../context/DocumentContext'
 import { getComponentGroupName } from '@jointhedots/ui/ComponentsLibrary'
-import { openDialog } from '@jointhedots/ui/openDialog'
-import { Menu } from '@jointhedots/ui/openContextualMenu'
+import { Menu } from '@jointhedots/ui/Layouts/Menu'
+import { openDialog } from '@jointhedots/ui/Layouts'
 
 class ComponentPickerOption extends MenuOption {
   constructor(

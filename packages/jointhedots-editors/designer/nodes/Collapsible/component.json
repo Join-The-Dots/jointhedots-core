@@ -3,11 +3,13 @@
    "title": "Collapsible layout",
    "description": "Display as collapsible layout",
    "icon": "bi:arrows-collapse",
-   "view": {
-      "properties": {
-         "open": {
-            "type": "boolean",
-            "default": true
+   "specs": {
+      "view": {
+         "properties": {
+            "open": {
+               "type": "boolean",
+               "default": true
+            }
          }
       }
    },

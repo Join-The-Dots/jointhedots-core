@@ -1,9 +1,11 @@
 import { createNewComponent } from "@jointhedots/core"
+import { ApplicationBoardManifest } from "@jointhedots/ui/ApplicationBoard/component"
+import { GithubServiceManifest } from "./GithubComponent/component"
 
 createNewComponent({
    "$id": "config:main-repo",
    "type": "jtd:github.service",
-   "name": "github main repo",
+   "title": "github main repo",
    "icon": "fa:git",
    "settings": {
       "url": "https://github.com/jointhedots/jointhedots-app",
@@ -11,26 +13,7 @@ createNewComponent({
       "org": "jointhedots",
       "branch": "main",
    }
-})
-
-createNewComponent({
-   "$id": "config:openAI",
-   "name": "openAI",
-   "type": "jtd:open-ai.service",
-   "settings": {
-      "accessKey": "qds5qgqzs-vdg-6hbrz5hr54bgvs544d",
-   }
-})
-
-createNewComponent({
-   "$id": "config:einstein",
-   "name": "einstein",
-   "type": "jtd:einstein-service-factory",
-   "icon": "fa:link",
-   "settings": {
-      "accessKey": "qds5qgqzs-vdg-6hbrz5hr54bgvs544d",
-   }
-})
+} as GithubServiceManifest)
 
 createNewComponent({
    "$id": "board:my-explorer",
@@ -39,12 +22,20 @@ createNewComponent({
    "description": "Add or remove entry points via the setup",
    "icon": "standard:custom_notification",
    "services": { "view.react": true },
+   "requirements": {
+      servicePoints: {
+         "storage/sources": { service: "storage/sources" }
+      }
+   },
    "toolings": [
       {
          "type": "servicePoint",
          "anchor": "status",
-         "id": "SourceOrgs",
-         "service": "storage"
+         "id": "storage/sources"
+      },
+      {
+         "type": "notifications",
+         "anchor": "status",
       },
       {
          "type": "link",
@@ -98,4 +89,4 @@ createNewComponent({
          }
       }
    }
-})
+} as ApplicationBoardManifest)

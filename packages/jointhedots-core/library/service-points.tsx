@@ -1,8 +1,7 @@
-import { MapLike } from "../common/types"
 import { acquireComponent, ComponentsRegistry } from "./manifold"
 import { ComponentID, ServiceEntry, ServiceType } from "./components"
-import { ILog, notifyError } from "../logging"
 import { getSettings, listenSettings, WriteMode } from "./settings"
+import { ILogDispatcher, Log, LogObject } from "../logging"
 
 export const ServicePoints: Map<string, ServicePoint> = new Map()
 
@@ -23,7 +22,7 @@ export type ServicePointSetting = {
 export type ServiceChangeHandler = (service: ServicePoint) => void
 const ServiceChangeHandlers = new Set<ServiceChangeHandler>()
 
-export class ServicePoint<IService = unknown> implements ILog {
+export class ServicePoint<IService = unknown> implements ILogDispatcher {
    service: ServiceType = ""
    name: string = ""
    services: IService[] = []
@@ -85,7 +84,10 @@ export class ServicePoint<IService = unknown> implements ILog {
    }
    notifyError(error: Error) {
       this.failure = error
-      notifyError(error)
+      Log.error(error)
+   }
+   notifyObject(object: LogObject) {
+      Log.it(object)
    }
 }
 
@@ -106,7 +108,7 @@ ComponentsRegistry.listen((component) => {
    }
 })
 
-async function fetchComponentsService<IService>(components_ids: string[], service: string, servicepoint: string, log: ILog): Promise<IService[]> {
+async function fetchComponentsService<IService>(components_ids: string[], service: string, servicepoint: string, log: ILogDispatcher): Promise<IService[]> {
    const services = []
    if (Array.isArray(components_ids) && components_ids.length > 0) {
       for (const component_id of components_ids) {

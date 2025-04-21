@@ -731,7 +731,7 @@ export class DXDisplay extends DXElement {
       return this
    }
    override consolidate(builder: ModelBuilder) {
-      const propsTyping = this.entry.manifest["view"]
+      const propsTyping = this.entry.manifest.specs.view
       this.props = builder.consolidate(this.props, propsTyping)
       this.dock = builder.consolidate(this.dock, CommonTypes.any)
    }

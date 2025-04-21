@@ -2,11 +2,13 @@
    "$id": "tweet",
    "description": "Embed tweet",
    "icon": "bi:twitter",
-   "view": {
-      "properties": {
-         "tweetID": {
-            "type": "string",
-            "examples": "https://twitter.com/jack/status/20"
+   "specs": {
+      "view": {
+         "properties": {
+            "tweetID": {
+               "type": "string",
+               "examples": "https://twitter.com/jack/status/20"
+            }
          }
       }
    },

@@ -2,10 +2,12 @@
    "$id": "image",
    "description": "Display image with caption",
    "icon": "bi:card-image",
-   "view": {
-      "properties": {
-         "src": {
-            "type": "string"
+   "specs": {
+      "view": {
+         "properties": {
+            "src": {
+               "type": "string"
+            }
          }
       }
    },

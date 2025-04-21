@@ -1,17 +1,16 @@
-import React from "react"
-import { IconCollection, IconProps, registerIconCollection } from "./Icon"
-import "./style.scss"
+import { IconCollection, IconElement, registerIconCollection } from "../Icon"
 
 export class IconAvatarCollection implements IconCollection {
-   draw(props: IconProps) {
-      const { name, title, className, onClick } = props
-      const tag = getTag(name.slice(7))
-      return <div
-         className={(className || "") + " jtd-icons-avatar"}
-         title={title}
-         style={{ "--avatar-bgcolor": stringToRGB(name) } as any}
-         onClick={onClick}
-      >
+   setup(element: IconElement) {
+      const { name } = element
+      const tag = getTag(name)
+      element.className = `jtd-icons-avatar ${element.className}`
+      element.style["--avatar-bgcolor"] = stringToRGB(name)
+      element.tag = tag
+   }
+   draw(element: IconElement) {
+      const { tag, className, style } = element
+      return <div className={className} style={style}>
          <div>{tag}</div>
       </div>
    }

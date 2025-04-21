@@ -2,7 +2,7 @@ import { getViewReferenceFrom, getViewInfosFrom, gotoURLView, MapLike, ServicePo
 import { NavBar } from './NavBar'
 import { Button } from 'react-lightning-design-system'
 import { Box, Grid, NavigationBeacon, SLDSPage } from './Utils'
-import { InvokeView, useAsyncMemo, useCurrentView, UseServicePoints } from '@jointhedots/core/react'
+import { InvokeView, useAsyncMemo, useCurrentView, useLocationHash, UseServicePoints } from '@jointhedots/core/react'
 import "@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.min.css"
 import { ApplicationSettings } from "./Settings"
 import { ViewRequirements } from "@jointhedots/core/services"
@@ -19,15 +19,12 @@ export type AppPage = {
 export type BaseTooling = {
    type: string
    anchor: "status" | "menu"
-   name: string
    icon?: string
-   secondary?: boolean
 }
 
 export type ServicePointTooling = BaseTooling & {
    type: "servicePoint"
    id: string
-   service: string
 }
 
 export type LinkTooling = BaseTooling & {
@@ -37,7 +34,11 @@ export type LinkTooling = BaseTooling & {
    view?: string | ViewInfos
 }
 
-export type AppTooling = ServicePointTooling | LinkTooling
+export type NotificationsTooling = BaseTooling & {
+   type: "notifications"
+}
+
+export type AppTooling = ServicePointTooling | LinkTooling | NotificationsTooling
 
 export type AppDescriptor = {
    title?: string
@@ -86,10 +87,13 @@ export function ApplicationPage(props: {
 
 export function ApplicationBoard(props: {
    descriptor: AppDescriptor
+   placeholder?: React.ReactNode
 }) {
-   const { landingPage, requirements } = props.descriptor
+   const { placeholder, descriptor } = props
+   const { landingPage, requirements } = descriptor
+   const hash = useLocationHash()
    const origin = useCurrentView()
-   const displayed = origin?.nested || getViewInfosFrom(landingPage?.view)
+   const displayed = origin?.nested || getViewInfosFrom(landingPage?.view) || getViewInfosFrom(hash)
    const active = getViewReferenceFrom(displayed)
    const services = useAsyncMemo(async () => {
       const services = [] as ServicePoint[]
@@ -101,7 +105,7 @@ export function ApplicationBoard(props: {
 
    let content = null
    if (!displayed) {
-      content = <>{/* TODO: add placeholder*/}</>
+      content = <>{placeholder}</>
    }
    else if (displayed.name === "settings") {
       content = <ApplicationSettings />

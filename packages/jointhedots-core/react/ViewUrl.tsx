@@ -12,7 +12,7 @@ async function renderViewDescriptor(infos: ViewInfos, origin?: string, fallback?
    if (infos) {
       try {
          const { component, properties } = await evaluateViewInfos(infos, origin)
-         const schema = ViewServiceKey.descriptor(component)
+         const schema = ViewServiceKey.spec(component)
          const View = await ViewReactKey.fetch(component)
          if (!View) throw new Error(`Component '${infos.name}' has no 'view.react' service`)
 

@@ -1,15 +1,17 @@
 {
    "$id": "p",
    "description": "Paragraph",
-   "view": {
-      "properties": {
-         "children": {
-            "type": "array",
-            "items": {
-               "type": "display",
-               "docking": {
+   "specs": {
+      "view": {
+         "properties": {
+            "children": {
+               "type": "array",
+               "items": {
                   "type": "display",
-                  "view": "p#view.docking.web"
+                  "docking": {
+                     "type": "display",
+                     "view": "p#view.docking.web"
+                  }
                }
             }
          }

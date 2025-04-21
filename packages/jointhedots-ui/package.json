@@ -12,8 +12,6 @@
       "./Icon": "./Icon",
       "./Instrumentation": "./Instrumentation",
       "./Items": "./Items",
-      "./openContextualMenu": "./openContextualMenu",
-      "./openDialog": "./openDialog",
       "./ServicePoint": "./ServicePoint",
       "./Layouts": "./Layouts",
       "./theme": "./theme"

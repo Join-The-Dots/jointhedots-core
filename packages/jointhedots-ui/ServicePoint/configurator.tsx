@@ -1,10 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react"
-import openContextualMenu from "../openContextualMenu"
+import React, { useCallback, useEffect, useState } from "react"
+import { openContextualMenu } from "../Layouts"
 import {
    ServicePointSetting, ServicePoint,
    ComponentPublication, ComponentsRegistry, fetchComponentsPublications,
    createComponentFilter, listenServicePoints, unlistenServicePoints,
    failedComponentPublication, ServicePoints, getServicePoint,
+   getSettings, listenSettings, unlistenSettings,
+   acquireComponent,
 } from "@jointhedots/core"
 import { ItemIcon, ItemRowShort, LabelDecoration } from "../Items"
 import { Button } from "react-lightning-design-system"
@@ -13,7 +15,7 @@ import { AddComponentButton, ComponentItem, ComponentItemDisplay, CreateComponen
 import { IconButton } from "../Icon"
 
 import { blue, cyan, deepOrange, green, pink, purple, deepPurple, orange } from '@mui/material/colors'
-import { getSettings, listenSettings, unlistenSettings } from "@jointhedots/core/library/settings"
+import { useNotificationInfos, useNotifications } from "../Notifications"
 
 export const DefaultColorsMap = [green, pink, blue, cyan, deepOrange, purple, deepPurple, orange].map(x => x["A700"])
 
@@ -178,6 +180,12 @@ function ServicePointEditable(props: {
 }) {
    const { servicePoint, compact, providers, colormap, onChange } = props
    const multiple = true//servicePoint?.multiple
+   useNotificationInfos()
+
+   const logstats = useNotifications(
+      () => providers.map((item) => acquireComponent(item.component_id).getLogStats())
+      , [providers]
+   )
 
    const onClick = useCallback((e) => {
       openContextualMenu(e, (close) => {
@@ -202,13 +210,21 @@ function ServicePointEditable(props: {
    }
    else {
       const ItemComp = compact ? ItemIcon : ItemRowShort
-      return <Button onClick={onClick}>
+      return <div className="slds-button" onClick={onClick}>
          {providers.map((cnx, i) => {
-            const deco: LabelDecoration[] = colormap && [{ type: "shape", color: colormap[i] }]
-            return <ItemComp key={cnx.component_id} name={cnx.title} icon={cnx.icon} decorations={deco} />
+            const deco: LabelDecoration[] = []
+            const error_count = logstats?.[i]?.error_count || 0
+            if (colormap) deco.push({ type: "shape", color: colormap[i] })
+            if (error_count > 0) deco.push({ type: "badge", name: "bi:exclamation-triangle-fill" })
+            return <ItemComp
+               key={cnx.component_id}
+               name={cnx.title}
+               icon={cnx.icon}
+               decorations={deco}
+            />
          })}
          {multiple && !compact && <IconButton name="bi:plus-circle" onClick={onClick} />}
-      </Button>
+      </div>
    }
 }
 
@@ -232,7 +248,7 @@ export function ServicePointStatus(props: {
    const { servicePoint } = props
    const descriptor = useServiceDescriptor(servicePoint)
 
-   const connexions = useAsyncMemo(
+   const providers = useAsyncMemo(
       () => fetchComponentsPublications(descriptor?.providers)
       , [], [descriptor]
    )
@@ -242,9 +258,9 @@ export function ServicePointStatus(props: {
    }
 
    return <ServicePointEditable compact
-      colormap={connexions.length > 1 ? DefaultColorsMap : undefined}
+      colormap={providers.length > 1 ? DefaultColorsMap : undefined}
       servicePoint={descriptor}
-      providers={connexions}
+      providers={providers}
       onChange={onChange}
    />
 }
@@ -262,7 +278,7 @@ export function ServicePointInput(props: {
    const { label, value, onChange } = props
    const failure = getServicePoint(value.id)?.failure
 
-   const connexions = useAsyncMemo(
+   const providers = useAsyncMemo(
       () => fetchComponentsPublications(value.providers)
       , [], [value.providers]
    )
@@ -275,7 +291,7 @@ export function ServicePointInput(props: {
          <div className="slds-input">
             <ServicePointEditable
                servicePoint={value}
-               providers={connexions}
+               providers={providers}
                onChange={onChange}
             />
             {failure && <ErrorDisplayer error={failure} />}

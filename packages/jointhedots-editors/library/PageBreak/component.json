@@ -2,7 +2,8 @@
    "$id": "pagebreak",
    "description": "Pagination page break",
    "icon": "bi:scissors",
-   "view": {
+   "specs": {
+      "view": {}
    },
    "services": {
       "view.web": "./PageBreak#PageBreak"

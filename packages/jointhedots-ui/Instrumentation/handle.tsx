@@ -1,7 +1,7 @@
 import React from "react"
 import { executeZoneCommand, ElementTooling, ElementInstrumentation, ElementController, InstrumentationKind, ElementCommand } from "./instrumentation"
 import { InstrumentationZone } from "./zone"
-import Icon from "../Icon/Icon"
+import { Icon } from "../Icon"
 
 type PropsType = {
    zone: InstrumentationZone

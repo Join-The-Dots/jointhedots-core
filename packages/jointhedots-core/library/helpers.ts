@@ -22,7 +22,7 @@ export function createComponentPublication(manif: ComponentManifest): ComponentP
       component_id: $id,
       type: manif.type,
       icon: manif.icon,
-      title: manif.title || manif.name || $id,
+      title: manif.title || $id,
       services: manif.services ? Object.keys(manif.services) : [],
       description: manif.description || "",
       keywords: manif.keywords,

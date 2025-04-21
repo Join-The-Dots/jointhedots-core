@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useMemo } from 'react'
 import { ComponentsRegistry, ComponentPublication, IComponentProvider, MapLike, ComponentFilter, createComponentFilter, acquireComponent, deleteComponent } from '@jointhedots/core'
 import { useAsyncState } from '@jointhedots/core/react'
-import { Stack } from '@jointhedots/ui/Layouts'
+import { Stack } from '@jointhedots/ui/Layouts/Stack'
 import { TextInput } from '@jointhedots/ui/utils/TextInput'
-import { ItemProps, ItemRowRich, ItemRowShort } from '../Items'
+import { ItemRowRich, ItemRowShort, ToolingProps } from '../Items'
 import { askQuestion } from '../Dialog'
 import { editComponentManifest } from './ComponentsEditor'
+import { NotificationsList } from '../Notifications'
+import { createPanel } from '../Layouts'
 import './index.scss'
 
 export function getComponentGroupName(id: string) {
@@ -46,7 +48,7 @@ export function ComponentItem(props: {
 }) {
    const { entry, display, selected, onSelect, onActivate } = props
    const ItemRow = display?.small ? ItemRowShort : ItemRowRich
-   const tooling = []
+   const tooling: ToolingProps[] = []
    if (entry.type) {
       if (display?.allowEdit) tooling.push({
          name: "edit",
@@ -70,6 +72,20 @@ export function ComponentItem(props: {
          }
       })
    }
+   const logstats = acquireComponent(entry.component_id).getLogStats()
+   if (logstats.error_count) {
+      tooling.push({
+         name: "Issues",
+         icon: "bi:exclamation-triangle-fill",
+         onActivate: async (label) => {
+            createPanel({
+               title: entry.title,
+               icon: entry.icon || `avatar:${entry.title}`,
+               content: <ComponentIssuesList entry={entry} />,
+            }).open("side")
+         }
+      })
+   }
    return <ItemRow
       data={entry}
       icon={entry.icon || "avatar:" + entry.title}
@@ -80,6 +96,13 @@ export function ComponentItem(props: {
       onSelect={onSelect && ((item) => onSelect(item.data))}
       onActivate={onActivate && ((item) => onActivate(item.data))}
    />
+}
+
+export function ComponentIssuesList(props: {
+   entry: ComponentPublication
+}) {
+   const { entry } = props
+   return <NotificationsList subject_uri={entry.component_id} />
 }
 
 export function ComponentsList(props: {

@@ -2,40 +2,44 @@
    "$id": "jtd:github.service",
    "title": "GitHub Repository Service",
    "icon": "fa:git",
+   "platform": "web",
    "tags": [
       "component.storage"
    ],
-   "component": {
-      "attributes": {
-         "settings": {
-            "type": "object",
-            "properties": {
-               "url": {
-                  "type": "string"
+   "specs": {
+      "component": {
+         "attributes": {
+            "settings": {
+               "type": "object",
+               "properties": {
+                  "url": {
+                     "type": "string"
+                  },
+                  "password": {
+                     "type": "string"
+                  },
+                  "org": {
+                     "type": "string"
+                  },
+                  "repo": {
+                     "type": "string"
+                  },
+                  "branch": {
+                     "type": "string"
+                  }
                },
-               "password": {
-                  "type": "string"
-               },
-               "org": {
-                  "type": "string"
-               },
-               "repo": {
-                  "type": "string"
-               },
-               "branch": {
-                  "type": "string"
-               }
-            },
-            "required": [
-               "url",
-               "password",
-               "org",
-               "branch"
-            ]
+               "required": [
+                  "url",
+                  "password",
+                  "org",
+                  "branch"
+               ]
+            }
          }
       }
    },
    "services": {
-      "component": "./component#GithubDriverService"
+      "component": "./component#GithubController",
+      "component.editor": "./component#GithubServiceEditor"
    }
 }

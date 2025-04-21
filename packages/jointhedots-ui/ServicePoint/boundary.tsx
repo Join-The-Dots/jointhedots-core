@@ -1,14 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { ServicePointSetting, ServicePoint } from "@jointhedots/core"
+import { ServicePointSetting, ServicePoint, getSettings } from "@jointhedots/core"
 import { Button, ModalContent, ModalHeader } from "react-lightning-design-system"
 import { MissingServiceError, registerErrorDisplayer } from "@jointhedots/core/react"
-import { openDialog } from "../openDialog"
 import { ServicePointInput } from "./configurator"
 import Icon from "../Icon"
-import { getSettings } from "@jointhedots/core/library/settings"
+import { openDialog } from "../Layouts"
 
 
-function DefaultServiceConfigurator(props: {
+function ServiceConfiguratorForm(props: {
    services: ServicePoint[]
    onApply?: () => void
 }) {
@@ -56,7 +55,7 @@ function DefaultServiceConfigurator(props: {
    </div>
 }
 
-function FlexibleServiceConfigurator(props: {
+export function DefaultServiceConfigurator(props: {
    services: ServicePoint[]
    onApply?: () => void
 }) {
@@ -73,12 +72,12 @@ function FlexibleServiceConfigurator(props: {
    }, [divRef])
    const onSettings = () => {
       openDialog<void>((resolve) => {
-         return <DefaultServiceConfigurator {...props} onApply={resolve} />
+         return <ServiceConfiguratorForm {...props} onApply={resolve} />
       }).then(props.onApply)
    }
    return <div ref={divRef} style={{ overflow: "hidden" }}>
       {sizing == 2
-         ? <DefaultServiceConfigurator {...props} />
+         ? <ServiceConfiguratorForm {...props} />
          : sizing == 1
             ? <div style={{ maxWidth: 400, padding: 5, margin: "auto" }}> <Button type="destructive" onClick={onSettings} >
                <Icon name="bi:exclamation-diamond" style={{ margin: 5 }} />{" Settings"}
@@ -100,7 +99,7 @@ export class ServiceRequirementBoundary extends React.Component<{
    render() {
       const { error } = this.state
       if (error) {
-         return <FlexibleServiceConfigurator
+         return <DefaultServiceConfigurator
             services={error.missings}
             onApply={() => this.setState({ error: undefined })}
          />
@@ -113,7 +112,7 @@ export class ServiceRequirementBoundary extends React.Component<{
 export function registerMissingServiceDisplayer() {
    registerErrorDisplayer(MissingServiceError, (props) => {
       const { error, onRetry } = props
-      return <FlexibleServiceConfigurator
+      return <DefaultServiceConfigurator
          services={error.missings}
          onApply={onRetry}
       />

@@ -12,6 +12,7 @@
 
    &>* {
       color: white;
+      font-family: 'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif;
       font-weight: bold;
       font-size: 0.5em;
    }
@@ -25,12 +26,13 @@
    height: 1.8em;
    min-width: 1.8em;
    min-height: 1.8em;
+   max-width: 1.8em;
+   max-height: 1.8em;
    transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1),
       box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1),
       border-color 250ms cubic-bezier(0.4, 0, 0.2, 1);
    border-radius: 100%;
    cursor: pointer;
-   margin: auto;
 
    &:hover {
       background-color: rgba(0, 0, 0, 0.12);
@@ -47,5 +49,19 @@
 
    &:focus {
       box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.5);
+   }
+}
+
+.jtd-icon {
+   position: relative;
+   height: 1em;
+   width: 1em;
+   min-height: 1em;
+   min-width: 1em;
+   max-height: 1em;
+   max-width: 1em;
+
+   &>* {
+      position: absolute;
    }
 }

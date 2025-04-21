@@ -1,13 +1,19 @@
 {
    "type": "web",
-   "name": "playground:app-web",
+   "name": "playground:services",
    "title": "Playground for JTD",
    "icon": "../../../logo.png",
    "webviews": {
       "show.html": {
          "title": "Show room",
-         "entry": "./startup.tsx"
+         "entry": "./startup"
+      },
+      "callback.html": {
+         "title": "Callback",
+         "entry": "./callback"
       }
    },
-   "manifest": {"background_color": ""}
+   "manifest": {
+      "background_color": ""
+   }
 }

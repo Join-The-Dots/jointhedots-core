@@ -5,7 +5,7 @@ import { InsertInlineImageDialog } from '../../nodes/InlineImage/InlineImagePlug
 import { InsertTableDialog } from '../../nodes/Table/TablePlugin';
 import { ComponentViewDialog } from '@jointhedots/editors/designer/nodes/Component/ComponentViewDialog'
 import { useDocumentContext } from '../../context/DocumentContext';
-import { openDialog } from '@jointhedots/ui/openDialog'
+import { openDialog } from '@jointhedots/ui/Layouts'
 
 export function InsertToolbox(props: { activeEditor: LexicalEditor, editor: LexicalEditor, isEditable: boolean, showModal: any }) {
   const { activeEditor, isEditable, showModal } = props

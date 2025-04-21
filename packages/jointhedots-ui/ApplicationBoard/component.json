@@ -2,38 +2,40 @@
    "$id": "jtd:application.board.component",
    "title": "Application Board",
    "icon": "utility:apps",
-   "component": {
-      "services": [
-         "view.react"
-      ],
-      "attributes": {
-         "entries": {
-            "type": "object",
-            "additionalProperties": {
-               "anyOf": [
-                  {
-                     "type": "string"
-                  },
-                  {
-                     "type": "object",
-                     "properties": {
-                        "name": {
-                           "type": "string",
-                           "title": "App name, must be unique"
-                        },
-                        "icon": {
-                           "type": "string"
-                        },
-                        "entries": {
-                           "type": "object"
-                        }
+   "specs": {
+      "component": {
+         "services": [
+            "view.react"
+         ],
+         "attributes": {
+            "entries": {
+               "type": "object",
+               "additionalProperties": {
+                  "anyOf": [
+                     {
+                        "type": "string"
                      },
-                     "required": [
-                        "name",
-                        "entries"
-                     ]
-                  }
-               ]
+                     {
+                        "type": "object",
+                        "properties": {
+                           "name": {
+                              "type": "string",
+                              "title": "App name, must be unique"
+                           },
+                           "icon": {
+                              "type": "string"
+                           },
+                           "entries": {
+                              "type": "object"
+                           }
+                        },
+                        "required": [
+                           "name",
+                           "entries"
+                        ]
+                     }
+                  ]
+               }
             }
          }
       }

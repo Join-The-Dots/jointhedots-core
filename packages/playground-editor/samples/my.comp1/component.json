@@ -2,22 +2,24 @@
    "$id": "my.comp1",
    "description": "my comp1",
    "icon": "bi:scissors",
-   "view": {
-      "properties": {
-         "propA": {
-            "type": "string"
-         },
-         "propB": {
-            "type": "number"
-         },
-         "propC": {
-            "type": "array",
-            "items": {
+   "specs": {
+      "view": {
+         "properties": {
+            "propA": {
                "type": "string"
+            },
+            "propB": {
+               "type": "number"
+            },
+            "propC": {
+               "type": "array",
+               "items": {
+                  "type": "string"
+               }
+            },
+            "propD": {
+               "type": "display"
             }
-         },
-         "propD": {
-            "type": "display"
          }
       }
    },

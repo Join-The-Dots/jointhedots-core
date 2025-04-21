@@ -3,13 +3,13 @@ import { toast } from 'react-toastify'
 import Icon from '@jointhedots/ui/Icon'
 import { Tabs } from '@jointhedots/editors/elements/ui/Tabs'
 import { EditionDriver, EditionContext, ValueProps } from '../../interfaces'
-import { Stack } from '@jointhedots/ui/Layouts'
+import { Stack } from '@jointhedots/ui/Layouts/Stack'
 import "./index.scss"
 import Button from '@jointhedots/editors/ui/ButtonIcon'
 import { ValueMenu } from '../ElementMenu'
 import { JSXInput } from '../../../ui/InputCode'
 import { ElementsEditors } from '@jointhedots/editors/elements'
-import openContextualMenu from '@jointhedots/ui/openContextualMenu'
+import { openContextualMenu } from '@jointhedots/ui/Layouts'
 
 function ValueHeading(props: ValueProps & {
    ctl: EditionDriver

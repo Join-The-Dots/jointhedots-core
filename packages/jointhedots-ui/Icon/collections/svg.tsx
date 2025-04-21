@@ -1,6 +1,5 @@
-import React from "react"
-import { IconCollection, IconProps } from "./Icon"
-import { ThemeLighting, ThemeProvider } from "../theme"
+import { IconCollection, IconElement } from "../Icon"
+import { ThemeLighting, ThemeProvider } from "../../theme"
 
 export class IconSVGCollection implements IconCollection {
    lights: { [name: string]: string } = {}
@@ -11,17 +10,15 @@ export class IconSVGCollection implements IconCollection {
       this.lights[name] = `url(${light_icon})`
       this.darks[name] = `url(${dark_icon})`
    }
-   draw(props: IconProps, theme: ThemeProvider) {
-      const { name, title, className, style, onClick } = props
+   setup(element: IconElement) {
+      Object.assign(element.style, styles)
+   }
+   draw(element: IconElement, theme: ThemeProvider) {
+      const { name, className, style } = element
       const icon = theme.lighting === ThemeLighting.Light
          ? this.lights[name] || this.lights[this.defaultIcon]
          : this.darks[name] || this.darks[this.defaultIcon]
-      return <div
-         className={className || ""}
-         title={title}
-         style={{ ...style, backgroundImage: icon, ...styles }}
-         onClick={onClick}
-      />
+      return <div className={className} style={{ backgroundImage: icon, ...style }} />
    }
 }
 

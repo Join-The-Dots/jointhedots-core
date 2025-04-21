@@ -7,7 +7,7 @@ import '@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-s
 import "@jointhedots/ui/theme"
 import "../components/icons-sf-symbols"
 import "../components/icons-fontawesome"
-import "../components/icons-bootstrap"
+import "../components/icons"
 import "../components/register-local-components"
 import { ApplicationSelector } from "@jointhedots/ui/ApplicationBoard"
 import "../components/services"

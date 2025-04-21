@@ -2,10 +2,12 @@
    "$id": "figma",
    "description": "Display figma diagram",
    "icon": "bi:figma",
-   "view": {
-      "properties": {
-         "documentID": {
-            "type": "string"
+   "specs": {
+      "view": {
+         "properties": {
+            "documentID": {
+               "type": "string"
+            }
          }
       }
    },

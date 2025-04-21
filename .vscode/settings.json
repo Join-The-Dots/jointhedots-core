@@ -9,6 +9,20 @@
         "application.json"
       ],
       "url": "./node_modules/@jointhedots/gear/schemas/application.schema.json"
+    },
+    {
+      "fileMatch": [
+        "component.json",
+        "*.component.json",
+        "component.yml",
+        "*.component.yml",
+        "component.toml",
+        "*.component.toml",
+      ],
+      "url": "./node_modules/@jointhedots/gear/schemas/component.schema.json"
     }
-  ]
+  ],
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.tabSize": 3,
 }

@@ -9,12 +9,12 @@ import { ComponentEntry } from './manifold'
 
 export type ServiceType = string
 
-export class ServiceEntry<S extends any, D extends any> {
+export class ServiceEntry<Instance extends any, Spec extends any> {
    constructor(public resource: string) { }
-   get(entry: ComponentEntry): S { return entry.getResource(this.resource)?.get<S>() }
-   fetch(entry: ComponentEntry): Promise<S> { return entry.fetchResource<S>(this.resource) }
-   descriptor(entry: ComponentEntry): D { return entry.acquireResource(this.resource)?.descriptor as D }
-   subservice<T extends any>(name: string) { return new ServiceEntry<T, D>(`${this.resource}.${name}`) }
+   get(entry: ComponentEntry): Instance { return entry.getResource(this.resource)?.get<Instance>() }
+   fetch(entry: ComponentEntry): Promise<Instance> { return entry.fetchResource<Instance>(this.resource) }
+   spec(entry: ComponentEntry): Spec { return entry.acquireResource(this.resource)?.spec as Spec }
+   subservice<T extends any>(name: string) { return new ServiceEntry<T, Spec>(`${this.resource}.${name}`) }
 }
 
 //-------------------------------------------------------------
@@ -43,14 +43,18 @@ export type ComponentManifest = {
    // Metadata
    title?: string
    icon?: string
+   description?: string
    keywords?: string[] // Keywords helping for user searching (into publication)
    tags?: string[] // Tags for filtering helping (into publication)
    doc?: DocumentationSchema
 
+   // Specifications
+   specs?: MapLike<any>
+
    // Services
    services?: MapLike<ResourceEntry> // Resources providing specific services interfaces
 
-} & MapLike<any>
+}
 
 //-------------------------------------------------------------
 // Component controller: Component manifest entry "component"
@@ -91,7 +95,7 @@ export interface ComponentController {
    checkDescriptor(descriptor: ComponentManifest): Promise<ComponentChecking>
 }
 
-export const ComponentServiceKey = new ServiceEntry<ComponentController, ComponentSchema>("component")
+export const ComponentControllerKey = new ServiceEntry<ComponentController, ComponentSchema>("component")
 
 export type ComponentEditorProps<T extends ComponentManifest = ComponentManifest> = {
    descriptor: ComponentSchema
@@ -108,7 +112,7 @@ export type ComponentEditor<T extends ComponentManifest = ComponentManifest> = {
    editor: React.ComponentType<ComponentEditorProps<T>>
 }
 
-export const ComponentEditorKey = ComponentServiceKey.subservice<ComponentEditor>("editor")
+export const ComponentEditorKey = ComponentControllerKey.subservice<ComponentEditor>("editor")
 
 //-------------------------------------------------------------
 // Component providers

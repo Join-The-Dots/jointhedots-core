@@ -2,6 +2,12 @@ import * as ACorn from "acorn"
 import * as AString from "astring"
 import { MapLike } from "../common/types"
 
+export enum EmbedSyntax {
+   DollarBracket,  // Embed: $(expr)  | Escaping: \$(expr)
+   DollarCurly,    // Embed: ${expr}  | Escaping: \${expr}
+   CurlyCurly,     // Embed: {{expr}} | Escaping: \{{expr}}
+}
+
 export type TextScope = {
    vars: { [key: string]: any }
 }
@@ -77,41 +83,64 @@ export class TextTemplate {
    }
 }
 
-export type BindingKeygen = (text: string) => (index: number) => string
+export type PlaceholderGenerator = (text: string) => (index: number) => string
 
-export function parseTextTemplate(code: string, keygen: BindingKeygen = defaultBindingKeygen): TextTemplate {
-   const { tokTypes } = ACorn
+function createSyntaxStyle(startToken: string, endToken: string, escapeChar: string) {
+   return {
+      startToken,
+      endToken,
+      escapeChar,
+      escapeCode: escapeChar.charCodeAt(0),
+   }
+}
+
+const embedSyntaxStyles = [
+   createSyntaxStyle("$(", ")", "\\"), // DollarBracket
+   createSyntaxStyle("${", "}", "\\"), // DollarCurly
+   createSyntaxStyle("{{", "}}", "\\"), // CurlyCurly
+]
+
+export function parseTextTemplate(code: string, syntax: EmbedSyntax, placeholder: PlaceholderGenerator = defaultPlaceholderGen): TextTemplate {
+   const { startToken, endToken, escapeCode } = embedSyntaxStyles[syntax]
    const options: ACorn.Options = { ecmaVersion: 2020 }
-   const tokenizer = ACorn.tokenizer(code, options)
 
    const bindings: MapLike<TextBinding> = {}
-   const binding_keygen = keygen(code)
+   const binding_placeholder = placeholder(code)
    let binding_count = 0
 
    const issues: Error[] = []
    const chunks = []
    let chunk_start = 0
+   let cur_pos = 0
    while (true) {
 
-      // Next token
-      let token = tokenizer.getToken()
-      if (token.type === tokTypes.eof) break
+      // Next embed
+      cur_pos = code.indexOf(startToken, cur_pos)
+      if (cur_pos < 0) break
 
-      // Parse js embedding $(...)
-      if (token["value"] === "$" && code.slice(token.start, token.start + 2) == "$(") {
+      // Parse embed
+      if (code.charCodeAt(cur_pos - 1) === escapeCode) {
+         chunks.push(code.slice(chunk_start, cur_pos - 1), startToken)
+         chunk_start = cur_pos = cur_pos + startToken.length
+      }
+      else {
          try {
-            const ast = ACorn.parseExpressionAt(code, token.start, options)
-
-            const binding_key = binding_keygen(binding_count)
-            bindings[binding_key] = new TextBinding(ast.start, ast.end, ast)
-            binding_count++
-
-            while (token.end < ast.end) token = tokenizer.getToken()
-            chunks.push(code.slice(chunk_start, ast.start), binding_key)
-            chunk_start = ast.end
+            const ast = ACorn.parseExpressionAt(code, cur_pos + startToken.length, options)
+            const embed_end = code.indexOf(endToken, ast.end)
+            if (embed_end > 0 && code.slice(ast.end, embed_end).trim() === "") {
+               const placeholder = binding_placeholder(binding_count)
+               bindings[placeholder] = new TextBinding(ast.start, ast.end, ast)
+               chunks.push(code.slice(chunk_start, cur_pos), placeholder)
+               chunk_start = cur_pos = embed_end + endToken.length
+               binding_count++
+            }
+            else {
+               throw new Error(`Embedding shall end with '${endToken}'`)
+            }
          }
          catch (e) {
             issues.push(e)
+            cur_pos++
          }
       }
    }
@@ -121,7 +150,7 @@ export function parseTextTemplate(code: string, keygen: BindingKeygen = defaultB
    return new TextTemplate(pattern, bindings, issues)
 }
 
-function defaultBindingKeygen(text: string) {
+function defaultPlaceholderGen(text: string) {
    let binding_mark = "$"
    while (text.includes(binding_mark)) binding_mark += "_"
    return (index: number): string => {

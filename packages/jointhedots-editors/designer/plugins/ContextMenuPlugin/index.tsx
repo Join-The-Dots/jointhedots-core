@@ -26,7 +26,7 @@ import {useCallback, useMemo} from 'react';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { useDocumentContext } from '../../context/DocumentContext';
-import { openDialog } from '@jointhedots/ui/openDialog'
+import { openDialog } from '@jointhedots/ui/Layouts'
 
 function ContextMenuItem({
   index,

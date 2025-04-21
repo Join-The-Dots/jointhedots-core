@@ -71,7 +71,7 @@ export function ComponentsConfigurator(props: {
 }) {
    const { title, filter } = props
    return <>
-      <h2 className="slds-tile">
+      <h2 className="slds-tile" style={{ display: "flex" }}>
          {title}
          <AddComponentButton />
       </h2>

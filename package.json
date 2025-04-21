@@ -32,9 +32,10 @@
    },
    "scripts": {
       "watch": "tspc --watch --noEmit",
-      "serve": "jointhedots-gear serve --app playground:app-web --devmode --port 3001",
+      "serve:svc": "jointhedots-gear serve --app playground:services --devmode --port 3001",
+      "serve:ui": "jointhedots-gear serve --app playground:ui --devmode --port 3002",
       "build": "jointhedots-gear make --libs @jointhedots/core,@jointhedots/ui --pack --dist ./dist",
-      "build:pwa": "jointhedots-gear make --watch --apps playground:app-web --dist ./dist",
+      "build:pwa": "jointhedots-gear make --watch --apps playground:services --dist ./dist",
       "build:ext": "jointhedots-gear make --watch --apps playground:app-chrome --dist ./dist",
       "make": "jointhedots-gear make --watch --libs @jointhedots/core,@jointhedots/ui --devmode --dist ../sf-explorer-app/dist",
       "test": "mocha"

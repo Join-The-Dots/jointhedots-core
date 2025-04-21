@@ -3,16 +3,18 @@
    "title": "Table Layout",
    "description": "Display grid as table layout",
    "icon": "bi:table",
-   "view": {
-      "properties": {
-         "colWidths": {
-            "type": "array",
-            "items": {
-               "type": "number"
+   "specs": {
+      "view": {
+         "properties": {
+            "colWidths": {
+               "type": "array",
+               "items": {
+                  "type": "number"
+               }
+            },
+            "rowStriping": {
+               "type": "boolean"
             }
-         },
-         "rowStriping": {
-            "type": "boolean"
          }
       }
    },

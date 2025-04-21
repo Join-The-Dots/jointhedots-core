@@ -2,11 +2,13 @@
    "$id": "excalidraw",
    "description": "Display excalidraw diagram",
    "icon": "bi:easel2",
-   "view": {
-      "properties": {
-         "data": {
-            "type": "string",
-            "default": "[]"
+   "specs": {
+      "view": {
+         "properties": {
+            "data": {
+               "type": "string",
+               "default": "[]"
+            }
          }
       }
    },

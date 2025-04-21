@@ -1,6 +1,7 @@
-import React, { Component } from "react"
+import { openContextualMenu } from "@jointhedots/ui/Layouts"
+import { Component } from "react"
 import { FeaturesContext, ReactFeaturesContext } from "../FeaturesLayout"
-import openContextualMenu, { Menu } from "@jointhedots/ui/openContextualMenu"
+import { Menu } from "@jointhedots/ui/Layouts/Menu"
 
 class FrameMenu extends Component<any> {
    static contextType = ReactFeaturesContext
@@ -33,7 +34,7 @@ class FrameMenu extends Component<any> {
          }
       }
       if (this.getWindowsCount() > 0) {
-         menuItems.push(<Menu.Section key={menuItems.length} title="Windows"/>)
+         menuItems.push(<Menu.Section key={menuItems.length} title="Windows" />)
          for (const featureName in features) {
             const feature = features[featureName]
             const panels = feature[".class"].panels

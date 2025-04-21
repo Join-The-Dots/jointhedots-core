@@ -1,12 +1,14 @@
 {
    "$id": "list",
    "description": "List",
-   "view": {
-      "properties": {
-         "children": {
-            "type": "array",
-            "items": {
-               "type": "display"
+   "specs": {
+      "view": {
+         "properties": {
+            "children": {
+               "type": "array",
+               "items": {
+                  "type": "display"
+               }
             }
          }
       }

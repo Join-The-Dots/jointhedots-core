@@ -2,14 +2,16 @@
    "$id": "equation",
    "description": "Display math equation",
    "icon": "bi:math",
-   "view": {
-      "properties": {
-         "equation": {
-            "type": "string"
-         },
-         "inline": {
-            "type": "boolean",
-            "default": true
+   "specs": {
+      "view": {
+         "properties": {
+            "equation": {
+               "type": "string"
+            },
+            "inline": {
+               "type": "boolean",
+               "default": true
+            }
          }
       }
    },

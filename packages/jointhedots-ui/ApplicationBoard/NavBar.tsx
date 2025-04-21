@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { createComponentFilter, ComponentPublication, getViewReferenceFrom, gotoURLView, ViewInfos, getServicePoint, acquireServicePoint } from "@jointhedots/core"
+import { createComponentFilter, ComponentPublication, getViewReferenceFrom, gotoURLView, ViewInfos, acquireServicePoint } from "@jointhedots/core"
 import { ItemRowShort, LabelButton } from '@jointhedots/ui/Items'
 import { AppDescriptor, AppPage, AppTooling } from '.'
 import { ComponentsFilteredList } from '../ComponentsLibrary'
 import { ServicePointStatus } from '../ServicePoint'
 import { useCurrentView } from '@jointhedots/core/react'
+import { NotificationsBell } from '../Notifications'
 import Icon from "@jointhedots/ui/Icon"
 
 export const useOutsideClick = (callback: () => void) => {
@@ -187,13 +188,8 @@ export function NavBar(props: {
                     <div style={{ flexGrow: 1, }}></div>
                 </div>
             </nav>
-            <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 5, paddingRight: 5 }}>
                 {Array.isArray(toolings) && <ApplicationTooling toolings={toolings} anchor="status" />}
-                <span style={{ fontSize: "130%" }}>
-                    <LabelButton icon="bi:person-gear" name="Configuration" onActivate={() => {
-                        gotoURLView({ name: "settings" }, origin)
-                    }} />
-                </span>
             </div>
         </div>
     )
@@ -215,6 +211,9 @@ function ApplicationTooling(props: {
                 if (scv) {
                     return <ServicePointStatus key={key} servicePoint={scv} />
                 }
+            }
+            else if (desc.type === "notifications") {
+                return <NotificationsBell key={key} />
             }
             else if (desc.type === "link") {
                 const { url, view, title, icon } = desc

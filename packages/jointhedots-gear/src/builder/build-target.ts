@@ -237,12 +237,12 @@ export class BuildTarget {
          throw new Error(`Component '${id}' declared twice`)
       }
 
-      const manifest: Partial<ComponentManifest> = {
+      const manifest = {
          ...descriptor,
          application: undefined,
          publish: undefined,
          entries: undefined,
-      }
+      } as ComponentManifest
 
       if (descriptor.services) {
          manifest.services = {}

@@ -8,10 +8,12 @@ import qs from 'query-string'
 
 export type ViewInfos = {
    name: string
-   params?: Record<string, string | string[] | MapLike<string>>
+   params?: Record<string, ViewParam | ViewParam[] | MapLike<ViewParam>>
    content?: string
    nested?: ViewInfos
 }
+
+export type ViewParam = string | boolean | number
 
 export type ViewInvokable = {
    component: ComponentEntry
@@ -106,7 +108,7 @@ function parseValue(schema: JSONSchema, data: any, safe: boolean): any {
 
 function parseViewProps(component: ComponentEntry, manifest: ComponentManifest, view: ViewInfos, origin: string): MapLike<any> {
    const props = {} as MapLike<any>
-   const schema = ViewServiceKey.descriptor(component)
+   const schema = ViewServiceKey.spec(component)
 
    const safe = origin === "safe"
    /* if (safe !== true) {

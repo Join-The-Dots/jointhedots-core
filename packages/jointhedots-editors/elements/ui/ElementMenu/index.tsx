@@ -1,7 +1,7 @@
 import React from 'react'
 import { EditionDriver, EditorMenu, EditorMenuItem, EditionEnvironment, ValueProps } from '../../interfaces'
 import { stringifyDescriptor, convertTextToAST } from '@jointhedots/core'
-import { Menu } from '@jointhedots/ui/openContextualMenu'
+import { Menu } from '@jointhedots/ui/Layouts/Menu'
 
 export function ValueMenu(props: ValueProps & { menu?: EditorMenu, context: EditionEnvironment, ctl: EditionDriver, onClose: () => void }) {
    const { ctl, context, menu, value, typing, onChange, onClose } = props

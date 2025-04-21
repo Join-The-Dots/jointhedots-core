@@ -1,9 +1,10 @@
 import { Octokit } from "@octokit/rest"
-import { ComponentEntry, ComponentManifest, ComponentController, ServiceType } from "@jointhedots/core"
+import { ComponentEntry, ComponentManifest, ComponentController, ServiceType, Log, ErrorTypes, ComponentEditor } from "@jointhedots/core"
 import {
    ChangeSetId, FileKey, StorageChangeLog, StorageChangeSet,
    StorageChangeStatus, StorageService, StorageStats, StorageTransaction
 } from "@jointhedots/core/services"
+import { GithubSSOEditor } from "./sso"
 
 interface CommittedFile {
    path: string
@@ -13,7 +14,12 @@ interface CommittedFile {
    url: string
 }
 
-export const GithubDriverService: ComponentController = {
+export type GithubServiceManifest = ComponentManifest & {
+   settings: any
+   url: string
+}
+
+export const GithubController: ComponentController = {
 
    // Component runtime
    getAvailableServices(component: ComponentEntry): ServiceType[] {
@@ -25,14 +31,31 @@ export const GithubDriverService: ComponentController = {
    },
 
    // Component management
-   async createComponent(component: ComponentEntry, descriptor: ComponentManifest) {
+   async createComponent(component: ComponentEntry, descriptor: GithubServiceManifest) {
       component.instance = new GithubService(descriptor)
+      Log.about("error", component.instance, "Credentials invalid", {
+        // follow: "",
+         actions: [{
+            scenario: "connect",
+            icon: "bi:plug",
+            title: "Connect",
+         }]
+      })
    },
-   async updateComponent(component: ComponentEntry, descriptor: ComponentManifest) {
+   async updateComponent(component: ComponentEntry, descriptor: GithubServiceManifest) {
       return component.instance.update(descriptor)
    },
-   async checkDescriptor(descriptor: ComponentManifest) {
+   async checkDescriptor(descriptor: GithubServiceManifest) {
       return null
+   },
+}
+
+export const GithubServiceEditor: ComponentEditor = {
+   creator: (props) => {
+      return <GithubSSOEditor />
+   },
+   editor: (props) => {
+      return <GithubSSOEditor />
    },
 }
 
@@ -48,22 +71,14 @@ export class GithubService implements StorageService {
    branch?: string
    name: string
 
-   constructor(public descriptor: ComponentManifest) {
+   constructor(public descriptor: GithubServiceManifest) {
       this.update(descriptor)
    }
    get location() {
       return this.url
    }
-   getAvailableServices(): ServiceType[] {
-      return ["storage"]
-   }
-   getService(type: string) {
-      switch (type) {
-         case "storage": return this as StorageService
-      }
-   }
-   update(descriptor: ComponentManifest) {
-      this.name = descriptor.name
+   update(descriptor: GithubServiceManifest) {
+      this.name = descriptor.title
       Object.assign(this, descriptor.settings)
       return this
    }

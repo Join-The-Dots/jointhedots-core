@@ -1,0 +1,17 @@
+{
+   "$id": "github-proxy",
+   "specs": {
+      "api": {
+         "$ref": "https://api.github.com/openapi"
+      }
+   },
+   "services": {
+      "api": {
+         "platform": "worker",
+         "module": ".",
+         "allow_domains": [
+            "https://github.com/*"
+         ]
+      }
+   }
+}

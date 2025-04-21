@@ -2,19 +2,18 @@ import React, { Suspense } from "react"
 import ReactDOM from 'react-dom/client'
 import { ErrorBoundary, InvokeURLView, useAsyncMemo } from "@jointhedots/core/react"
 import { ToastContainer } from "react-toastify"
+import { ApplicationSelector } from "@jointhedots/ui/ApplicationBoard"
 import 'react-toastify/dist/ReactToastify.css'
 import '@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.css'
 import "@jointhedots/ui/theme"
-import "../components/icons-sf-symbols"
-import "../components/icons-fontawesome"
-import "../components/icons-bootstrap"
+import "../components/icons"
 import "../components/register-local-components"
-import { ApplicationSelector } from "@jointhedots/ui/ApplicationBoard"
 import "../components/services"
 
 import { acquireComponent, createComponentFilter, createComponentPublication, searchComponentsPublications, ServicePoint } from "@jointhedots/core/index"
 import { SourceOrgsPoint } from "../components/services"
 import { createComponentManifest } from "@jointhedots/ui/ComponentsLibrary/ComponentsEditor"
+import { GithubServiceManifest } from "../components/GithubComponent/component"
 
 
 async function connectGitServiceUrl(servicePoint: ServicePoint, driver_id: string, url: string) {
@@ -23,7 +22,7 @@ async function connectGitServiceUrl(servicePoint: ServicePoint, driver_id: strin
       keywords: [url],
    })
    for (const found of await searchComponentsPublications(filter)) {
-      const manifest = await acquireComponent(found.component_id).fetch()
+      const manifest = await acquireComponent(found.component_id).fetch<GithubServiceManifest>()
       if (manifest.url === url) {
          servicePoint.override([found.component_id])
          return found

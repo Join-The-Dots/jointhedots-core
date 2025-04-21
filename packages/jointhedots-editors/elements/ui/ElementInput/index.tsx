@@ -6,7 +6,8 @@ import { DropZone } from '../../../ui/DragAndDrop'
 import { ValueMenu } from '../ElementMenu'
 import { useAsyncState } from '@jointhedots/core/react/useAsyncState'
 import { ElementsEditors } from '@jointhedots/editors/elements'
-import openContextualMenu, { Menu } from '@jointhedots/ui/openContextualMenu'
+import { Menu } from '@jointhedots/ui/Layouts/Menu'
+import { openContextualMenu } from '@jointhedots/ui/Layouts'
 
 export function NoInput(props: ValueProps): JSX.Element {
    if (props.value instanceof Object) return <>Unsupported: {props.value.toString()}</>
@@ -35,7 +36,7 @@ export default function ValueInput(props: ValueProps & {
    }, [onChange])
 
    const onSelectMenu = (e) => {
-      return openContextualMenu(e.currentTarget, async (close) => {
+      return openContextualMenu(e, async (close) => {
          const items = []
          const matchings = await ElementsEditors.listControllerOf(value, typing)
          const apply = (ctl: EditionDriver) => () => {
@@ -61,7 +62,7 @@ export default function ValueInput(props: ValueProps & {
       let View = ctl.editor?.input || NoInput
 
       const onToolsMenu = (e) => {
-         return openContextualMenu(e.currentTarget, (close) => {
+         return openContextualMenu(e, (close) => {
             return <ValueMenu {...props} ctl={ctl} context={context} menu={menu} onClose={close} />
          })
       }

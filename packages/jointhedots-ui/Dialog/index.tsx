@@ -1,8 +1,8 @@
-import { openDialog } from "../openDialog"
 import Form from '@rjsf/core'
 import validator from '@rjsf/validator-ajv8'
 import { JSONSchema } from "@jointhedots/core"
 import { Button, Modal, ModalContent, ModalHeader } from "react-lightning-design-system"
+import { openDialog } from '../Layouts'
 
 export function askQuestion(question: string): Promise<boolean> {
    return openDialog((resolve) => {

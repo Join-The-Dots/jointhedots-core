@@ -3,7 +3,8 @@ import { DragDropZone } from "../DragAndDrop"
 import { stopEvent } from "../event.utils"
 import { FeaturesContext, ReactFeaturesContext, PanelInstance } from "../FeaturesLayout"
 import WindowedContainer from "."
-import openContextualMenu, { Menu } from "@jointhedots/ui/openContextualMenu"
+import { Menu } from "@jointhedots/ui/Layouts/Menu"
+import { openContextualMenu } from "@jointhedots/ui/Layouts"
 
 export type PanelProps = {
    id: string,

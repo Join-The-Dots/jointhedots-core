@@ -5,7 +5,7 @@ import {
 } from "@jointhedots/core"
 import { useCallback, useEffect, useState } from "react"
 import { ComponentBrowser } from "@jointhedots/ui/ComponentsLibrary/ComponentsBrowser"
-import { Stack } from "@jointhedots/ui/Layouts"
+import { Stack } from "@jointhedots/ui/Layouts/Stack"
 import Icon from "@jointhedots/ui/Icon"
 import Button from "@jointhedots/editors/ui/Button"
 
@@ -49,7 +49,7 @@ export function PanelNodeCreation(props: {
    const [selected, setSelected] = useState<Selected>(null)
 
    useEffect(() => {
-      component && component.fetch().then(manifest => {
+      component && component.fetch<any>().then(manifest => {
          const schema = manifest[service] || CommonTypes.any as JSONSchema
          const { templates } = manifest
          if (templates) {

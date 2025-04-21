@@ -113,22 +113,6 @@
    font-size: 80%;
 }
 
-.jtd-openContextualMenu {
-   box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1),
-     inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-   border-radius: 8px;
-   background-color: #fff;
-   color: #111;
-   padding: 5px;
-   min-height: 40px;
-   min-width: 150px;
-   overflow: auto;
-
-   &> :first-child.jtd-menu-separator {
-      border: none;
-   }
-}
-
 .jtd-menu-anchor {
    display: flex;
    flex-direction: row;

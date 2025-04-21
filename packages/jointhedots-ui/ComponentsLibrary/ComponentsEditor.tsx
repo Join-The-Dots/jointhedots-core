@@ -1,12 +1,12 @@
 import { useMemo, useRef, useState } from "react"
 import { toast } from 'react-toastify'
-import { createNewComponent, ComponentManifest, ComponentSchema, JSONSchema, ComponentEntry, updateComponent, acquireComponent, acquireResource, ComponentController, ComponentServiceKey, ComponentEditorKey, ComponentEditor, ComponentEditorProps, ComponentChecking } from "@jointhedots/core"
-import { ModalContent, ModalFooter, Tab, Tabs, Button, Alert, Modal } from "react-lightning-design-system"
-import { openDialog } from "../openDialog"
+import { createNewComponent, ComponentManifest, JSONSchema, ComponentEntry, updateComponent, acquireComponent, ComponentController, ComponentControllerKey, ComponentEditorKey, ComponentEditor, ComponentEditorProps, ComponentChecking } from "@jointhedots/core"
+import { ModalContent, Button } from "react-lightning-design-system"
 import Icon, { IconButton } from "../Icon"
 import Form from "@rjsf/core"
 import validator from '@rjsf/validator-ajv8'
 import { CodeEditorHOC, StandardLanguageProvider } from "../CodeEditor"
+import { openDialog } from "../Layouts"
 
 const JSONEditor = CodeEditorHOC(new StandardLanguageProvider("json"))
 
@@ -21,7 +21,7 @@ function generateGUID() {
 
 export function createInitialeManifest(driver: ComponentManifest): ComponentManifest {
    const component_id = "config:" + generateGUID()
-   const services = (driver["component"].services || []).reduce((prev, key) => {
+   const services = (driver.specs["component"].services || []).reduce((prev, key) => {
       prev[key] = true
       return prev
    }, {})
@@ -40,21 +40,22 @@ export function createInitialeManifest(driver: ComponentManifest): ComponentMani
 
 export async function createComponentManifest(driver: ComponentEntry, service?: string) {
    const driver_manifest = await driver.fetch()
-   const handler = await ComponentServiceKey.fetch(driver)
+   const controller = await ComponentControllerKey.fetch(driver)
    const editor = await ComponentEditorKey.fetch(driver)
 
    let manifest = createInitialeManifest(driver_manifest)
-   const result = await handler.checkDescriptor(manifest)
+   const result = await controller.checkDescriptor(manifest)
    manifest = result?.fixed || manifest
 
    const newManifest = await openDialog<ComponentManifest>((resolve) => {
       return <ComponentManifestEditor
          created={true}
          driver={driver}
-         handler={handler}
+         controller={controller}
          editor={editor}
          manifest={manifest}
          onValidate={resolve}
+         onCancel={() => resolve(null)}
       />
    })
 
@@ -71,7 +72,7 @@ export async function createComponentManifest(driver: ComponentEntry, service?: 
 
 export async function editComponentManifest(manifest: ComponentManifest) {
    const driver = acquireComponent(manifest.type)
-   const handler = await ComponentServiceKey.fetch(driver)
+   const handler = await ComponentControllerKey.fetch(driver)
    const editor = await ComponentEditorKey.fetch(driver)
    await driver.fetch()
 
@@ -79,10 +80,11 @@ export async function editComponentManifest(manifest: ComponentManifest) {
       return <ComponentManifestEditor
          created={false}
          driver={driver}
-         handler={handler}
+         controller={handler}
          editor={editor}
          manifest={manifest}
          onValidate={resolve}
+         onCancel={() => resolve(null)}
       />
    })
 
@@ -103,7 +105,7 @@ const DefaultEditor = (props: ComponentEditorProps) => {
       onChange={(e) => onChange(e.formData)}
    />
       <Button type="brand" onClick={() => onValidate(manifest)}>Apply</Button>
-      <Button type="neutral" onClick={onCancel}>Cancel</Button>
+      {onCancel && <Button type="neutral" onClick={onCancel}>Cancel</Button>}
    </>
 }
 
@@ -115,21 +117,22 @@ const JSONManifestEditor = (props: ComponentEditorProps) => {
 
 export function ComponentManifestEditor(props: {
    driver: ComponentEntry
-   handler: ComponentController
+   controller: ComponentController
    editor?: ComponentEditor
    manifest: ComponentManifest
    created: boolean
    onValidate: (manifest: ComponentManifest) => void
+   onCancel?: () => void
 }) {
-   const { driver, handler, editor, created, onValidate } = props
+   const { driver, controller, editor, created, onValidate, onCancel } = props
    const [manifest, setManifest] = useState(props.manifest)
-   const descriptor = ComponentServiceKey.descriptor(driver)
+   const descriptor = ComponentControllerKey.spec(driver)
    const driver_manifest = driver.manifest
    const [result, setResult] = useState<ComponentChecking>(null)
    const [codeMode, setCodeMode] = useState(false)
 
    const applyManifest = async (manifest) => {
-      const result = await handler.checkDescriptor(manifest)
+      const result = await controller.checkDescriptor(manifest)
       if (!result || (!result.issues?.length && !result.fixed)) {
          onValidate(manifest)
       }
@@ -172,7 +175,7 @@ export function ComponentManifestEditor(props: {
             schema={schema}
             onChange={setManifest}
             onValidate={applyManifest}
-            onCancel={() => onValidate(null)}
+            onCancel={onCancel}
          />
          {result?.issues?.length && <div className='JDT-ErrorBoundary'>
             {result.issues.map(issue => {
