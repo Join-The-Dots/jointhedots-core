@@ -142,7 +142,7 @@ export type JSONSchemaCustom = {
    aliases?: MapLike<string>
 }
 
-export type ResourceEntry<ResourceInterface = any> = ResourceLink<ResourceInterface> | true | {
+export type ResourceEntry<ResourceInterface = any> = ResourceLink<ResourceInterface> | {
    type: ResourceLink<ResourceFactory<ResourceInterface>>
    data?: any
 }

@@ -44,15 +44,16 @@ function ServiceConfiguratorForm(props: {
       onApply?.()
    }, [onApply, descriptors])
 
-   return <div style={{ padding: 10, maxWidth: 400, margin: "auto" }}>
-      <ModalHeader title="Following services are required" />
-      <ModalContent className="slds-p-around_large">
-         {list}
-      </ModalContent>
-      <Button type="brand" onClick={apply}>
+   return <div style={{ display: "flex", flexDirection: "column", gap: 20, padding: 10, maxWidth: 400, margin: "auto" }}>
+      <div style={{
+         fontSize: "150%",
+         borderBottom: "solid thin grey"
+      }}>Following services are required</div>
+      {list}
+      <Button type="brand" onClick={apply} >
          {"Apply"}
       </Button>
-   </div>
+   </div >
 }
 
 export function DefaultServiceConfigurator(props: {
@@ -64,7 +65,7 @@ export function DefaultServiceConfigurator(props: {
    useEffect(() => {
       const div = divRef.current
       const sizer = new ResizeObserver(() => {
-         if (div.clientWidth < 800 && div.clientHeight < 500) setSizing(1)
+         if (div.clientWidth < 400 && div.clientHeight < 300) setSizing(1)
          else setSizing(2)
       })
       sizer.observe(div)
@@ -77,11 +78,15 @@ export function DefaultServiceConfigurator(props: {
    }
    return <div ref={divRef} style={{ overflow: "hidden" }}>
       {sizing == 2
-         ? <ServiceConfiguratorForm {...props} />
+         ? <div style={{ borderRadius: 10, border: "solid thin grey" }}>
+            <ServiceConfiguratorForm {...props} />
+         </div>
          : sizing == 1
-            ? <div style={{ maxWidth: 400, padding: 5, margin: "auto" }}> <Button type="destructive" onClick={onSettings} >
-               <Icon name="bi:exclamation-diamond" style={{ margin: 5 }} />{" Settings"}
-            </Button>
+            ? <div style={{ maxWidth: 400, padding: 5, margin: "auto" }}>
+               <Button type="destructive" onClick={onSettings} >
+                  <Icon name="bi:exclamation-diamond" />
+                  {"Settings"}
+               </Button>
             </div>
             : null
       }

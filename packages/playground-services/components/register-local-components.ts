@@ -21,7 +21,6 @@ createNewComponent({
    "title": "My Explorer",
    "description": "Add or remove entry points via the setup",
    "icon": "standard:custom_notification",
-   "services": { "view.react": true },
    "requirements": {
       servicePoints: {
          "storage/sources": { service: "storage/sources" }

@@ -48,8 +48,7 @@ class FloatingDock implements PanelDock {
          // Create popup node
          this.node = document.createElement("div")
          this.node.className = this.className ? `${this.className} ${defaultClassName}` : defaultClassName
-         Object.assign(this.node.style, this.style || defaultStyle)
-         this.node.style["--jtd-floating-zindex"] = getStackZIndex(this.stackIndex)
+         this.node.setAttribute("style",`--jtd-floating-zindex:${getStackZIndex(this.stackIndex)};`)
          this.root = ReactDOMClient.createRoot(this.node)
          document.body.appendChild(this.node)
 
@@ -138,10 +137,8 @@ class FloatingDock implements PanelDock {
 export type StyleType = { [key: string]: string }
 
 let defaultClassName = "jtd-panel-floating-dock"
-let defaultStyle: StyleType = {}
 
-export function setDefaultFloatingStyle(className?: string, style?: StyleType) {
-   defaultStyle = style || defaultStyle
+export function setDefaultFloatingStyle(className?: string) {
    defaultClassName = `${className || ""} jtd-panel-floating-dock`
 }
 

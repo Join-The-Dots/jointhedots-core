@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react"
-import { areSimilarObjects } from "@jointhedots/core/index"
+import { areSimilarObjects } from "@jointhedots/core"
 import { DrawerDock } from "./DrawerDock"
 import { ModalDock } from "./ModalDock"
 import { ToolingProps } from "@jointhedots/ui/Items"

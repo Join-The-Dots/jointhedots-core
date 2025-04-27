@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useState } from "react"
+import {
+   acquireComponent, ILogDispatcher, LogInfos, LogObject, queryLogInfos,
+   queryLogObjects, QueryLogResult, registerLogCollector, unregisterLogCollector,
+} from "@jointhedots/core"
 import { IconButton } from "../Icon"
-import { ILogDispatcher, LogInfos, LogObject, queryLogInfos, queryLogObjects, QueryLogResult, registerLogCollector, unregisterLogCollector } from "@jointhedots/core/logging"
 import { usePanel } from "../Layouts"
 import { ItemRowRich } from "../Items"
-import { acquireComponent } from "@jointhedots/core/index"
+import { executeCommand } from "@jointhedots/core/services"
 
 class NotifObjectsCollector implements ILogDispatcher {
    constructor(
@@ -70,7 +73,7 @@ export function NotificationsBell() {
    let bell = "bi:bell[info]"
    if (infos.error_count > 0) bell = "bi:bell-fill[error]"
    else if (infos.warn_count > 0) bell = "bi:bell-fill[warn]"
-   return <IconButton name={bell} onClick={onShow} />
+   return <IconButton name={bell} size="1.3em" onClick={onShow} />
 }
 
 export function NotificationsList(props: {
@@ -92,7 +95,7 @@ export function Notification(props: {
 }) {
    const { component_id, icon, title, message, actions } = props.object
    const comp = acquireComponent(component_id)
-   const name = comp.get()?.title || title || component_id
+   const name = comp.manifest?.title || title || component_id
    return <ItemRowRich
       icon={icon || getEventIcon(props.object)}
       name={name}
@@ -103,7 +106,7 @@ export function Notification(props: {
             name: action.title,
             summary: action.summary,
             onActivate: () => {
-               console.log("do action:", component_id, action.scenario)
+               executeCommand(action)
             }
          }
       })}
@@ -111,10 +114,10 @@ export function Notification(props: {
 }
 
 function getEventIcon(object: LogObject) {
-   if (object.kind === "error") {
+   if (object.status === "error") {
       return object.icon ? object.icon + "|bi:exclamation-triangle-fill[error]" : "bi:exclamation-triangle-fill[error]"
    }
-   else if (object.kind === "warn") {
+   else if (object.status === "warn") {
       return object.icon ? object.icon + "|bi:exclamation-triangle-fill[warn]" : "bi:exclamation-triangle-fill[warn]"
    }
    else {

@@ -1,10 +1,12 @@
 import { Octokit } from "@octokit/rest"
-import { ComponentEntry, ComponentManifest, ComponentController, ServiceType, Log, ErrorTypes, ComponentEditor } from "@jointhedots/core"
+import { ComponentEntry, ComponentManifest, ComponentController, Log, ComponentEditor, getComponentFromData } from "@jointhedots/core"
 import {
    ChangeSetId, FileKey, StorageChangeLog, StorageChangeSet,
    StorageChangeStatus, StorageService, StorageStats, StorageTransaction
 } from "@jointhedots/core/services"
 import { GithubSSOEditor } from "./sso"
+import { Cmdlet, CmdPayload, CmdResult, CommandsService } from "@jointhedots/core/services/Commands"
+import { toast } from "react-toastify"
 
 interface CommittedFile {
    path: string
@@ -21,33 +23,33 @@ export type GithubServiceManifest = ComponentManifest & {
 
 export const GithubController: ComponentController = {
 
-   // Component runtime
-   getAvailableServices(component: ComponentEntry): ServiceType[] {
-      return ["storage"]
-   },
-   async getService(component: ComponentEntry, type: ServiceType) {
-      if (type === "storage") return component.instance
-      return null
-   },
-
    // Component management
-   async createComponent(component: ComponentEntry, descriptor: GithubServiceManifest) {
+   async createComponent(component: ComponentEntry<GithubService>, descriptor: GithubServiceManifest) {
       component.instance = new GithubService(descriptor)
-      Log.about("error", component.instance, "Credentials invalid", {
-        // follow: "",
+      Log.openTicket(component, "connection", {
+         status: "error",
+         message: "Credentials invalid",
          actions: [{
-            scenario: "connect",
             icon: "bi:plug",
             title: "Connect",
+            target: `command://${descriptor.$id}/reconnect`,
          }]
       })
    },
-   async updateComponent(component: ComponentEntry, descriptor: GithubServiceManifest) {
-      return component.instance.update(descriptor)
+   async updateComponent(component: ComponentEntry<GithubService>, descriptor: GithubServiceManifest) {
+      component.instance.update(descriptor)
    },
    async checkDescriptor(descriptor: GithubServiceManifest) {
       return null
    },
+}
+
+export function GetStorageService(component: ComponentEntry<GithubService>): StorageService {
+   return component.instance
+}
+
+export function GetCommandsService(component: ComponentEntry<GithubService>): CommandsService {
+   return component.instance
 }
 
 export const GithubServiceEditor: ComponentEditor = {
@@ -59,7 +61,7 @@ export const GithubServiceEditor: ComponentEditor = {
    },
 }
 
-export class GithubService implements StorageService {
+export class GithubService implements StorageService, CommandsService {
    //https://api.github.com/repos/pegros/PEG_LIST/git/trees/master?recursive=3
    _files: CommittedFile[] = []
    _githubClient?: Octokit
@@ -81,6 +83,13 @@ export class GithubService implements StorageService {
       this.name = descriptor.title
       Object.assign(this, descriptor.settings)
       return this
+   }
+   async execute<C extends Cmdlet>(cmd: string, data: CmdPayload<C>): Promise<CmdResult<C>> {
+      if (cmd === "/reconnect") {
+         toast.info(`Reconnect '${getComponentFromData(this).id}'`)
+         Log.closeTicket(this, "connection")
+      }
+      return null
    }
 
    // File access

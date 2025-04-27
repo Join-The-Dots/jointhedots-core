@@ -33,7 +33,7 @@ async function connectGitServiceUrl(servicePoint: ServicePoint, driver_id: strin
    const driver = acquireComponent(driver_id)
    const manif = await createComponentManifest(driver, servicePoint.service)
    if (manif) {
-      const found = createComponentPublication(manif)
+      const found = await createComponentPublication(manif)
       servicePoint.override([found.component_id])
       return found
    }

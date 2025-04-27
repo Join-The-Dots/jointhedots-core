@@ -65,7 +65,6 @@ export type ComponentSchema = {
    readonly name: ServiceType
    readonly title: string
    readonly icon: string
-   readonly services: string[]
    readonly attributes: MapLike<JSONSchema>
 }
 
@@ -82,10 +81,6 @@ export interface ComponentChecking {
 
 // Component service "component"
 export interface ComponentController {
-
-   // Component runtime
-   getAvailableServices(component: ComponentEntry): ServiceType[]
-   getService<IService>(component: ComponentEntry, type: ServiceType): Promise<IService>
 
    // Component management
    createComponent(component: ComponentEntry, descriptor: ComponentManifest): Promise<void>

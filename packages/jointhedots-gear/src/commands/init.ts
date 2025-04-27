@@ -1,6 +1,5 @@
 import { CommandModule } from "yargs"
-import { directory, file } from "../utils/file.js";
-import Fs from 'node:fs'
+import { file } from "../utils/file.js"
 
 export function command_init(): CommandModule<any, {
 }> {
@@ -18,7 +17,18 @@ export function command_init(): CommandModule<any, {
                      "application.json"
                   ],
                   "url": "./node_modules/@jointhedots/gear/schemas/application.schema.json"
-               }
+               },
+               {
+                  "fileMatch": [
+                     "component.json",
+                     "*.component.json",
+                     "component.yml",
+                     "*.component.yml",
+                     "component.toml",
+                     "*.component.toml",
+                  ],
+                  "url": "./node_modules/@jointhedots/gear/schemas/component.schema.json"
+               },
             ]
          })
       }

@@ -6,15 +6,6 @@ export type ApplicationBoardManifest = ComponentManifest & AppDescriptor
 
 export const ApplicationBoardDriver: ComponentController = {
 
-   // Component runtime
-   getAvailableServices(component: ComponentEntry): ServiceType[] {
-      return ["view.react"]
-   },
-   async getService(component: ComponentEntry, type: ServiceType): Promise<any> {
-      if (type === "view.react") return ApplicationBoardHOC(component.manifest)
-      return null
-   },
-
    // Component management
    async createComponent(component: ComponentEntry, descriptor: ComponentManifest) {
       //component.instance = new GithubService(descriptor)
@@ -27,8 +18,9 @@ export const ApplicationBoardDriver: ComponentController = {
    },
 }
 
-function ApplicationBoardHOC(descriptor: AppDescriptor): ViewReactService {
+export function GetApplicationView(component: ComponentEntry) {
    return function () {
-      return <ApplicationBoard descriptor={descriptor} />
+      return <ApplicationBoard descriptor={component.manifest} />
    }
 }
+

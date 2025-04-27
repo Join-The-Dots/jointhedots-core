@@ -1,5 +1,6 @@
 import { URI } from 'vscode-uri'
 import { ComponentFilter, ComponentManifest, ComponentPublication } from './components'
+import { acquireComponent } from './manifold'
 
 export function parseComponentURI(ref: string): URI {
    if (ref.startsWith("./")) {
@@ -16,17 +17,36 @@ export function parseComponentURI(ref: string): URI {
    }
 }
 
-export function createComponentPublication(manif: ComponentManifest): ComponentPublication {
+export async function getComponentServicesList(manif: ComponentManifest): Promise<string[]> {
+   const services = manif.services ? Object.keys(manif.services) : []
+   if (manif.type) {
+      const controller = await acquireComponent(manif.type)?.fetch()
+      if (controller) {
+         for (const key in controller?.services) {
+            if (key.startsWith("component.")) {
+               const name = key.slice(10)
+               if (!services.includes(name)) services.push(name)
+            }
+         }
+      }
+      else {
+         throw new Error("Cannot create publiction properly")
+      }
+   }
+   return services
+}
+
+export async function createComponentPublication(manif: ComponentManifest): Promise<ComponentPublication> {
    const { $id } = manif
    return {
       component_id: $id,
       type: manif.type,
       icon: manif.icon,
       title: manif.title || $id,
-      services: manif.services ? Object.keys(manif.services) : [],
       description: manif.description || "",
       keywords: manif.keywords,
       tags: manif.tags,
+      services: await getComponentServicesList(manif),
    }
 }
 

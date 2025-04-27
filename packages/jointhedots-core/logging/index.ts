@@ -1,13 +1,18 @@
-import { generateKey } from "crypto"
 import { MapLike } from "../common/types"
-import { acquireComponent, ComponentEntry, ComponentResource, ComponentsRegistry } from "../library/manifold"
-import { useEffect, useState } from "react"
+import { getComponentFromData } from "../library/manifold"
+import { Command } from "../services/Commands"
 
-export type LogKind =
+export type LogObjectID = string
+
+export type LogStatus =
    "error" |
    "warn" |
    "notify" |
    "info"
+
+export type LogKind =
+   "event" |
+   "ticket"
 
 export interface ILogDispatcher {
    notifyError(error: Error, subject?: any)
@@ -18,19 +23,16 @@ export interface ILogSubject {
    getSubject(): string
 }
 
-export interface LogAction {
-   scenario: string
-   icon?: string // Object icon
-   title?: string // Object name
-   summary?: string // Object short description
+export interface LogAction extends Command {
    optional?: boolean
-   attributes?: MapLike<string | number>
    doc_uri?: string
+   callback?: Command
 }
 
 export interface LogObject {
-   id: string
+   id: LogObjectID
    kind: LogKind
+   status: LogStatus
    message: string // Object short description
    component_id: string // Object resource or component id
    doc_uri?: string
@@ -42,9 +44,9 @@ export interface LogObject {
 }
 
 class ConsoleLog implements ILogDispatcher {
-   notifyError(error: Error, subject?: any) {
+   notifyError(error: Error, target?: any) {
       console.error(error)
-      this.notifyObject(createLogFromError(error, subject))
+      this.notifyObject(createLogFromError(error, target))
    }
    notifyObject(object: LogObject) {
       log_objects.push(object)
@@ -105,7 +107,7 @@ export type LogInfos = {
 export function queryLogInfos(component_id?: string): LogInfos {
    return log_objects.reduce((info, obj) => {
       if (component_id === undefined || component_id === obj.component_id) {
-         switch (obj.kind) {
+         switch (obj.status) {
             case "error":
                info.error_count++
             case "warn":
@@ -127,61 +129,70 @@ export function queryLogInfos(component_id?: string): LogInfos {
 }
 
 export const Log = {
-   it(object: LogObject) {
+   send(object: LogObject) {
       setTimeout(() => {
          for (const collector of log_dispatchers) {
             collector.notifyObject(object)
          }
       }, 0)
    },
-   error(error: Error, subject?: any) {
+   error(error: Error, target?: any) {
       setTimeout(() => {
          for (const collector of log_dispatchers) {
-            collector.notifyError(error, subject)
+            collector.notifyError(error, target)
          }
       }, 0)
    },
-   about(kind: LogKind, subject: any, message: string, options?: Partial<LogObject>) {
-      setTimeout(() => {
-         const object = {
-            ...options,
-            id: generateLogId(),
-            kind,
-            component_id: getComponentFromSubject(subject).id,
-            message,
-         }
-         for (const collector of log_dispatchers) {
-            collector.notifyObject(object)
-         }
-      }, 0)
+   event(target: any, options?: Partial<LogObject>) {
+      const entry = getComponentFromData(target)
+      const id = generateLogId()
+      Log.send({
+         ...options,
+         kind: "event",
+         status: options.status || "error",
+         message: options.message || `Issue with component: ${id}`,
+         component_id: entry.id,
+         id,
+      })
+   },
+   openTicket(target: any, name: string, options?: Partial<LogObject>) {
+      const entry = getComponentFromData(target)
+      const id = `${entry.id}/${name}`
+      Log.send({
+         ...options,
+         kind: "ticket",
+         status: options.status || "error",
+         message: options.message || `Issue with component: ${id}`,
+         component_id: entry.id,
+         id,
+      })
+   },
+   closeTicket(target: any, name: string) {
+      const entry = getComponentFromData(target)
+      const id = `${entry.id}/${name}`
+      const index = log_objects.findIndex(x => x.id === id)
+      if (index >= 0) {
+         const ticket = log_objects[index]
+         log_objects.splice(index, 1)
+         Log.event(target, {
+            ...ticket,
+            kind: "event",
+            status: "info",
+            icon: "[success]bi:check-circle",
+            message: `[closed] ${ticket.message}`,
+            actions: undefined,
+            doc_uri: undefined,
+         })
+      }
    },
 }
 
-export function createLogFromError(error: Error, subject?: any): LogObject {
+export function createLogFromError(error: Error, target?: any): LogObject {
    return {
       id: generateLogId(),
-      kind: "error",
-      component_id: getComponentFromSubject(subject).id,
+      kind: "event",
+      status: "error",
+      component_id: getComponentFromData(target).id,
       message: error.message,
    }
-}
-
-export function getDefaultLogComponent() {
-   return acquireComponent("log:application")
-}
-
-export function getComponentFromSubject(subject: any, is_static?: boolean): ComponentEntry {
-   if (subject instanceof Object) {
-      const target = ComponentsRegistry.datamap.get(subject) || subject
-      if (target instanceof ComponentEntry) {
-         return target
-      }
-      if (target instanceof ComponentResource) {
-         return target.component
-      }
-      if (!is_static && subject["getSubjectUri"] instanceof Function) {
-         return getComponentFromSubject(subject["getSubjectUri"](), true)
-      }
-   }
-   return getDefaultLogComponent()
 }

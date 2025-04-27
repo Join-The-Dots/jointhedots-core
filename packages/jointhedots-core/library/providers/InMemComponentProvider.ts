@@ -25,7 +25,7 @@ export class InMemComponentPublisher implements IComponentPublisher {
 export class InMemComponentProvider extends InMemComponentPublisher implements IComponentProvider {
    manifests = new Map<string, ComponentManifest>()
    async add_component(manifest: ComponentManifest): Promise<ComponentPublication> {
-      const entry = createComponentPublication(manifest)
+      const entry = await createComponentPublication(manifest)
       this.manifests.set(entry.component_id, manifest)
       this.pubs.set(entry.component_id, entry)
       return entry

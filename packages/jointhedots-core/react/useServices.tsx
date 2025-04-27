@@ -93,13 +93,7 @@ class ServicePointsController implements IServicePointsController {
       if (requireds) {
          for (const svc of requireds) {
             const items = svc.ready ? svc.services : await svc.fetch()
-            if (items.length > 0) {
-               this.services.set(svc, items)
-            }
-            else {
-               if (!missings) missings = []
-               missings.push(svc)
-            }
+            this.services.set(svc, items)
          }
       }
       if (requirements) {
@@ -107,14 +101,18 @@ class ServicePointsController implements IServicePointsController {
          for (const id in servicePoints) {
             const svc = acquireServicePoint(id)
             const items = svc.ready ? svc.services : await svc.fetch()
-            if (items.length > 0) {
-               this.services.set(svc, items)
-            }
-            else {
+            const req = servicePoints[id]
+            if (req.service && svc.service !== req.service) {
                if (!missings) missings = []
                missings.push(svc)
             }
-            //TODO
+            else if (items.length < (req.cardinality || 1)) {
+               if (!missings) missings = []
+               missings.push(svc)
+            }
+            else {
+               this.services.set(svc, items)
+            }
          }
       }
       this.onNewProvider(new ServicePointsProxy(this))
@@ -135,21 +133,21 @@ listenServicePoints(globalSupport.onServiceChangeHandler)
 export const ServicePointsSupportContext: React.Context<IServicePointsSupport> = React.createContext(globalSupport)
 export const ServicePointsProviderContext: React.Context<IServicePointsProvider> = React.createContext(globalSupport)
 
-export function useServices<IService>(servicePoint: ServicePoint<IService>): IService[] {
+export function useServices<IService>(servicePoint: ServicePoint<IService>, cardinality?: number): IService[] {
    const provider = React.useContext(ServicePointsProviderContext)
    if (!provider) {
       console.error("Wrap in <MountServicePoints> before using service point:", servicePoint.id)
       return null
    }
    const result = provider.getService<IService>(servicePoint)
-   if (result.length == 0) {
+   if (result.length < (cardinality === undefined ? 1 : cardinality)) {
       throw new MissingServiceError([servicePoint], [servicePoint])
    }
    return result
 }
 
-export function useService<IService>(servicePoint: ServicePoint<IService>): IService {
-   return useServices(servicePoint)[0]
+export function useService<IService>(servicePoint: ServicePoint<IService>, optional?: boolean): IService {
+   return useServices(servicePoint, optional ? 0 : 1)[0]
 }
 
 async function createServicesController(
@@ -181,11 +179,6 @@ export function useServicesProvider(requireds: ServicePoint[], requirements: Vie
 export type ServiceConfiguratorComponent = React.ComponentType<{
    services: ServicePoint[]
 }>
-
-export function OverrideServicePoints(props: {
-}){
-   
-}
 
 export function UseServicePoints(props: {
    requireds?: ServicePoint[]

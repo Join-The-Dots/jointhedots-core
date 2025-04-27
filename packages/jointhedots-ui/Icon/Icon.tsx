@@ -82,6 +82,7 @@ const IconFlags: MapLike<IconStyle> = {
    "info": makeColorFlag("grey"),
    "primary": makeColorFlag("#36f"),
    "secondary": makeColorFlag("#666"),
+   "success": makeColorFlag("#6d0"),
    "badge": {
       style: {
          "fontSize": "0.6em",

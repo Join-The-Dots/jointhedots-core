@@ -154,11 +154,15 @@ export async function evaluateViewInfos(view: string | ViewInfos, origin?: strin
    if (typeof view === "string") view = getViewInfosFrom(view)
    const component = acquireComponent(view.name)
    const manifest = await component.fetch()
-   if (component.failure) throw component.failure
-   const properties = parseViewProps(component, manifest, view, origin || "unknown")
-   return {
-      component,
-      properties,
+   if (component.valid) {
+      const properties = parseViewProps(component, manifest, view, origin || "unknown")
+      return {
+         component,
+         properties,
+      }
+   }
+   else {
+      throw new Error(`Component '${component.id}' is invalid`)
    }
 }
 

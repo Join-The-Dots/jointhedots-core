@@ -14,6 +14,7 @@
       "./Items": "./Items",
       "./ServicePoint": "./ServicePoint",
       "./Layouts": "./Layouts",
+      "./Notifications": "./Notifications",
       "./theme": "./theme"
    },
    "dependencies": {

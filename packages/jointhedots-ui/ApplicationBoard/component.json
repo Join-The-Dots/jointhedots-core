@@ -4,9 +4,6 @@
    "icon": "utility:apps",
    "specs": {
       "component": {
-         "services": [
-            "view.react"
-         ],
          "attributes": {
             "entries": {
                "type": "object",
@@ -41,6 +38,7 @@
       }
    },
    "services": {
-      "component": "./component#ApplicationBoardDriver"
+      "component": "./component#ApplicationBoardDriver",
+      "component.view.react": "./component#GetApplicationView"
    }
 }

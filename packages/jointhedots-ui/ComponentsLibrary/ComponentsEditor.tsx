@@ -94,11 +94,11 @@ export async function editComponentManifest(manifest: ComponentManifest) {
 }
 
 const DefaultEditor = (props: ComponentEditorProps) => {
-   const { descriptor, schema, manifest, onChange, onValidate, onCancel } = props
+   const { schema, manifest, onChange, onValidate, onCancel } = props
    const form_ref = useRef<Form>()
    return <><Form
       ref={form_ref}
-      schema={schema}
+      schema={schema as any}
       validator={validator}
       formData={manifest}
       templates={{ ButtonTemplates: { SubmitButton: () => <></> } }}

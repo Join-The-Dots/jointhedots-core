@@ -4,12 +4,12 @@ import { ServiceEntry } from "../library/components"
 import { MapLike } from "../common/types"
 
 export type ViewServicePoint = {
-   service: string
-   multiple?: boolean
+   service?: string
+   cardinality?: number
 }
 
 export type ViewRequirements = {
-   servicePoints?: MapLike<ViewServicePoint>
+   servicePoints?: { [service: string]: ViewServicePoint }
 }
 
 export type ViewDescriptor = JSONSchema & {

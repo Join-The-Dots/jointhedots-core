@@ -7,15 +7,17 @@ import { CombinedComponentProvider } from "./providers/CombinedComponentProvider
 import { LocalComponentProvider } from "./providers/LocalComponentProvider"
 import { Log, LogObject, queryLogInfos, queryLogObjects, QueryLogResult } from "../logging"
 
-type ComponentErrorManifest = ComponentManifest & {
+export type ComponentErrorManifest = ComponentManifest & {
+   type: "<error>"
    error: Error
 }
 
+export type ComponentServiceGetter<Service = any> = (entry: ComponentEntry) => Service
+
 // Component registry entry
-export class ComponentEntry {
+export class ComponentEntry<Instance = any> {
+   protected __instance__?: Instance = undefined
    manifest?: ComponentManifest = undefined
-   instance?: any = undefined
-   failure?: Error = undefined
    constructor(
       readonly id: string,
    ) {
@@ -35,23 +37,26 @@ export class ComponentEntry {
       }
    }
    get valid(): boolean {
-      return this.manifest !== undefined && this.failure === undefined
+      return this.manifest !== undefined && this.manifest.type !== "<error>"
    }
    get loaded(): boolean {
       return this.manifest !== undefined
    }
    get installed(): boolean {
-      return this.instance !== undefined
+      return this.__instance__ !== undefined
    }
-   setError(error: Error) {
-      this.failure = error
-      this.set<ComponentErrorManifest>({
-         $id: this.id,
-         error,
-         services: {}
-      })
-      Log.error(error, this)
-      return this
+   get instance(): Instance {
+      return this.__instance__
+   }
+   set instance(value: Instance) {
+      this.__instance__ = value
+      if (value instanceof Object) {
+         ComponentsRegistry.datamap.set(value, this)
+      }
+      else if (value !== null) {
+         this.__instance__ = null
+         throw new Error(`Component instance shall be an object`)
+      }
    }
    get<Manifest extends ComponentManifest = ComponentManifest>(): Manifest {
       if (this.manifest === undefined) {
@@ -69,11 +74,23 @@ export class ComponentEntry {
 
       if (this.manifest === undefined) {
          loading = ComponentsRegistry.components_provider.get_component_manifest(this.id).then(async (manifest) => {
+            if (manifest.type) {
+               await acquireComponent(manifest.type).fetch()
+            }
             if (manifest) this.manifest = manifest
-            else this.setError(new Error(`Component '${this.id}' not found`))
+            else throw new Error(`Component '${this.id}' not found`)
             return this.manifest
          }, (e) => {
-            this.setError(e)
+            Log.error(e)
+            this.set<ComponentErrorManifest>({
+               $id: this.id,
+               type: "<error>",
+               error: new Error(e.message)
+            })
+            Log.openTicket(this, "install", {
+               status: "error",
+               message: e.message,
+            })
             return this.manifest
          })
       }
@@ -102,13 +119,6 @@ export class ComponentEntry {
                await controller.createComponent(this, this.manifest)
             }
 
-            if (this.instance instanceof Object) {
-               ComponentsRegistry.datamap.set(this.instance, this)
-            }
-            else {
-               this.instance = null
-            }
-
             resolve(this)
          })
       }
@@ -129,8 +139,7 @@ export class ComponentEntry {
       return rc
    }
    getResource(identifier: string): ComponentResource {
-      const { manifest } = this
-      if (manifest?.services?.[identifier]) {
+      if (this.hasResource(identifier)) {
          return this.acquireResource(identifier)
       }
       return null
@@ -140,7 +149,13 @@ export class ComponentEntry {
       if (manifest?.services?.[identifier]) {
          return true
       }
-      return null
+      else if (manifest?.type) {
+         const type = acquireComponent(manifest.type)
+         if (type) {
+            return type?.hasResource(`component.${identifier}`)
+         }
+      }
+      return false
    }
    async getResourceAsync(identifier: string): Promise<ComponentResource> {
       if (this.manifest === undefined) await this.fetch()
@@ -201,14 +216,10 @@ export class ComponentResource {
                   this.entry = await ComponentsRegistry.resources_loader.load_resource(uri)
                   this.identifier = identifier
                }
-               else if (ref === true) {
-                  const controller = ComponentControllerKey.get(acquireComponent(manifest.type))
-                  this.entry = await controller.getService(component, this.resource)
-                  this.identifier = null
-               }
-               else if (ref) {
-                  const factory = await acquireComponent(ref.type).acquireResource("factory").fetch()
-                  this.entry = await factory(ref.data)
+               else if (manifest.type) {
+                  const controller = acquireComponent(manifest.type)
+                  const getter = await controller.getResource(`component.${this.resource}`).fetch<ComponentServiceGetter>()
+                  this.entry = await getter(this.component)
                   this.identifier = null
                }
                else {
@@ -298,6 +309,26 @@ export class ComponentsManifold {
 
 export const ComponentsRegistry = new ComponentsManifold()
 
+export function getDefaultComponent() {
+   return acquireComponent("log:application")
+}
+
+export function getComponentFromData(data: any, is_static?: boolean): ComponentEntry {
+   if (data instanceof Object) {
+      const target = ComponentsRegistry.datamap.get(data) || data
+      if (target instanceof ComponentEntry) {
+         return target
+      }
+      if (target instanceof ComponentResource) {
+         return target.component
+      }
+      if (!is_static && data["getComponent"] instanceof Function) {
+         return getComponentFromData(data["getComponent"](), true)
+      }
+   }
+   return getDefaultComponent()
+}
+
 export function acquireComponent(id: string): ComponentEntry {
    let obj = ComponentsRegistry.components.get(id) as ComponentEntry
    if (!obj && typeof id === "string") {
@@ -357,7 +388,11 @@ export async function deleteComponent(id: string): Promise<void> {
    if (await provider.delete_component(id)) {
       const component = ComponentsRegistry.components.get(id)
       if (component) {
-         component.failure = new Error(`Component deleted`)
+         component.set<ComponentErrorManifest>({
+            $id: component.id,
+            type: "<error>",
+            error: new Error(`Component deleted`),
+         })
          ComponentsRegistry.listeners.forEach(l => l(component))
          ComponentsRegistry.components.delete(id)
       }

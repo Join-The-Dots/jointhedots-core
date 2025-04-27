@@ -26,7 +26,7 @@ export function CreateComponentSelector(props: {
       const driver = acquireComponent(pub.component_id)
       const manif = await createComponentManifest(driver, service)
       if (manif && props.onCreate) {
-         props.onCreate(createComponentPublication(manif))
+         props.onCreate(await createComponentPublication(manif))
       }
    }
 

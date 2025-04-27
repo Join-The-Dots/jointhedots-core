@@ -7,16 +7,27 @@ export class PopupCancel extends Error {
 
 export function openDialog<T>(renderer: (resolve: (data: T) => void) => React.ReactNode, height?: string): Promise<T> {
    return new Promise(resolve => {
-      const panel = createPanel({
+      const panel = createPanel()
+      let done = false
+      panel.display({
          title: "",
          icon: "",
          height,
          content: renderer((res) => {
+            if (!done) {
+               done = true
+               resolve(res)
+            }
             panel.close()
-            resolve(res)
          }),
-         onClose: () => resolve(undefined),
-      }).open("modal")
+         onClose: () => {
+            if (!done) {
+               done = true
+               resolve(undefined)
+            }
+         },
+      })
+      panel.open("modal")
    })
 }
 

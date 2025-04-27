@@ -162,8 +162,8 @@ async function searchComponents(db: IDBDatabase, filter: ComponentFilter): Promi
 }
 
 function storeComponent(db: IDBDatabase, manifest: ComponentManifest): Promise<ComponentPublication> {
-   return new Promise((resolve, reject) => {
-      const entry = createComponentPublication(manifest)
+   return new Promise(async (resolve, reject) => {
+      const entry = await createComponentPublication(manifest)
       const db_T = db.transaction(["components", "components_services", "components_manifests"], "readwrite")
 
       const components_store = db_T.objectStore("components")

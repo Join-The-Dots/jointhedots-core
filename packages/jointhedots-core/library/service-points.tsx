@@ -87,7 +87,7 @@ export class ServicePoint<IService = unknown> implements ILogDispatcher {
       Log.error(error)
    }
    notifyObject(object: LogObject) {
-      Log.it(object)
+      Log.send(object)
    }
 }
 

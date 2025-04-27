@@ -1,6 +1,6 @@
 {
    "name": "jointhedots",
-   "version": "2.0.10",
+   "version": "2.0.11",
    "type": "module",
    "private": true,
    "license": "MIT",
@@ -16,6 +16,7 @@
       "@types/typescript": "^2.0.0",
       "esm": "^3.2.25",
       "mocha": "^10.7.3",
+      "ts-json-schema-generator": "^2.4.0",
       "ts-node": "^10.9.2",
       "ts-patch": "^3.2.1",
       "tsconfig-paths": "^4.2.0",
