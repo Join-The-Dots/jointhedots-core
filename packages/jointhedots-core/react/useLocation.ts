@@ -36,7 +36,7 @@ export function useLocationHash(): string {
    return location
 }
 
-export function useLocationQuery(): MapLike<string> {
+export function getLocationQuery(): MapLike<string> {
    const { search } = window.location
    const query = {}
    if (search.startsWith("?")) {

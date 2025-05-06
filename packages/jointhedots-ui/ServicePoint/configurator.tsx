@@ -283,7 +283,7 @@ export function ServicePointInput(props: {
       , [], [value.providers]
    )
 
-   return <div className="slds-form-element">
+   return <div className={failure ? "slds-form-element slds-has-error" : "slds-form-element"}>
       <label className="slds-form-element__label">
          {label || value.id}
       </label>
@@ -294,8 +294,8 @@ export function ServicePointInput(props: {
                providers={providers}
                onChange={onChange}
             />
-            {failure && <ErrorDisplayer error={failure} />}
          </div>
+         {failure && <div className="slds-form-element__help" id="error-id">{failure.message}</div>}
       </div>
    </div>
 }

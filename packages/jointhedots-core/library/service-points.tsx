@@ -119,11 +119,11 @@ async function fetchComponentsService<IService>(components_ids: string[], servic
                services.push(srv)
             }
             else {
-               log.notifyError(new Error(`ServicePoint '${servicepoint}' component '${component_id}' not implement service '${service}'`))
+               log.notifyError(new Error(`ServicePoint '${servicepoint}': component '${component_id}' not implement service '${service}'`))
             }
          }
          else {
-            log.notifyError(new Error(`ServicePoint '${servicepoint}' component '${component_id}' not found`))
+            log.notifyError(new Error(`ServicePoint '${servicepoint}': component '${component_id}' not found`))
          }
       }
    }

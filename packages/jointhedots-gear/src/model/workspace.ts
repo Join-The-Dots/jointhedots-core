@@ -256,6 +256,11 @@ async function discover_library(ws: Workspace, location: string) {
    if (lib_not_exists) {
       const lib_desc = await readJsonFile(Path.join(lib_path, "/package.json"))
       if (lib_desc?.componentsContainer) {
+         const other = ws.get_library(lib_desc.name)
+         if (other) {
+            throw new Error(`library '${lib_desc.name}' declared multiple times\n - ${other.path}\n - ${lib_path}`)
+         }
+
          const lib = new Library(lib_desc.name, lib_path, lib_desc, ws)
          ws.libraries.push(lib)
 

@@ -5,17 +5,18 @@ import { StaticContentProvider } from "./handlers/StaticContentProvider"
 import { StaticComponentProvider } from "./providers/StaticComponentProvider"
 import { CombinedComponentProvider } from "./providers/CombinedComponentProvider"
 import { LocalComponentProvider } from "./providers/LocalComponentProvider"
-import { Log, LogObject, queryLogInfos, queryLogObjects, QueryLogResult } from "../logging"
+import { Log, queryLogInfos, queryLogObjects, QueryLogResult } from "../logging"
 
 export type ComponentErrorManifest = ComponentManifest & {
    type: "<error>"
-   error: Error
+   message: string
+   stack?: string
 }
 
 export type ComponentServiceGetter<Service = any> = (entry: ComponentEntry) => Service
 
 // Component registry entry
-export class ComponentEntry<Instance = any> {
+export class ComponentEntry<Instance extends Object = any> {
    protected __instance__?: Instance = undefined
    manifest?: ComponentManifest = undefined
    constructor(
@@ -74,23 +75,23 @@ export class ComponentEntry<Instance = any> {
 
       if (this.manifest === undefined) {
          loading = ComponentsRegistry.components_provider.get_component_manifest(this.id).then(async (manifest) => {
-            if (manifest.type) {
-               await acquireComponent(manifest.type).fetch()
+            if (manifest) {
+               if (manifest.type) {
+                  await acquireComponent(manifest.type).fetch()
+               }
+               this.manifest = manifest
             }
-            if (manifest) this.manifest = manifest
             else throw new Error(`Component '${this.id}' not found`)
             return this.manifest
-         }, (e) => {
-            Log.error(e)
+         }).catch((e) => {
+            Log.error(e, this)
             this.set<ComponentErrorManifest>({
                $id: this.id,
                type: "<error>",
-               error: new Error(e.message)
-            })
-            Log.openTicket(this, "install", {
-               status: "error",
                message: e.message,
+               stack: e.stack,
             })
+            this.__instance__ = new Error(e.message) as any
             return this.manifest
          })
       }
@@ -108,17 +109,21 @@ export class ComponentEntry<Instance = any> {
       if (this.instance === undefined) {
          this.instance = null
          installing = new Promise(async (resolve) => {
-            if (this.loaded === false) {
-               await this.fetch()
-            }
+            try {
+               if (this.loaded === false) {
+                  await this.fetch()
+               }
 
-            const type = this.manifest?.type
-            if (type) {
-               const entry = acquireComponent(type)
-               const controller = await ComponentControllerKey.fetch(entry)
-               await controller.createComponent(this, this.manifest)
+               const type = this.manifest?.type
+               if (type) {
+                  const entry = acquireComponent(type)
+                  const controller = await ComponentControllerKey.fetch(entry)
+                  await controller.createComponent(this, this.manifest)
+               }
             }
-
+            catch (e) {
+               Log.error(e, this)
+            }
             resolve(this)
          })
       }
@@ -218,9 +223,16 @@ export class ComponentResource {
                }
                else if (manifest.type) {
                   const controller = acquireComponent(manifest.type)
-                  const getter = await controller.getResource(`component.${this.resource}`).fetch<ComponentServiceGetter>()
-                  this.entry = await getter(this.component)
-                  this.identifier = null
+                  const resource = controller.getResource(`component.${this.resource}`)
+                  if (resource) {
+                     const getter = await resource.fetch<ComponentServiceGetter>()
+                     if (getter) this.entry = await getter(this.component)
+                     else this.entry = null
+                     this.identifier = null
+                  }
+                  else {
+                     throw new Error(`Cannot provide service '${this.resource}'`)
+                  }
                }
                else {
                   this.entry = null
@@ -309,6 +321,12 @@ export class ComponentsManifold {
 
 export const ComponentsRegistry = new ComponentsManifold()
 
+acquireComponent("<error>").set({
+   $id: "<error>",
+   icon: "bi:house",
+   title: "Define invalid component",
+})
+
 export function getDefaultComponent() {
    return acquireComponent("log:application")
 }
@@ -391,7 +409,7 @@ export async function deleteComponent(id: string): Promise<void> {
          component.set<ComponentErrorManifest>({
             $id: component.id,
             type: "<error>",
-            error: new Error(`Component deleted`),
+            message: `Component deleted`,
          })
          ComponentsRegistry.listeners.forEach(l => l(component))
          ComponentsRegistry.components.delete(id)

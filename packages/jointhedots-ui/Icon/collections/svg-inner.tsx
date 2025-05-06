@@ -5,14 +5,16 @@ export class IconSVGInnerCollection implements IconCollection {
    public lightRef: string
    public darkRef: string
    constructor(
-      light_url: URL | string,
-      dark_url: URL | string,
+      readonly light_url: URL | string,
+      readonly dark_url: URL | string,
+      readonly classNamer?: (element: IconElement) => string,
    ) {
       this.lightRef = `${light_url}#`
       this.darkRef = `${dark_url}#`
    }
    setup(element: IconElement) {
-      element.className = `slds-button__icon ${element.className}`
+      const { classNamer } = this
+      element.className = classNamer ? classNamer(element) : element.className
       Object.assign(element.style, styles)
    }
    draw(element: IconElement, theme: ThemeProvider) {

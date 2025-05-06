@@ -143,7 +143,7 @@ function findComponentsByService(db: IDBDatabase, services: string[], results: S
 
 async function searchComponents(db: IDBDatabase, filter: ComponentFilter): Promise<ComponentPublication[]> {
    const { services } = filter
-   if (services) {
+   if (services && services.length > 0) {
       const results = []
       const found_ids = new Set<ComponentID>()
       await findComponentsByService(db, services, found_ids)

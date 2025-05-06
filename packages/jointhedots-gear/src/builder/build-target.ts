@@ -234,7 +234,7 @@ export class BuildTarget {
    add_component(descriptor: ComponentManifest, baseDir: string, library: Library) {
       const id = descriptor.$id
       if (this.components[id]) {
-         throw new Error(`Component '${id}' declared twice`)
+         throw new Error(createComponentDuplicateMessage(id, this.workspace))
       }
 
       const manifest = {
@@ -301,4 +301,18 @@ export function resolve_entry_path(lib: Library, entryId: string, baseDir: strin
 
    if (Fs.existsSync(fpath)) return fpath
    return null
+}
+
+function createComponentDuplicateMessage(id: string, workspace: Workspace) {
+   const duplicates = []
+   const libs = []
+   for (const lib of workspace.libraries) {
+      for (const [cpath, cmanifest] of lib.components.entries()) {
+         if (cmanifest.$id === id) {
+            duplicates.push(`\n - ${cpath}`)
+         }
+      }
+      libs.push(`\n - ${lib.name}: ${lib.path}`)
+   }
+   return `Component '${id}' declared multiple times: ${duplicates.join("")}\n> libraries:${libs.join("")}\n`
 }

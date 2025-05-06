@@ -76,7 +76,7 @@ export function ComponentItem(props: {
    if (logstats.error_count) {
       tooling.push({
          name: "Issues",
-         icon: "bi:exclamation-triangle-fill",
+         icon: "[error]bi:exclamation-triangle-fill",
          onActivate: async (label) => {
             createPanel({
                title: entry.title,

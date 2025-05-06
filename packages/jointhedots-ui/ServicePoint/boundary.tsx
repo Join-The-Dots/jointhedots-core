@@ -47,7 +47,7 @@ function ServiceConfiguratorForm(props: {
    return <div style={{ display: "flex", flexDirection: "column", gap: 20, padding: 10, maxWidth: 400, margin: "auto" }}>
       <div style={{
          fontSize: "150%",
-         borderBottom: "solid thin grey"
+         borderBottom: "dotted thin #aaaa",
       }}>Following services are required</div>
       {list}
       <Button type="brand" onClick={apply} >
@@ -78,7 +78,7 @@ export function DefaultServiceConfigurator(props: {
    }
    return <div ref={divRef} style={{ overflow: "hidden" }}>
       {sizing == 2
-         ? <div style={{ borderRadius: 10, border: "solid thin grey" }}>
+         ? <div style={{ borderRadius: 10, maxWidth: 400, border: "solid thin grey", margin: "auto" }}>
             <ServiceConfiguratorForm {...props} />
          </div>
          : sizing == 1
