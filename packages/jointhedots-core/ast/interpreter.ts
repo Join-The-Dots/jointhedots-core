@@ -1,17 +1,17 @@
 import { AST } from "."
 import { MapLike } from '../common/types'
 
-export interface InterpreterScope<C> {
+export interface InterpreterScope {
    getThis(): any
    getValue(id: string): any
    setValue(id: string, value: any): void
 }
 
-export class LocalScope<C> implements InterpreterScope<C> {
-   locals: MapLike<any> = {}
+export class LocalScope<C = unknown> implements InterpreterScope {
    constructor(
-      readonly $parentScope: InterpreterScope<C>,
+      readonly $parentScope: InterpreterScope,
       readonly $thisScope: any,
+      readonly locals: MapLike<any> = {},
    ) {
    }
    getThis(): any {
@@ -43,7 +43,7 @@ export class LocalScope<C> implements InterpreterScope<C> {
 
 export const EmptyScope = new LocalScope(null, null)
 
-export function evaluateExpression<C>(node: AST.Any, scope: InterpreterScope<C>): any {
+export function evaluateExpression(node: AST.Any, scope: InterpreterScope): any {
    switch (node.type) {
       case 'Literal':
          return (node as AST.Literal).value
@@ -161,7 +161,9 @@ export function evaluateExpression<C>(node: AST.Any, scope: InterpreterScope<C>)
          const { object, property, computed } = node as AST.MemberExpression
          const obj = evaluateExpression(object, scope)
          const prop = computed ? evaluateExpression(property, scope) : (property as AST.Identifier).name
-         return obj[prop]
+         const val = obj[prop]
+         if (typeof val !== 'function') return val
+         else return val.bind(obj)
       }
 
       case 'ConditionalExpression': {

@@ -8,8 +8,8 @@ import { useState } from "react"
 const JsonEditor = MonacoEditorHOC(new StandardLanguageProvider("json"))
 
 function ApplicationRoot() {
-   const [text, setText] = useState("My \\$(val1) = $( val1 )")
-   const [data, setData] = useState(`{"val1":42}`)
+   const [text, setText] = useState("My \\$(val1) = $( val1.map(x=>x*2).join(';') )")
+   const [data, setData] = useState(`{"val1":[42,1,2]}`)
    let result = ""
    try {
       const tmpl = parseTextTemplate(text, EmbedSyntax.DollarBracket)
@@ -19,6 +19,7 @@ function ApplicationRoot() {
       result = tmpl.evaluate(ctx)
    }
    catch (e) {
+      console.error(e)
       result = e.toString()
    }
    return <>

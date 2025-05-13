@@ -1,6 +1,7 @@
 import * as ACorn from "acorn"
 import * as AString from "astring"
 import { MapLike } from "../common/types"
+import { evaluateExpression, InterpreterScope, LocalScope } from "./interpreter"
 
 export enum EmbedSyntax {
    DollarBracket,  // Embed: $(expr)  | Escaping: \$(expr)
@@ -8,11 +9,8 @@ export enum EmbedSyntax {
    CurlyCurly,     // Embed: {{expr}} | Escaping: \{{expr}}
 }
 
-export type TextScope = {
+export type TextContext = {
    vars: { [key: string]: any }
-}
-
-export type TextContext = TextScope & {
    encoder?: (value: any) => string
 }
 
@@ -23,7 +21,7 @@ export class TextBinding {
       public node: ACorn.AnyNode,
    ) {
    }
-   evaluate(scope: TextScope) {
+   evaluate(scope: InterpreterScope) {
       return evaluateExpression(this.node, scope)
    }
    toString() {
@@ -40,13 +38,7 @@ export class TextTemplate {
    }
    evaluate(context: TextContext): string {
       const { pattern, bindings } = this
-
-      const scope: TextScope = {
-         vars: {
-            ...context.vars,
-            $: (x) => x,
-         },
-      }
+      const scope = new LocalScope(null, null, context.vars)
 
       let text = pattern
       const encoder = context.encoder || defaultTextEncoder
@@ -162,50 +154,4 @@ function defaultTextEncoder(value: any): string {
    if (value === undefined) return ""
    if (value === null) return ""
    return value.toString()
-}
-
-function evaluateExpression(node: any, scope: TextScope): any {
-   switch (node.type) {
-      case 'Literal':
-         return node.value
-      case 'Identifier':
-         const value = scope.vars[node.name]
-         if (value === undefined) {
-            throw new Error(`Identifier not found: ${node.name}`)
-         }
-         return value
-      case 'BinaryExpression':
-         const left = evaluateExpression(node.left, scope)
-         const right = evaluateExpression(node.right, scope)
-         switch (node.operator) {
-            case '+': return left + right
-            case '-': return left - right
-            case '*': return left * right
-            case '/': return left / right
-            default: throw new Error(`Unsupported operator: ${node.operator}`)
-         }
-      case 'UnaryExpression':
-         const operand = evaluateExpression(node.argument, scope)
-         switch (node.operator) {
-            case '-': return -operand
-            case '+': return +operand
-            default: throw new Error(`Unsupported unary operator: ${node.operator}`)
-         }
-      case 'MemberExpression':
-         const object = evaluateExpression(node.object, scope)
-         const property = node.computed ? evaluateExpression(node.property, scope) : node.property.name
-         if (object == null || !(property in object)) {
-            throw new Error(`Property ${property} not found on object`)
-         }
-         return object[property]
-      case 'CallExpression':
-         const func = evaluateExpression(node.callee, scope)
-         const args = node.arguments.map(arg => evaluateExpression(arg, scope))
-         if (typeof func !== 'function') {
-            throw new Error('Trying to call a non-function')
-         }
-         return func(...args)
-      default:
-         throw new Error(`Unsupported AST node type: ${node.type}`)
-   }
 }
