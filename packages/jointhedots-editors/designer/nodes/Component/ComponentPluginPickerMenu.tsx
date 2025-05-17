@@ -17,6 +17,7 @@ import { useDocumentContext } from '../../context/DocumentContext'
 import { getComponentGroupName } from '@jointhedots/ui/ComponentsLibrary'
 import { Menu } from '@jointhedots/ui/Layouts/Menu'
 import { openDialog } from '@jointhedots/ui/Layouts'
+import { LabelSelected } from '@jointhedots/ui/Items'
 
 class ComponentPickerOption extends MenuOption {
   constructor(
@@ -144,7 +145,7 @@ export function ComponentPluginPickerMenu(): JSX.Element {
                       key={option.key}
                       name={option.title}
                       icon={option.icon}
-                      selected={selectedIndex === i}
+                      selected={selectedIndex === i?LabelSelected.Enabled:LabelSelected.Disabled}
                       onClick={() => {
                         setHighlightedIndex(i)
                         selectOptionAndCleanUp(option)

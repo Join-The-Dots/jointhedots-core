@@ -3,11 +3,11 @@ import { ComponentsRegistry, ComponentPublication, IComponentProvider, MapLike, 
 import { useAsyncState } from '@jointhedots/core/react'
 import { Stack } from '@jointhedots/ui/Layouts/Stack'
 import { TextInput } from '@jointhedots/ui/utils/TextInput'
-import { ItemRowRich, ItemRowShort, ToolingProps } from '../Items'
+import { ItemRowRich, ItemRowShort, LabelSelected, ToolingProps } from '../Items'
 import { askQuestion } from '../Dialog'
-import { editComponentManifest } from './ComponentsEditor'
-import { NotificationsList } from '../Notifications'
+import { editComponent } from './ComponentsEditor'
 import { createPanel } from '../Layouts'
+import { ComponentInfos } from './ComponentsInfos'
 import './index.scss'
 
 export function getComponentGroupName(id: string) {
@@ -41,14 +41,41 @@ export type ComponentItemDisplay = {
 
 export function ComponentItem(props: {
    entry: ComponentPublication
-   selected?: boolean
    display?: ComponentItemDisplay
+   selected?: LabelSelected
    onSelect?: (item: ComponentPublication) => void
    onActivate?: (item: ComponentPublication) => void
 }) {
    const { entry, display, selected, onSelect, onActivate } = props
    const ItemRow = display?.small ? ItemRowShort : ItemRowRich
    const tooling: ToolingProps[] = []
+
+   if (selected !== LabelSelected.None) {
+      const enabled = selected & LabelSelected.Enabled
+      tooling.push({
+         name: enabled ? "Unselect" : "Select",
+         icon: enabled ? "bi:dash-square-dotted" : "bi:plus-square",
+         optional: true,
+         onActivate: async (item) => {
+            onSelect(item.data)
+         }
+      })
+   }
+   
+   const logstats = acquireComponent(entry.component_id).getLogStats()
+   const hasIssues = logstats.error_count > 0
+   tooling.push({
+      name: hasIssues ? "Issues" : "Infos",
+      icon: hasIssues ? "[error]bi:exclamation-triangle-fill" : "bi:info",
+      onActivate: async () => {
+         createPanel({
+            title: entry.title,
+            icon: entry.icon || `avatar:${entry.title}`,
+            content: <ComponentInfos entry={entry} />,
+         }).open("side")
+      },
+   })
+
    if (entry.type) {
       if (display?.allowEdit) tooling.push({
          name: "edit",
@@ -56,36 +83,22 @@ export function ComponentItem(props: {
          optional: true,
          onActivate: async () => {
             const { component_id } = entry
-            const manifest = await acquireComponent(component_id).fetch()
-            await editComponentManifest(manifest)
+            await editComponent(acquireComponent(component_id))
          },
       })
       if (display?.allowDelete) tooling.push({
-         name: "delete",
+         name: "destroy",
          icon: "bi:trash",
          optional: true,
          onActivate: async () => {
-            if (await askQuestion(`Do you want to delete '${entry.title}' ?`)) {
+            if (await askQuestion(`Do you want to destroy component '${entry.title}' ?`)) {
                if (selected) onSelect(entry)
                deleteComponent(entry.component_id)
             }
          }
       })
    }
-   const logstats = acquireComponent(entry.component_id).getLogStats()
-   if (logstats.error_count) {
-      tooling.push({
-         name: "Issues",
-         icon: "[error]bi:exclamation-triangle-fill",
-         onActivate: async (label) => {
-            createPanel({
-               title: entry.title,
-               icon: entry.icon || `avatar:${entry.title}`,
-               content: <ComponentIssuesList entry={entry} />,
-            }).open("side")
-         }
-      })
-   }
+   
    return <ItemRow
       data={entry}
       icon={entry.icon || "avatar:" + entry.title}
@@ -96,13 +109,6 @@ export function ComponentItem(props: {
       onSelect={onSelect && ((item) => onSelect(item.data))}
       onActivate={onActivate && ((item) => onActivate(item.data))}
    />
-}
-
-export function ComponentIssuesList(props: {
-   entry: ComponentPublication
-}) {
-   const { entry } = props
-   return <NotificationsList subject_uri={entry.component_id} />
 }
 
 export function ComponentsList(props: {

@@ -15,10 +15,12 @@
       "./ServicePoint": "./ServicePoint",
       "./Layouts": "./Layouts",
       "./Notifications": "./Notifications",
+      "./Inputs": "./Inputs",
       "./theme": "./theme"
    },
    "dependencies": {
-      "@salesforce-ux/design-system": "^2.21.1",
+      "@salesforce-ux/design-system": "^2.27.1",
+      "@salesforce/design-system-react": "^0.10.63",
       "@rjsf/core": "^5.23.2",
       "@rjsf/utils": "^5.23.2",
       "@rjsf/validator-ajv8": "^5.23.2"

@@ -28,6 +28,7 @@ export abstract class StackedDock implements PanelDock {
       else if (index > 0) {
          this.updateStack(this.main)
       }
+      dispatchOutsideEvent("open", null)
    }
    removePanel(panel: Panel) {
       const index = this.stack.indexOf(panel)
@@ -50,4 +51,28 @@ export abstract class StackedDock implements PanelDock {
       }
    }
    abstract updateStack(previousMain: Panel)
+}
+
+export type OutsideEventID = "mouse" | "open"
+export type OutsideHandler = (type: OutsideEventID, target: HTMLElement) => void
+
+const outsideListeners = new Set<OutsideHandler>()
+
+export function dispatchOutsideEvent(type: OutsideEventID, target: HTMLElement) {
+   for (const handler of outsideListeners) {
+      handler(type, target)
+   }
+}
+
+export function addOutsideEventListener(handler: OutsideHandler) {
+   if (outsideListeners.size === 0) {
+      window.addEventListener("mousedown", (e) => {
+         dispatchOutsideEvent("mouse", e["target"] as HTMLElement)
+      }, { capture: true })
+   }
+   outsideListeners.add(handler)
+}
+
+export function removeOutsideEventListener(handler: OutsideHandler) {
+   outsideListeners.delete(handler)
 }

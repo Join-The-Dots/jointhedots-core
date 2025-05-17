@@ -1,4 +1,5 @@
 import React from "react";
+import '@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.css'
 import "./theme-dark.scss"
 import "./theme-light.scss"
 import "./theme.scss"

@@ -52,15 +52,19 @@ export function GetCommandsService(component: ComponentEntry<GithubService>): Co
    return component.instance
 }
 
-export const GithubServiceEditor: ComponentEditor = {
-   creator: (props) => {
-      return <GithubSSOEditor />
-   },
-   editor: (props) => {
-      return <GithubSSOEditor />
-   },
+export function GetEditor(component: ComponentEntry<GithubService>): ComponentEditor {
+   return {
+      creator: (props) => {
+         return <GithubSSOEditor />
+      },
+      editor: (props) => {
+         return <GithubSSOEditor />
+      },
+      preview: (props) => {
+         return <>Preview</>
+      },
+   }
 }
-
 export class GithubService implements StorageService, CommandsService {
    //https://api.github.com/repos/pegros/PEG_LIST/git/trees/master?recursive=3
    _files: CommittedFile[] = []

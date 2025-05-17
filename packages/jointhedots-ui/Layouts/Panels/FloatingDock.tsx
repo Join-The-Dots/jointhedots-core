@@ -3,10 +3,19 @@ import ReactDOMClient from 'react-dom/client'
 import ReactDOM from 'react-dom'
 import { createPanel, Panel, PanelDisplay, PanelDock } from "."
 import { computeEdgeBoxDOM, PositionType } from "@jointhedots/ui/computeEdgeBox"
-import { getStackZIndex, overlays_stack } from "./StackedDock"
+import { addOutsideEventListener, getStackZIndex, OutsideHandler, overlays_stack, removeOutsideEventListener } from "./StackedDock"
 import "./style.scss"
 
+export type StyleType = { [key: string]: string }
+
 export type FloatingTarget = UIEvent | Element | React.Component | React.SyntheticEvent<Element, Event>
+
+export type FloatingDockOptions = {
+   position?: PositionType
+   variant?: "menu" | "popup"
+   className?: string
+   noAutoClose?: boolean
+}
 
 class FloatingDock implements PanelDock {
    node: HTMLElement
@@ -16,9 +25,7 @@ class FloatingDock implements PanelDock {
    stackIndex: number = 0
    resolve?: (data: any) => void
    constructor(
-      readonly position: PositionType,
-      readonly className?: string,
-      readonly style?: StyleType,
+      readonly opts: FloatingDockOptions,
    ) {
    }
    stick(target: FloatingTarget) {
@@ -35,6 +42,10 @@ class FloatingDock implements PanelDock {
             return false
          }
 
+         const { opts } = this
+         const variantClass = variantClasses[opts.variant] || variantClasses.default
+         const position = opts.position || "down-right"
+
          // Purge top of stack popup
          this.stackIndex = 0
          while (this.stackIndex < overlays_stack.length) {
@@ -47,15 +58,15 @@ class FloatingDock implements PanelDock {
 
          // Create popup node
          this.node = document.createElement("div")
-         this.node.className = this.className ? `${this.className} ${defaultClassName}` : defaultClassName
-         this.node.setAttribute("style",`--jtd-floating-zindex:${getStackZIndex(this.stackIndex)};`)
+         this.node.className = opts.className ? `${opts.className} ${variantClass}` : variantClass
+         this.node.setAttribute("style", `--jtd-floating-zindex:${getStackZIndex(this.stackIndex)};`)
          this.root = ReactDOMClient.createRoot(this.node)
          document.body.appendChild(this.node)
 
          const updatePosition = () => {
             if (this.node) {
                if (this.tracked.isConnected) {
-                  computeEdgeBoxDOM(this.position, this.node, this.tracked)
+                  computeEdgeBoxDOM(position, this.node, this.tracked)
                   this.node.style.visibility = "visible"
                   setTimeout(updatePosition, 25)
                }
@@ -66,8 +77,8 @@ class FloatingDock implements PanelDock {
          }
 
          // Append popup in document on top of stack
-         window.addEventListener("mousedown", this._handleClickOutside, { capture: true })
-         computeEdgeBoxDOM(this.position, this.node, this.tracked, document.body)
+         addOutsideEventListener(this._handleClickOutside)
+         computeEdgeBoxDOM(position, this.node, this.tracked, document.body)
          overlays_stack.push({ node: this.node, close: this.hide.bind(this) })
 
          // Render popup on node
@@ -76,10 +87,13 @@ class FloatingDock implements PanelDock {
       }
       return true
    }
-   private _handleClickOutside = (e) => {
-      if (this.node && !this.tracked.contains(e.target)) {
+   private _handleClickOutside: OutsideHandler = (type, target) => {
+      if (type === "open" && !this.opts.noAutoClose) {
+         this.close()
+      }
+      if (type === "mouse" && this.node && !this.tracked.contains(target)) {
          for (let i = this.stackIndex; i < overlays_stack.length; i++) {
-            if (overlays_stack[i].node.contains(e.target)) return
+            if (overlays_stack[i].node.contains(target)) return
          }
          this.close()
       }
@@ -88,7 +102,7 @@ class FloatingDock implements PanelDock {
       if (this.root) {
 
          // Remove popup
-         window.removeEventListener("mousedown", this._handleClickOutside)
+         removeOutsideEventListener(this._handleClickOutside)
          document.body.removeChild(this.node)
          this.root.unmount()
          this.root = null
@@ -134,12 +148,10 @@ class FloatingDock implements PanelDock {
    }
 }
 
-export type StyleType = { [key: string]: string }
-
-let defaultClassName = "jtd-panel-floating-dock"
-
-export function setDefaultFloatingStyle(className?: string) {
-   defaultClassName = `${className || ""} jtd-panel-floating-dock`
+const variantClasses = {
+   "default": "jtd-panel-floating-dock menu",
+   "menu": "jtd-panel-floating-dock menu",
+   "popup": "jtd-panel-floating-dock popup",
 }
 
 const stopableEvents = ["click", "dbclick", "contextmenu"]
@@ -168,11 +180,9 @@ function getTrackedElement(target: FloatingTarget): Element {
 
 export function createFloatingDock(
    target: FloatingTarget,
-   position?: PositionType,
-   className?: string,
-   style?: StyleType,
+   options?: FloatingDockOptions
 ): FloatingDock {
-   const dock = new FloatingDock(position || "down-right", className, style)
+   const dock = new FloatingDock(options || {})
    dock.stick(target)
    return dock
 }

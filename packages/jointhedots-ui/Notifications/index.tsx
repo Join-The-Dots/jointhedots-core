@@ -3,21 +3,28 @@ import {
    acquireComponent, ILogDispatcher, LogInfos, LogObject, queryLogInfos,
    queryLogObjects, QueryLogResult, registerLogCollector, unregisterLogCollector,
 } from "@jointhedots/core"
-import { IconButton } from "../Icon"
+import { Button, ButtonIcon } from "../Inputs"
 import { usePanel } from "../Layouts"
 import { ItemRowRich } from "../Items"
 import { executeCommand } from "@jointhedots/core/services"
+import { EmptyListPlaceholder } from "../EmptyListPlaceholder"
+import "./style.scss"
 
 class NotifObjectsCollector implements ILogDispatcher {
    constructor(
       readonly count: number,
       readonly dispatch: (result: QueryLogResult) => void,
+      readonly subject_uri?: string,
    ) {
+      this.update()
    }
    notifyError(error: Error, subject?: any) {
    }
    notifyObject(object: LogObject) {
-      this.dispatch(queryLogObjects(this.count))
+      this.update()
+   }
+   update() {
+      this.dispatch(queryLogObjects(this.count, this.subject_uri))
    }
 }
 
@@ -26,6 +33,7 @@ class NotifCollector<T> implements ILogDispatcher {
       readonly evaluate: (object?: LogObject) => T,
       readonly dispatch: (result: T) => void,
    ) {
+      this.dispatch(this.evaluate())
    }
    notifyError(error: Error, subject?: any) {
    }
@@ -37,10 +45,10 @@ class NotifCollector<T> implements ILogDispatcher {
 export function useNotificationObjects(count: number, subject_uri?: string): QueryLogResult {
    const [result, setResult] = useState(queryLogObjects(count, subject_uri))
    useEffect(() => {
-      const collect = new NotifObjectsCollector(count, setResult)
+      const collect = new NotifObjectsCollector(count, setResult, subject_uri)
       registerLogCollector(collect)
       return () => unregisterLogCollector(collect)
-   }, [count])
+   }, [count, subject_uri])
    return result
 }
 
@@ -54,7 +62,7 @@ export function useNotifications<T>(evaluate: (object?: LogObject) => T, deps?: 
       const collect = new NotifCollector(evaluate, setResult)
       registerLogCollector(collect)
       return () => unregisterLogCollector(collect)
-   }, deps)
+   }, deps || [])
    return result
 }
 
@@ -73,21 +81,83 @@ export function NotificationsBell() {
    let bell = "bi:bell[info]"
    if (infos.error_count > 0) bell = "bi:bell-fill[error]"
    else if (infos.warn_count > 0) bell = "bi:bell-fill[warn]"
-   return <IconButton name={bell} size="1.3em" onClick={onShow} />
+   return <ButtonIcon icon={bell} size="1.3em" onClick={onShow} />
+}
+
+
+/**
+ * NotificationSection component
+ * Renders a section of notifications with a title and content
+ */
+function NotificationSection(props: {
+   title: string
+   items: React.ReactNode[]
+   emptyMessage: string
+   emptyIcon: string
+}) {
+   const { title, items, emptyMessage, emptyIcon } = props
+
+   return (
+      <section className="notifications-section">
+         <div className="section-header">
+            <h2>{title}</h2>
+            {items.length > 0 && <span className="count">{items.length}</span>}
+         </div>
+
+         <div className="section-content">
+            {items.length > 0 ? (
+               <div className="notification-items">{items}</div>
+            ) : (
+               <EmptyListPlaceholder
+                  message={emptyMessage}
+                  icon={emptyIcon}
+               />
+            )}
+         </div>
+      </section>
+   )
 }
 
 export function NotificationsList(props: {
    subject_uri?: string
 }) {
-   const { objects, hasMore } = useNotificationObjects(10, props.subject_uri)
-   return <div>
-      {objects.map((obj) => {
-         return <Notification key={obj.id} object={obj} />
-      })}
-      {hasMore && <div>
-         <IconButton name="bi:more" onClick={null} />
-      </div>}
-   </div>
+   const [count, setCount] = useState(10)
+   const { objects, hasMore } = useNotificationObjects(count, props.subject_uri)
+   const tickets = []
+   const events = []
+
+   for (const obj of objects) {
+      if (obj.kind === "ticket") {
+         tickets.push(<Notification key={obj.id} object={obj} />)
+      }
+      else {
+         events.push(<Notification key={obj.id} object={obj} />)
+      }
+   }
+
+   return (
+      <div className="notifications-list">
+         <NotificationSection
+            title="Tickets"
+            items={tickets}
+            emptyMessage="No issues to display"
+            emptyIcon="bi:exclamation-triangle"
+         />
+
+         <NotificationSection
+            title="Events"
+            items={events}
+            emptyMessage="No events to display"
+            emptyIcon="bi:calendar-event"
+         />
+
+         {hasMore && <Button
+            icon="bi:more"
+            label="Load more"
+            onClick={() => setCount(count + 10)}
+         />}
+      </div>
+   )
 }
 
 export function Notification(props: {

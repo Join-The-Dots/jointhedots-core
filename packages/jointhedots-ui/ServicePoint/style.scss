@@ -1,0 +1,112 @@
+.service-point-shortcut {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid #e0e0e0;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  }
+
+  &--has-issues {
+    background-color: #fff8f8;
+    border-color: #ffdddd;
+  }
+
+  &--empty {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+.service-component-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    background-color: #f8f8f8;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: bold;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  &__content {
+    padding: 0.5rem;
+  }
+
+  &__status {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background-color: #f8f8f8;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+  }
+}
+
+.service-provider-popup {
+  padding: 0.5rem;
+
+  &__title {
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+  }
+
+  &__status {
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+  }
+
+  &__error {
+    color: red;
+  }
+
+  &__warning {
+    color: orange;
+  }
+}
+
+.service-status-indicator {
+  margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &__badge {
+    border-radius: 1rem;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: white;
+
+    &--error {
+      background-color: red;
+    }
+
+    &--warning {
+      background-color: orange;
+    }
+  }
+}

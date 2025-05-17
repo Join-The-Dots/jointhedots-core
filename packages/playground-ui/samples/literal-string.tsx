@@ -2,7 +2,7 @@
 import { MonacoEditorHOC } from "@jointhedots/editors/ui/MonacoEditorHOC"
 import { StandardLanguageProvider } from "@jointhedots/ui/CodeEditor"
 import { EmbedSyntax, parseTextTemplate } from "@jointhedots/core/ast"
-import { renderRoot } from "../config"
+import { renderRoot } from "../components/config"
 import { useState } from "react"
 
 const JsonEditor = MonacoEditorHOC(new StandardLanguageProvider("json"))

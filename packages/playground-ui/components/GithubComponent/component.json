@@ -3,8 +3,7 @@
    "title": "GitHub Repository Service",
    "icon": "fa:git",
    "tags": [
-      "component.storage",
-      "component.commands"
+      "component.storage"
    ],
    "specs": {
       "component": {
@@ -47,7 +46,7 @@
    },
    "services": {
       "component": "./component#GithubController",
-      "component.editor": "./component#GithubServiceEditor",
+      "component.editor": "./component#GetEditor",
       "component.storage": "./component#GetStorageService",
       "component.commands": "./component#GetCommandsService"
    }

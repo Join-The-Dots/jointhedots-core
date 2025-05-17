@@ -1,12 +1,12 @@
 import { useEffect, useMemo } from "react"
-import { areSimilarObjects } from "@jointhedots/core"
+import { areSimilarObjects, Async } from "@jointhedots/core"
 import { DrawerDock } from "./DrawerDock"
 import { ModalDock } from "./ModalDock"
 import { ToolingProps } from "@jointhedots/ui/Items"
 
 export type PanelDisplay = {
-   icon: string
-   title: string
+   icon?: string
+   title?: string
    content: React.ReactNode
    tooling?: ToolingProps[]
    height?: number | string
@@ -100,10 +100,16 @@ export function createPanel<T = unknown>(displayed?: PanelDisplay): Panel {
    return panel
 }
 
-export function usePanel<T>(render: (panel: Panel<T>) => PanelDisplay, deps?: any[]): Panel {
+export function usePanel<T>(render: (panel: Panel<T>) => Async<PanelDisplay>, deps?: any[]): Panel {
    const panel = useMemo(() => new PanelInstance<T>(), [])
    useEffect(() => {
-      panel.display(render(panel))
+      const desc = render(panel)
+      if (desc instanceof Promise) {
+         desc.then(desc => panel.display(desc))
+      }
+      else {
+         panel.display(desc)
+      }
    }, deps || [])
    return panel
 }

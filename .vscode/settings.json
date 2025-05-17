@@ -22,6 +22,7 @@
       "url": "./node_modules/@jointhedots/gear/schemas/component.schema.json"
     }
   ],
+  "typescript.format.semicolons": "remove",
   "editor.insertSpaces": true,
   "editor.detectIndentation": false,
   "editor.tabSize": 3,

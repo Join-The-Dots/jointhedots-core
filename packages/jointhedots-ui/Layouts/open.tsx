@@ -1,6 +1,6 @@
 import { PositionType } from "../computeEdgeBox"
 import { createPanel } from "./Panels"
-import { createFloatingDock, FloatingTarget, StyleType } from "./Panels/FloatingDock"
+import { createFloatingDock, FloatingDockOptions, FloatingTarget, StyleType } from "./Panels/FloatingDock"
 
 export class PopupCancel extends Error {
 }
@@ -34,9 +34,7 @@ export function openDialog<T>(renderer: (resolve: (data: T) => void) => React.Re
 export function openContextualMenu<T>(
    target: FloatingTarget,
    renderer: (close: (value?: T) => void) => React.ReactNode | Promise<React.ReactNode>,
-   position?: PositionType,
-   className?: string,
-   style?: StyleType,
+   options?: FloatingDockOptions,
 ): Promise<T> {
    const panel = createPanel()
    const promise = new Promise<T>(async (resolve) => {
@@ -49,7 +47,7 @@ export function openContextualMenu<T>(
          }),
          onClose: () => resolve(undefined),
       })
-      panel.open(createFloatingDock(target, position, className, style))
+      panel.open(createFloatingDock(target, options))
    })
    promise["close"] = panel.close.bind(panel)
    return promise

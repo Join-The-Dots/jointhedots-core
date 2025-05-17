@@ -42,13 +42,13 @@ export class InstrumentationToolBox extends React.Component<PropsType> implement
          title={infos.title}
       >
          <span className="icon">
-            <Icon name="fa:clone" inversed />
+            <Icon name="fa:clone" inverse />
          </span>
          <span className="icon">
-            <Icon name="fa:paste" inversed />
+            <Icon name="fa:paste" inverse />
          </span>
          <span className="icon">
-            <Icon name="fa:trash" inversed onClick={this.onRemove} />
+            <Icon name="fa:trash" inverse onClick={this.onRemove} />
          </span>
          <span className="label">
             {infos.title}

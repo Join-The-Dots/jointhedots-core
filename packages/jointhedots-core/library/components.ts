@@ -102,12 +102,17 @@ export type ComponentEditorProps<T extends ComponentManifest = ComponentManifest
    onCancel: () => void
 }
 
+export type ComponentPreviewProps<T extends ComponentManifest = ComponentManifest> = {
+   manifest: T
+}
+
 export type ComponentEditor<T extends ComponentManifest = ComponentManifest> = {
    creator: React.ComponentType<ComponentEditorProps<T>>
    editor: React.ComponentType<ComponentEditorProps<T>>
+   preview?: React.ComponentType<ComponentPreviewProps<T>>
 }
 
-export const ComponentEditorKey = ComponentControllerKey.subservice<ComponentEditor>("editor")
+export const EditorKey = new ServiceEntry<ComponentEditor, unknown>("editor")
 
 //-------------------------------------------------------------
 // Component providers

@@ -34,7 +34,7 @@ export enum IconSize {
 export type IconProps = {
    name: string
    size?: IconSize | string // default is 'sm'
-   inversed?: boolean
+   inverse?: boolean
    title?: string
    className?: string
    style?: React.CSSProperties
@@ -45,8 +45,18 @@ export function registerIconCollection(namespace: string, collection: IconCollec
    IconCollections[namespace] = collection
 }
 
+export function getIconName(icon: string, name: string): string {
+   if (icon) {
+      return icon
+   }
+   else if (name) {
+      return "avatar:" + name
+   }
+   return null
+}
+
 export function Icon(props: IconProps) {
-   const { name, size, inversed, className, style } = props
+   const { name, size, inverse: inversed, className, style } = props
    const theme = React.useContext(ThemeContext)
    const icon = getIconParsed(name)
    const iconTheme = inversed ? theme.contrastTheme : theme
@@ -86,8 +96,36 @@ const IconFlags: MapLike<IconStyle> = {
    "badge": {
       style: {
          "fontSize": "0.6em",
-         "top": "-0.3em",
-         "right": "-0.3em",
+         "top": "-0.3em", "right": "-0.3em",
+         "left": "unset", "bottom": "unset",
+      }
+   },
+   "RT": {
+      style: {
+         "fontSize": "0.6em",
+         "top": "-0.3em", "right": "-0.3em",
+         "left": "unset", "bottom": "unset",
+      }
+   },
+   "RB": {
+      style: {
+         "fontSize": "0.6em",
+         "bottom": "-0.3em", "right": "-0.3em",
+         "left": "unset", "top": "unset",
+      }
+   },
+   "LT": {
+      style: {
+         "fontSize": "0.6em",
+         "top": "-0.3em", "left": "-0.3em",
+         "right": "unset", "bottom": "unset",
+      }
+   },
+   "LB": {
+      style: {
+         "fontSize": "0.6em",
+         "bottom": "-0.3em", "left": "-0.3em",
+         "right": "unset", "top": "unset",
       }
    },
 }

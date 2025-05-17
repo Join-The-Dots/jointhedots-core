@@ -41,6 +41,8 @@ body {
       padding: 3px;
 
       text-transform: capitalize;
+      text-overflow: ellipsis;
+      overflow: hidden;
       font-size: 12px;
    }
 
@@ -116,9 +118,11 @@ body {
       padding: 0 20px 0 3px;
       padding: 5px;
       font-size: 14px;
+      overflow: hidden;
 
       &>:first-child {
          text-transform: capitalize;
+         text-overflow: ellipsis;
          font-weight: bold;
          font-size: 12px;
       }

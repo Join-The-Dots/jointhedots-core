@@ -1,9 +1,10 @@
 import React from "react"
 import { Menu } from "../Layouts/Menu"
-import Icon, { IconButton } from "@jointhedots/ui/Icon"
+import Icon, { getIconName } from "@jointhedots/ui/Icon"
 import { toast } from 'react-toastify'
 import "./style.scss"
 import { createFloatingDock, openContextualMenu, PanelDock } from "../Layouts"
+import { ButtonIcon } from "../Inputs"
 
 export type ShapeDecoration = {
    type: "shape"
@@ -29,13 +30,22 @@ export type LabelProps<T = any> = {
    onActivate?: (label: LabelProps, dock: PanelDock) => void // On Object activation
 }
 
+export enum LabelSelected {
+   None,
+   Enabled = 1,
+   Disabled = 2,
+   Editable = 4,
+   EnabledEditable = Enabled | Editable,
+   DisabledEditable = Disabled | Editable,
+}
+
 export type ToolingProps = LabelProps & {
    optional?: boolean
 }
 
 export type ItemProps<T = any> = LabelProps<T> & {
    tags?: TagProps[]
-   selected?: boolean
+   selected?: LabelSelected
    onSelect?: (item: ItemProps) => void
 }
 
@@ -49,13 +59,7 @@ function GetNodeText(node?: React.ReactNode): string {
 
 function GetLabelIcon(label: LabelProps): string {
    const { icon, name } = label
-   if (icon) {
-      return icon
-   }
-   else if (name) {
-      return "avatar:" + name
-   }
-   return null
+   return getIconName(icon, name)
 }
 
 function DrawLabelIcon(label: LabelProps): React.ReactNode {
@@ -111,7 +115,7 @@ function DrawToolingMenu(tooling: ToolingProps[], onClose: () => void): React.Re
    </>
 }
 
-function DrawToolingWidgets(tooling: ToolingProps[]): React.ReactNode {
+export function DrawToolingWidgets(tooling: ToolingProps[]): React.ReactNode {
    if (tooling) {
       let onToolMenu = null
       const buttons = []
@@ -131,7 +135,7 @@ function DrawToolingWidgets(tooling: ToolingProps[]): React.ReactNode {
          }
       }
       if (onToolMenu) {
-         buttons.push(<IconButton name="bi:three-dots-vertical" onClick={onToolMenu} />)
+         buttons.push(<ButtonIcon icon="bi:three-dots-vertical" onClick={onToolMenu} />)
       }
       if (buttons.length > 0) {
          return React.createElement(React.Fragment, null, ...buttons)
@@ -145,7 +149,7 @@ function Switch(props: {
    onSelect?: (event: React.SyntheticEvent) => void
 }) {
    const { selected, onSelect } = props
-   return <IconButton name={selected ? "bi:dash-square-dotted" : "bi:plus-square"} onClick={onSelect} />
+   return <ButtonIcon icon={selected ? "bi:dash-square-dotted" : "bi:plus-square"} onClick={onSelect} />
 }
 
 export function LabelButton(label: LabelProps) {
@@ -164,9 +168,9 @@ export function LabelButton(label: LabelProps) {
          toast.error(e.message)
       }
    }
-   return <IconButton
-      name={GetLabelIcon(label)}
-      title={GetNodeText(label.summary)}
+   return <ButtonIcon
+      icon={GetLabelIcon(label)}
+      title={GetNodeText(label.summary) || label.name}
       onClick={onClick}
    />
 }
@@ -195,8 +199,8 @@ export function ItemRowShort(item: ItemProps) {
    >
       <div className="item-icon">{DrawLabelIcon(item)}</div>
       <div className="item-infos">{name}</div>
-      {(selected == true) ? <Switch selected={true} onSelect={() => onSelect(item)} /> : null}
-      {(selected == false) ? <Switch selected={false} onSelect={() => onSelect(item)} /> : null}
+      {(selected == LabelSelected.EnabledEditable) ? <Switch selected={true} onSelect={() => onSelect(item)} /> : null}
+      {(selected == LabelSelected.DisabledEditable) ? <Switch selected={false} onSelect={() => onSelect(item)} /> : null}
    </li>
 }
 
@@ -234,14 +238,18 @@ export function ItemRowRich(item: ItemProps) {
    const select = onSelect && ((e) => { e.stopPropagation(); onSelect(item) })
    const activate = onActivate ? ((e) => { e.stopPropagation(); onActivate(item, createFloatingDock(e)) }) : select
    return <li
-      className={selected === true ? "jtd-item-large selected" : (onSelect || selected === false) ? "jtd-item-large unselected" : "jtd-item-large"}
+      className={(selected & LabelSelected.Enabled)
+         ? "jtd-item-large selected"
+         : ((onSelect || (selected & LabelSelected.Disabled))
+            ? "jtd-item-large unselected" : "jtd-item-large")
+      }
       title={GetNodeText(summary)}
       onClick={onClick || activate}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
    >
-      {(selected == true) ? <Switch selected={true} onSelect={select} /> : null}
-      {(selected == false) ? <Switch selected={false} onSelect={select} /> : null}
+      {(selected == LabelSelected.EnabledEditable) ? <Switch selected={true} onSelect={select} /> : null}
+      {(selected == LabelSelected.DisabledEditable) ? <Switch selected={false} onSelect={select} /> : null}
       <div className="item-icon">{DrawLabelIcon(item)}</div>
       <div className="item-infos">
          <div>{name}</div>

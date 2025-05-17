@@ -1,0 +1,44 @@
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0.5rem;
+  
+  .notifications-section {
+    border-radius: 8px;
+    overflow: hidden;
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      
+      h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+      }
+      
+      .count {
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        padding: 0.1rem 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+      }
+    }
+    
+    .section-content {
+      border-radius: 6px;
+      overflow: hidden;
+      
+      .notification-items {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+    }
+  }
+  
+}

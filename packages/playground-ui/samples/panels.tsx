@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { createFloatingDock, usePanel } from "@jointhedots/ui/Layouts"
 import { Button, Input } from "react-lightning-design-system"
-import { renderRoot } from "../config"
+import { renderRoot } from "../components/config"
 
 function Input2(props: {
    state?: [string, (value: string) => void]

@@ -61,9 +61,9 @@ export function CodeEditorHOC<T>(provider: CodeLanguageProvider<T>) {
          super(props)
          this.getSnapshotBeforeUpdate({})
       }
-      override getSnapshotBeforeUpdate(prevProps) {
+      override getSnapshotBeforeUpdate(_prevProps) {
          const { value } = this.props
-         if (value !== this.model?.getValue()) {
+         if (value !== this.model?.getValue?.()) {
             this.setValue(value)
          }
          return null
@@ -177,5 +177,5 @@ export async function GetLanguageInfos(langId: string): Promise<{
    conf: Lang.LanguageConfiguration
    language: Lang.IMonarchLanguage
 }> {
-   return Monaco?.languages.getLanguages().find(x => x.id === langId)["loader"]()
+   return Monaco && Monaco.languages.getLanguages().find(x => x.id === langId)["loader"]()
 }

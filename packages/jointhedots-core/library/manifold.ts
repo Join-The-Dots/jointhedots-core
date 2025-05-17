@@ -372,24 +372,25 @@ export function resolveRelativeComponent(ref: string, from: ComponentEntry): Com
    return null
 }
 
-export async function createNewComponent(manifest: ComponentManifest): Promise<ComponentManifest> {
-   console.log("[New Component]", manifest?.$id)
-   const provider = ComponentsRegistry.components_provider
-   await provider.add_component(manifest)
-   return manifest
+export async function saveComponentManifest(manifest: ComponentManifest) {
+   const component = acquireComponent(manifest.$id)
+   ComponentsRegistry.loadings.delete(component)
+   component.manifest = manifest
+   return saveComponent(component)
 }
 
-export async function updateComponent(manifest: ComponentManifest): Promise<ComponentManifest> {
-   console.log("[Update Component]", manifest?.$id)
+export async function saveComponent(component: ComponentEntry) {
+   console.log("[Update Component]", component.id)
+   const manifest = await component.fetch()
    const provider = ComponentsRegistry.components_provider
    await provider.add_component(manifest)
 
-   const component = ComponentsRegistry.components.get(manifest.$id)
-   if (component && component.loaded) {
-      component.manifest = manifest
+   if (component.loaded) {
       if (manifest.type && component.installed) {
-         const controller = ComponentControllerKey.get(acquireComponent(manifest.type))
-         await controller.updateComponent(component, manifest)
+         const controller = await ComponentControllerKey.fetch(acquireComponent(manifest.type))
+         if (controller) {
+            await controller.updateComponent(component, manifest)
+         }
          if (component.instance instanceof Object) {
             ComponentsRegistry.datamap.set(component.instance, component)
          }
@@ -397,23 +398,27 @@ export async function updateComponent(manifest: ComponentManifest): Promise<Comp
       }
    }
 
-   return manifest
+   return component
 }
 
-export async function deleteComponent(id: string): Promise<void> {
+export async function deleteComponent(id: string) {
    console.log("deleteComponent", id)
    const provider = ComponentsRegistry.components_provider
    if (await provider.delete_component(id)) {
-      const component = ComponentsRegistry.components.get(id)
-      if (component) {
-         component.set<ComponentErrorManifest>({
-            $id: component.id,
-            type: "<error>",
-            message: `Component deleted`,
-         })
-         ComponentsRegistry.listeners.forEach(l => l(component))
-         ComponentsRegistry.components.delete(id)
-      }
+      unregisterComponent(id)
+   }
+}
+
+export function unregisterComponent(id: string) {
+   const component = ComponentsRegistry.components.get(id)
+   if (component) {
+      component.set<ComponentErrorManifest>({
+         $id: component.id,
+         type: "<error>",
+         message: `Component deleted`,
+      })
+      ComponentsRegistry.listeners.forEach(l => l(component))
+      ComponentsRegistry.components.delete(id)
    }
 }
 

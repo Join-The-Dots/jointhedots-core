@@ -1,25 +1,27 @@
 import { useMemo, useRef, useState } from "react"
 import { toast } from 'react-toastify'
-import { createNewComponent, ComponentManifest, JSONSchema, ComponentEntry, updateComponent, acquireComponent, ComponentController, ComponentControllerKey, ComponentEditorKey, ComponentEditor, ComponentEditorProps, ComponentChecking } from "@jointhedots/core"
+import {
+   ComponentManifest, JSONSchema, ComponentEntry, acquireComponent, ComponentController,
+   ComponentControllerKey, ComponentEditor, ComponentEditorProps, ComponentChecking,
+   EditorKey, unregisterComponent, saveComponent,
+   saveComponentManifest
+} from "@jointhedots/core"
 import { ModalContent, Button } from "react-lightning-design-system"
-import Icon, { IconButton } from "../Icon"
 import Form from "@rjsf/core"
 import validator from '@rjsf/validator-ajv8'
 import { CodeEditorHOC, StandardLanguageProvider } from "../CodeEditor"
-import { openDialog } from "../Layouts"
+import { createPanel } from "../Layouts"
+import { ButtonIcon } from "../Inputs"
 
 const JSONEditor = CodeEditorHOC(new StandardLanguageProvider("json"))
 
 function generateGUID() {
    const buf = new Uint8Array(16) // create a 16-byte array
    crypto.getRandomValues(buf) // fill buffer with random values
-   buf[6] = (buf[6] & 0x0f) | 0x40 // set bits 4-7 of the 7th byte to 0100
-   buf[8] = (buf[8] & 0x3f) | 0x80 // set bits 6-7 of the 9th byte to 10
-   const guid = Array.from(buf).map(b => b.toString(16).padStart(2, '0')).join('')
-   return `${guid.substring(0, 8)}-${guid.substring(8, 12)}-${guid.substring(12, 16)}-${guid.substring(16, 20)}-${guid.substring(20)}`
+   return Array.from(buf).map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
-export function createInitialeManifest(driver: ComponentManifest): ComponentManifest {
+export function initComponentManifest(driver: ComponentManifest): ComponentManifest {
    const component_id = "config:" + generateGUID()
    const services = (driver.specs["component"].services || []).reduce((prev, key) => {
       prev[key] = true
@@ -38,58 +40,96 @@ export function createInitialeManifest(driver: ComponentManifest): ComponentMani
    }
 }
 
-export async function createComponentManifest(driver: ComponentEntry, service?: string) {
+export async function createComponent(driver: ComponentEntry, service?: string): Promise<ComponentEntry> {
    const driver_manifest = await driver.fetch()
    const controller = await ComponentControllerKey.fetch(driver)
-   const editor = await ComponentEditorKey.fetch(driver)
 
-   let manifest = createInitialeManifest(driver_manifest)
+   let manifest = initComponentManifest(driver_manifest)
    const result = await controller.checkDescriptor(manifest)
    manifest = result?.fixed || manifest
 
-   const newManifest = await openDialog<ComponentManifest>((resolve) => {
-      return <ComponentManifestEditor
-         created={true}
-         driver={driver}
-         controller={controller}
-         editor={editor}
-         manifest={manifest}
-         onValidate={resolve}
-         onCancel={() => resolve(null)}
-      />
+   const component = acquireComponent(manifest.$id)
+   component.manifest = manifest
+
+   const newManifest = await new Promise<ComponentManifest>(async (resolve) => {
+      let done = false
+      const panel = createPanel()
+      const editor = await EditorKey.fetch(component)
+      panel.display({
+         title: `New: ${driver_manifest.title}`,
+         icon: `${driver_manifest.icon}|bi:plus-circle-fill[RB,info]`,
+         content: <ComponentManifestEditor
+            created={true}
+            driver={driver}
+            controller={controller}
+            editor={editor}
+            manifest={manifest}
+            onValidate={(x) => { done = true; resolve(x); panel.close() }}
+            onCancel={() => { panel.close() }}
+         />,
+         onClose: () => {
+            if (!done) {
+               done = true
+               resolve(undefined)
+            }
+         },
+      })
+      panel.open("side")
    })
 
    if (newManifest) {
       if (!service || newManifest.services?.[service]) {
-         return createNewComponent(newManifest)
+         await saveComponentManifest(newManifest)
+         return component
       }
       else {
          toast.error(`Component creation invalid for service '${service}'`)
       }
    }
+   unregisterComponent(component.id)
    return null
 }
 
 export async function editComponentManifest(manifest: ComponentManifest) {
-   const driver = acquireComponent(manifest.type)
-   const handler = await ComponentControllerKey.fetch(driver)
-   const editor = await ComponentEditorKey.fetch(driver)
-   await driver.fetch()
+   const component = acquireComponent(manifest.$id)
+   component.manifest = manifest
+   return editComponent(component)
+}
 
-   const newManifest = await openDialog<ComponentManifest>((resolve) => {
-      return <ComponentManifestEditor
-         created={false}
-         driver={driver}
-         controller={handler}
-         editor={editor}
-         manifest={manifest}
-         onValidate={resolve}
-         onCancel={() => resolve(null)}
-      />
+export async function editComponent(component: ComponentEntry) {
+   const manifest = await component.fetch()
+   const driver = acquireComponent(manifest.type)
+   const driver_manifest = await driver.fetch()
+   const handler = await ComponentControllerKey.fetch(driver)
+   const editor = await EditorKey.fetch(component)
+   const newManifest = await new Promise<typeof manifest>(resolve => {
+      const icon = manifest.icon || `avatar:${manifest.title}`
+      const panel = createPanel()
+      let done = false
+      panel.display({
+         title: `Edit: ${manifest.title || driver_manifest.title}`,
+         icon: `${icon}|bi:pencil-fill[RB,info]`,
+         content: <ComponentManifestEditor
+            created={false}
+            driver={driver}
+            controller={handler}
+            editor={editor}
+            manifest={manifest}
+            onValidate={(x) => { done = true; resolve(x); panel.close() }}
+            onCancel={() => { panel.close() }}
+         />,
+         onClose: () => {
+            if (!done) {
+               done = true
+               resolve(null)
+            }
+         },
+      })
+      panel.open("side")
    })
 
    if (newManifest) {
-      updateComponent(newManifest)
+      await saveComponentManifest(newManifest)
    }
 }
 
@@ -155,16 +195,17 @@ export function ComponentManifestEditor(props: {
    if (codeMode) Editor = JSONManifestEditor
 
    return <div>
-      <div style={{ position: "relative" }}>
-         <h1 style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 10, paddingTop: 12, fontSize: "200%" }}>
+      <div style={{ position: "relative", minHeight: "2.5em" }}>
+         {/*<h1 style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 10, paddingTop: 12, fontSize: "200%" }}>
             <Icon name={driver_manifest.icon || "blank"} style={{ fontSize: "150%" }} />
             <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
                <div style={{ fontSize: "80%" }}>{driver_manifest.title || driver_manifest.$id} </div>
                <div style={{ fontSize: "50%" }}>{manifest.title || "(no title)"}</div>
             </div>
-         </h1>
-         <div style={{ position: "absolute", top: 10, right: 10 }}>
-            <IconButton name="bi:code" onClick={() => setCodeMode(!codeMode)} />
+         </h1>*/}
+         <div style={lightReliefStyle}>{manifest.$id}</div>
+         <div style={{ position: "absolute", top: 0, right: 10 }}>
+            <ButtonIcon icon="bi:code" onClick={() => setCodeMode(!codeMode)} />
          </div>
       </div>
       <ModalContent className="slds-p-horizontal_small">
@@ -185,7 +226,6 @@ export function ComponentManifestEditor(props: {
             })}
          </div>}
       </ModalContent>
-      <div style={lightReliefStyle}>{manifest.$id}</div>
    </div>
 }
 const lightReliefStyle = {

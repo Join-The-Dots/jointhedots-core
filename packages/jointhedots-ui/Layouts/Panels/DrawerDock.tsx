@@ -49,6 +49,8 @@ const ResizableDrawer = (props: {
    }
 
    return <div style={{
+      display: "flex",
+      flexDirection: "column",
       height: '100%',
       position: 'relative',
       width: open ? width : 0,

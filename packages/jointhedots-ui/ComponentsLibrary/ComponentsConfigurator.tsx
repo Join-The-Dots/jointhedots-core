@@ -1,8 +1,9 @@
 import { ComponentFilter, createComponentFilter, acquireComponent, ComponentPublication, createComponentPublication, ComponentsRegistry } from "@jointhedots/core"
-import { ComponentBrowser, ComponentsFilteredList, ComponentsList } from "./ComponentsBrowser"
-import { LabelButton } from "../Items"
-import { createComponentManifest } from "./ComponentsEditor"
+import { ComponentBrowser, ComponentsList } from "./ComponentsBrowser"
+import { createComponent } from "./ComponentsEditor"
 import { useAsyncState } from "@jointhedots/core/react"
+import { openContextualMenu } from "../Layouts"
+import { Button } from "../Inputs"
 
 
 export function CreateComponentSelector(props: {
@@ -24,9 +25,9 @@ export function CreateComponentSelector(props: {
 
    const create = async function (pub: ComponentPublication) {
       const driver = acquireComponent(pub.component_id)
-      const manif = await createComponentManifest(driver, service)
-      if (manif && props.onCreate) {
-         props.onCreate(await createComponentPublication(manif))
+      const component = await createComponent(driver, service)
+      if (component && props.onCreate) {
+         props.onCreate(await createComponentPublication(component.manifest))
       }
    }
 
@@ -53,15 +54,16 @@ export function CreateComponentSelector(props: {
    </>
 }
 
-export function AddComponentButton(props: {
+export function NewComponentButton(props: {
    service?: string
+   label?: string
    onCreate?: (pub: ComponentPublication) => void
 }) {
-   const { service, onCreate } = props
-   return <LabelButton
+   const { label, service, onCreate } = props
+   return <Button
       icon="bi:plus"
-      name="Add Connexion"
-      content={() => <CreateComponentSelector service={service} onCreate={onCreate} />}
+      label={label || "New Component"}
+      onClick={(e) => openContextualMenu(e, () => <CreateComponentSelector service={service} onCreate={onCreate} />)}
    />
 }
 
@@ -73,7 +75,7 @@ export function ComponentsConfigurator(props: {
    return <>
       <h2 className="slds-tile" style={{ display: "flex" }}>
          {title}
-         <AddComponentButton />
+         <NewComponentButton />
       </h2>
       <ComponentBrowser filter={filter} />
    </>
