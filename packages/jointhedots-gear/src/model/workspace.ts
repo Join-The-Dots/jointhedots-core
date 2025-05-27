@@ -5,6 +5,7 @@ import { readJsonFile } from "./storage.js"
 import { checkComponentManifest, ComponentCatalogsDescriptor, ComponentManifest } from "./component.js"
 import { MapLike } from "../utils/helpers.js"
 import { WebAppManifest } from "web-app-manifest"
+import DotEnv from "dotenv"
 
 const debug_trace = false
 
@@ -123,14 +124,17 @@ export class Library {
    }
 }
 
+export type Constants = { [key: string]: string | number }
+
 export class Workspace {
    libraries: Library[] = []
-   constants: { [key: string]: string | number } = {}
+   constants: Constants = {}
    search_directories: string[] = []
    constructor(
       readonly name: string,
       readonly version: string,
       readonly path: string,
+      readonly devmode: boolean,
    ) {
    }
    get_library(name: string): Library {
@@ -275,10 +279,31 @@ async function discover_library(ws: Workspace, location: string) {
    }
 }
 
-export async function open_workspace(workspace_path: string): Promise<Workspace> {
+function patch_constants_from_env(constants: Constants, devmode: boolean): Constants {
+   const env = DotEnv.config()
+   for (const key in constants) {
+      if (devmode) {
+         const dvalue = env.parsed["DCONST_" + key]
+         if (dvalue !== undefined) {
+            constants[key] = dvalue
+            continue
+         }
+      }
+      {
+         const value = env.parsed["CONST_" + key]
+         if (value !== undefined) {
+            constants[key] = value
+            continue
+         }
+      }
+   }
+   return constants
+}
+
+export async function open_workspace(workspace_path: string, devmode: boolean): Promise<Workspace> {
    const package_json = await readJsonFile(workspace_path + "/package.json")
-   const ws = new Workspace(package_json.name, package_json.version, workspace_path)
-   ws.constants = package_json.constants || {}
+   const ws = new Workspace(package_json.name, package_json.version, workspace_path, devmode)
+   ws.constants = patch_constants_from_env(package_json.constants || {}, devmode)
 
    let package_lock: any = null
    for (let path = Path.resolve(ws.path); ;) {

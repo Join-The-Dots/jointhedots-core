@@ -39,7 +39,7 @@ export function command_serve(): CommandModule<any, {
             default: "./dist",
          }),
       handler: async (argv) => {
-         const ws = await open_workspace(".")
+         const ws = await open_workspace(".", argv.devmode)
          const app = ws.get_application(argv.app)
          if (!app) throw new Error(`Application '${argv.app}' not exists`)
          if (argv.devmode) console.log("> Use devmode")

@@ -52,7 +52,7 @@ export function command_make(): CommandModule<any, {
             default: "./dist",
          }),
       handler: async (argv) => {
-         const ws = await open_workspace(".")
+         const ws = await open_workspace(".", argv.devmode)
          if (argv.devmode) console.log("> Use devmode")
 
          let version = argv.versioned
