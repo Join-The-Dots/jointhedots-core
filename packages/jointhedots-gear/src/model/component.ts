@@ -62,6 +62,9 @@ export function checkComponentManifest(manif: ComponentManifest, path: string): 
    if (typeof manif.$id !== "string") {
       return new Error(`Component descriptor shall have '$id' at: ${path}`)
    }
+   if (!isValidComponentName(manif.$id)) {
+      return new Error(`Component descriptor have invalid '$id' -> '${manif.$id}' at: ${path}`)
+   }
    return null
 }
 
@@ -77,4 +80,10 @@ export function makeComponentPublication(manif: ComponentManifest): ComponentPub
       keywords: manif.keywords,
       tags: manif.tags,
    }
+}
+
+const check_name_regex = /^(?![xX][mM][lL])[a-z](([.0-9_a-z\-]*-[.0-9_a-z\-]*)|([.0-9_a-z:]*:[.0-9_a-z:]*))$/
+
+export function isValidComponentName(name) {
+   return check_name_regex.test(name)
 }
