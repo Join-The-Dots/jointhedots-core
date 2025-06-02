@@ -356,6 +356,18 @@ export function acquireComponent(id: string): ComponentEntry {
    return obj
 }
 
+export function acquireFutureComponent(manifest: ComponentManifest): ComponentEntry {
+   const id = manifest.$id
+   let obj = ComponentsRegistry.components.get(id) as ComponentEntry
+   if (!obj && typeof id === "string") {
+      obj = new ComponentEntry(id)
+      obj.manifest = manifest
+      obj.instance = null
+      ComponentsRegistry.components.set(id, obj)
+   }
+   return obj
+}
+
 export function acquireResource(ref: string): ComponentResource {
    const parts = ref.split("#")
    if (parts.length === 2) {
@@ -389,7 +401,13 @@ export async function saveComponent(component: ComponentEntry) {
       if (manifest.type && component.installed) {
          const controller = await ComponentControllerKey.fetch(acquireComponent(manifest.type))
          if (controller) {
-            await controller.updateComponent(component, manifest)
+            if (component.instance) {
+               await controller.updateComponent(component, manifest)
+            }
+            else {
+               component["__instance__"] = undefined
+               await controller.createComponent(component, manifest)
+            }
          }
          if (component.instance instanceof Object) {
             ComponentsRegistry.datamap.set(component.instance, component)

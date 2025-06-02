@@ -4,7 +4,8 @@ import {
    ComponentManifest, JSONSchema, ComponentEntry, acquireComponent, ComponentController,
    ComponentControllerKey, ComponentEditor, ComponentEditorProps, ComponentChecking,
    EditorKey, unregisterComponent, saveComponent,
-   saveComponentManifest
+   saveComponentManifest,
+   acquireFutureComponent
 } from "@jointhedots/core"
 import { ModalContent, Button } from "react-lightning-design-system"
 import Form from "@rjsf/core"
@@ -48,8 +49,7 @@ export async function createComponent(driver: ComponentEntry, service?: string):
    const result = await controller.checkDescriptor(manifest)
    manifest = result?.fixed || manifest
 
-   const component = acquireComponent(manifest.$id)
-   component.manifest = manifest
+   const component = acquireFutureComponent(manifest)
 
    const newManifest = await new Promise<ComponentManifest>(async (resolve) => {
       let done = false
@@ -88,12 +88,6 @@ export async function createComponent(driver: ComponentEntry, service?: string):
    }
    unregisterComponent(component.id)
    return null
-}
-
-export async function editComponentManifest(manifest: ComponentManifest) {
-   const component = acquireComponent(manifest.$id)
-   component.manifest = manifest
-   return editComponent(component)
 }
 
 export async function editComponent(component: ComponentEntry) {

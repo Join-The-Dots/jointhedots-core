@@ -9,6 +9,7 @@ export type PanelDisplay = {
    title?: string
    content: React.ReactNode
    tooling?: ToolingProps[]
+   closable?: boolean
    height?: number | string
    onClose?: () => void
 }

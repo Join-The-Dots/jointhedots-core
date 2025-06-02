@@ -24,7 +24,9 @@ export function ServicePointStatus(props: {
       getSettings().set("service_points", servicePoint.id, descriptor)
    }
 
-   return <ServicePointEditable compact
+   return <ServicePointEditable
+      compact
+      hasSelectMode
       colormap={providers.length > 1 ? DefaultColorsMap : undefined}
       servicePoint={descriptor}
       providers={providers}

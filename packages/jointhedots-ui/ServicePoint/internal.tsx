@@ -14,6 +14,7 @@ import { useNotificationInfos, useNotifications } from "../Notifications"
 import { openContextualMenu, Stack } from "../Layouts"
 import { Popup } from "../Layouts/Popup"
 import { ComponentCard } from "../ComponentsLibrary/ComponentsInfos"
+import { ButtonGroup } from "@salesforce/design-system-react"
 
 const service_display: ComponentItemDisplay = {
    grouped: false,
@@ -83,11 +84,11 @@ export function selectServiceConnexion(service: ServicePointSetting, multiple: b
 export function ServiceConnexionSelector(props: {
    servicePoint: ServicePointSetting
    multiple: boolean
-   selectable?: boolean
    colormap?: any[]
+   hasSelectMode?: boolean
    onChange: (service: ServicePointSetting) => void
 }) {
-   const { servicePoint, selectable, multiple, colormap, onChange } = props
+   const { servicePoint, hasSelectMode, multiple, colormap, onChange } = props
    const [edited, setEdited] = useState(false)
 
    const status = useAsyncState<{
@@ -141,7 +142,7 @@ export function ServiceConnexionSelector(props: {
                   >
                      <ServiceConnexionItem
                         cnx={cnx}
-                        selectable={edited && selectable}
+                        selectable={edited && hasSelectMode}
                         selected={edited ? LabelSelected.EnabledEditable : LabelSelected.Enabled}
                         onSelect={onSwitch}
                         onActivate={onActivate}
@@ -152,18 +153,33 @@ export function ServiceConnexionSelector(props: {
                   return <div key={i}>
                      <ServiceConnexionItem
                         cnx={cnx}
-                        selectable={edited && selectable}
+                        selectable={edited && hasSelectMode}
                         selected={edited ? LabelSelected.DisabledEditable : LabelSelected.Disabled}
                         onSelect={onSwitch}
                         onActivate={onActivate}
                      />
                   </div>
                })}
-               <NewComponentButton
-                  label="New Connexion"
-                  service={service}
-                  onCreate={onActivate}
-               />
+               {hasSelectMode
+                  ? <ButtonGroup>
+                     <NewComponentButton
+                        label="New Connexion"
+                        service={service}
+                        onCreate={onActivate}
+                     />
+                     <Button
+                        icon="bi:pencil-square"
+                        label="Selection"
+                        variant={edited ? "brand" : undefined}
+                        onClick={() => setEdited(!edited)}
+                     />
+                  </ButtonGroup>
+                  : <NewComponentButton
+                     label="New Connexion"
+                     service={service}
+                     onCreate={onActivate}
+                  />
+               }
             </Stack>
          }
       })}
@@ -175,9 +191,10 @@ export function ServicePointEditable(props: {
    providers: ComponentPublication[]
    colormap?: any[]
    compact?: boolean
+   hasSelectMode?: boolean,
    onChange: (service: ServicePointSetting) => void
 }) {
-   const { servicePoint, compact, providers, colormap, onChange } = props
+   const { servicePoint, compact, providers, colormap, hasSelectMode, onChange } = props
 
    const logstats = useNotifications(() => {
       return providers.map((item) => acquireComponent(item.component_id).getLogStats())
@@ -189,6 +206,7 @@ export function ServicePointEditable(props: {
             servicePoint={servicePoint}
             multiple={true}
             colormap={colormap}
+            hasSelectMode={hasSelectMode}
             onChange={(data) => close(onChange(data))}
          />
       })

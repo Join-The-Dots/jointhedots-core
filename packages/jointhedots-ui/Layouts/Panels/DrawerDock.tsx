@@ -129,7 +129,7 @@ export class DrawerDock extends StackedDock {
             name={displayed.title}
             tooling={[
                ...(displayed.tooling || []),
-               {
+               (displayed.closable !== false) && {
                   name: "close",
                   icon: "bi:x-lg",
                   onActivate: (label, dock) => {

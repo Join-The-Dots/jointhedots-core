@@ -45,7 +45,7 @@ export class ModalDock extends StackedDock {
          this.show()
          this.root.render(<div className="jtd-panel-modal-dock">
             <div />
-            <div onMouseDown={this.unstack}>
+            <div onMouseDown={(displayed.closable !== false) ? this.unstack : null}>
                <div onMouseDown={handleStopPropagation}>
                   {displayed.content}
                </div>

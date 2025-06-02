@@ -61,7 +61,7 @@ export function ComponentItem(props: {
          }
       })
    }
-   
+
    const logstats = acquireComponent(entry.component_id).getLogStats()
    const hasIssues = logstats.error_count > 0
    tooling.push({
@@ -92,13 +92,13 @@ export function ComponentItem(props: {
          optional: true,
          onActivate: async () => {
             if (await askQuestion(`Do you want to destroy component '${entry.title}' ?`)) {
-               if (selected) onSelect(entry)
+               if (selected & LabelSelected.Enabled) onSelect(entry)
                deleteComponent(entry.component_id)
             }
          }
       })
    }
-   
+
    return <ItemRow
       data={entry}
       icon={entry.icon || "avatar:" + entry.title}
