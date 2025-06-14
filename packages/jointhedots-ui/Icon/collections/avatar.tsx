@@ -18,10 +18,18 @@ export class IconAvatarCollection implements IconCollection {
 
 
 function getTag(name: string): string {
+   name = name.trim()
    let tag = name.charAt(0)
-   for (const x of name.matchAll(/[\-_ ]([a-zA-Z])/g)) {
-      tag += x[1]
-      if (tag.length >= 2) break
+   const lastChr0 = name.charAt(name.length - 1)
+   const lastChr1 = name.charAt(name.length - 2)
+   if (!isNaN(parseInt(lastChr0)) && isNaN(parseInt(lastChr1))) {
+      tag += lastChr0
+   }
+   else {
+      for (const x of name.matchAll(/[\-_ ]([a-zA-Z])/g)) {
+         tag += x[1]
+         if (tag.length >= 2) break
+      }
    }
    return tag.toUpperCase()
 }

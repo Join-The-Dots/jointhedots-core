@@ -10,7 +10,7 @@ import { NotificationsBell } from "@jointhedots/ui/Notifications"
 await saveComponentManifest({
    "$id": "config:main-repo",
    "type": "jtd:github.service",
-   "title": "github main repo",
+   "title": "github main repo 4",
    //"icon": "fa:git",
    "settings": {
       "url": "https://github.com/jointhedots/jointhedots-app",
