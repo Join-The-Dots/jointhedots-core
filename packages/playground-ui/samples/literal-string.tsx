@@ -8,7 +8,7 @@ import { useState } from "react"
 const JsonEditor = MonacoEditorHOC(new StandardLanguageProvider("json"))
 
 function ApplicationRoot() {
-   const [text, setText] = useState("My \\$(val1) = $( val1.map(x=>x*2).join(';') )")
+   const [text, setText] = useState("My \\$(val1) = $( val1.map(x=>{return x*2}).join(';') )")
    const [data, setData] = useState(`{"val1":[42,1,2]}`)
    let result = ""
    try {

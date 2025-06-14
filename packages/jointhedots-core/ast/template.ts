@@ -50,6 +50,7 @@ export class TextTemplate {
          }
          catch (e) {
             const code = AString.generate(binding.node)
+            console.log(`Invalid binding '${code}':`, e)
             throw new Error(`Invalid binding '${code}': ${e.message}`)
          }
       }
