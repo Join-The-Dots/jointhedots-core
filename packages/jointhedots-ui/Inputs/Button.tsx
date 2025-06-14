@@ -190,8 +190,9 @@ export class Button extends React.Component<ButtonProps> {
    }
 }
 
-export function ButtonIcon(props: {
+export type ButtonIconProps = {
    icon: string
+   hoveredIcon?: string
    size?: IconSize | string
    title?: string
    inversed?: boolean
@@ -199,11 +200,19 @@ export function ButtonIcon(props: {
    className?: string
    style?: React.CSSProperties
    onClick?: React.MouseEventHandler
-}) {
-   const { icon, size, inversed, variant, className, style, ...others } = props
+}
+
+export function ButtonIcon(props: ButtonIconProps) {
+   const { icon, hoveredIcon, size, inversed, variant, className, style, ...others } = props
    const baseClass = variant ? IconButtonClassname + variant : IconButtonClassname
    const buttonClass = className ? baseClass + className : baseClass
    const buttonStyle = size ? { ...style, fontSize: size && (IconSize[size] || size) } : style
+   if (hoveredIcon) {
+      const [hovered, setHovered] = useState(false)
+      return <div {...others} className={buttonClass} style={buttonStyle} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+         <Icon name={hovered ? hoveredIcon : icon} inverse={inversed} />
+      </div>
+   }
    return <div {...others} className={buttonClass} style={buttonStyle}>
       <Icon name={icon} inverse={inversed} />
    </div>

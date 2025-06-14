@@ -54,7 +54,7 @@ export function ComponentItem(props: {
       const enabled = selected & LabelSelected.Enabled
       tooling.push({
          name: enabled ? "Unselect" : "Select",
-         icon: enabled ? "bi:dash-square-dotted" : "bi:plus-square",
+         icon: enabled ? "bi:dash-circle-dotted" : "bi:check2-circle",
          optional: true,
          onActivate: async (item) => {
             onSelect(item.data)

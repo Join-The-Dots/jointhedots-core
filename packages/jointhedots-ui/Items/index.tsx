@@ -149,7 +149,11 @@ function Switch(props: {
    onSelect?: (event: React.SyntheticEvent) => void
 }) {
    const { selected, onSelect } = props
-   return <ButtonIcon icon={selected ? "bi:dash-square-dotted" : "bi:plus-square"} onClick={onSelect} />
+   return <ButtonIcon
+      icon={selected ? "bi:check-circle" : "bi:circle"}
+      hoveredIcon={selected ? "bi:circle" : "bi:check-circle"}
+      onClick={onSelect}
+   />
 }
 
 export function LabelButton(label: LabelProps) {

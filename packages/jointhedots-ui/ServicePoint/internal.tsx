@@ -168,6 +168,7 @@ export function ServiceConnexionSelector(props: {
                         onCreate={onActivate}
                      />
                      <Button
+                        style={{ flex: 1 }}
                         icon="bi:pencil-square"
                         label="Selection"
                         variant={edited ? "brand" : undefined}
