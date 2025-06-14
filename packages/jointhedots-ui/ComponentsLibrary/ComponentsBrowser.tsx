@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo } from 'react'
-import { ComponentsRegistry, ComponentPublication, IComponentProvider, MapLike, ComponentFilter, createComponentFilter, acquireComponent, deleteComponent } from '@jointhedots/core'
-import { useAsyncState } from '@jointhedots/core/react'
+import { ComponentsRegistry, ComponentPublication, IComponentProvider, MapLike, ComponentFilter, createComponentFilter, acquireComponent, deleteComponent, ComponentManifest } from '@jointhedots/core'
+import { useAsyncMemo, useAsyncState } from '@jointhedots/core/react'
 import { Stack } from '@jointhedots/ui/Layouts/Stack'
 import { TextInput } from '@jointhedots/ui/utils/TextInput'
 import { ItemRowRich, ItemRowShort, LabelSelected, ToolingProps } from '../Items'
@@ -8,6 +8,7 @@ import { askQuestion } from '../Dialog'
 import { editComponent } from './ComponentsEditor'
 import { createPanel } from '../Layouts'
 import { ComponentInfos } from './ComponentsInfos'
+import Icon from '../Icon'
 import './index.scss'
 
 export function getComponentGroupName(id: string) {
@@ -39,6 +40,27 @@ export type ComponentItemDisplay = {
    allowDelete?: boolean
 }
 
+export function getComponentIcon(entry: ComponentPublication | ComponentManifest) {
+   return entry.icon || "avatar:" + entry.title
+}
+
+export function ComponentLink(props: {
+   id: string
+}) {
+   const { id } = props
+   const manifest = useAsyncMemo(async () => {
+      const comp = acquireComponent(id)
+      return comp.fetch()
+   }, null, [id])
+   if (manifest) {
+      return <Stack>
+         <Icon name={getComponentIcon(manifest)} />
+         {manifest.title || id}
+      </Stack>
+   }
+   return <>component...</>
+}
+
 export function ComponentItem(props: {
    entry: ComponentPublication
    display?: ComponentItemDisplay
@@ -49,6 +71,7 @@ export function ComponentItem(props: {
    const { entry, display, selected, onSelect, onActivate } = props
    const ItemRow = display?.small ? ItemRowShort : ItemRowRich
    const tooling: ToolingProps[] = []
+   let summary: React.ReactNode = entry.description
 
    if (selected !== LabelSelected.None) {
       const enabled = selected & LabelSelected.Enabled
@@ -97,13 +120,16 @@ export function ComponentItem(props: {
             }
          }
       })
+      if (!summary) {
+         summary = <ComponentLink id={entry.type} />
+      }
    }
 
    return <ItemRow
       data={entry}
-      icon={entry.icon || "avatar:" + entry.title}
+      icon={getComponentIcon(entry)}
       name={entry.title || entry.component_id}
-      summary={entry.description || entry.type}
+      summary={summary}
       selected={selected}
       tooling={tooling}
       onSelect={onSelect && ((item) => onSelect(item.data))}
