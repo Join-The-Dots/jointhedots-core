@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react"
 import { Spinner } from "react-lightning-design-system"
-import { acquireServicePoint, listenServicePoints, ServicePoint } from "../library/service-points"
+import { acquireServicePoint, listenServicePoints, ServiceChangeHandler, ServicePoint, unlistenServicePoints } from "../library/service-points"
 import { useAsyncMemo } from "./useAsyncMemo"
 import { ViewRequirements } from "../services"
 import { ErrorDisplayer } from "./ErrorBoundary"
@@ -132,6 +132,13 @@ listenServicePoints(globalSupport.onServiceChangeHandler)
 
 export const ServicePointsSupportContext: React.Context<IServicePointsSupport> = React.createContext(globalSupport)
 export const ServicePointsProviderContext: React.Context<IServicePointsProvider> = React.createContext(globalSupport)
+
+export function useServicesListener(listener: ServiceChangeHandler) {
+   useEffect(() => {
+      const handler = listenServicePoints(listener)
+      return () => unlistenServicePoints(handler)
+   }, [listener])
+}
 
 export function useServices<IService>(servicePoint: ServicePoint<IService>, cardinality?: number): IService[] {
    const provider = React.useContext(ServicePointsProviderContext)

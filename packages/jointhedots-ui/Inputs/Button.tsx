@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import classNames from 'classnames'
 import { Tooltip } from '@salesforce/design-system-react'
 import { getHtmlProps } from './getProps'

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { ServicePointSetting, ServicePoint, getSettings } from "@jointhedots/core"
 import { Button, ModalContent, ModalHeader } from "react-lightning-design-system"
-import { MissingServiceError, registerErrorDisplayer } from "@jointhedots/core/react"
+import { MissingServiceError, registerErrorDisplayer, useServicesListener } from "@jointhedots/core/react"
 import { ServicePointInput } from "./configurator"
 import Icon from "../Icon"
 import { openDialog } from "../Layouts"
@@ -19,6 +19,8 @@ function ServiceConfiguratorForm(props: {
          return prev
       }, {})
    })
+
+   onApply && useServicesListener(onApply)
 
    const list = []
    for (const id in descriptors) {
