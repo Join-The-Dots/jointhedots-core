@@ -13,6 +13,7 @@ import validator from '@rjsf/validator-ajv8'
 import { CodeEditorHOC, StandardLanguageProvider } from "../CodeEditor"
 import { createPanel } from "../Layouts"
 import { ButtonIcon } from "../Inputs"
+import { getComponentIcon } from "./ComponentsBrowser"
 
 const JSONEditor = CodeEditorHOC(new StandardLanguageProvider("json"))
 
@@ -97,7 +98,7 @@ export async function editComponent(component: ComponentEntry) {
    const handler = await ComponentControllerKey.fetch(driver)
    const editor = await EditorKey.fetch(component)
    const newManifest = await new Promise<typeof manifest>(resolve => {
-      const icon = manifest.icon || `avatar:${manifest.title}`
+      const icon = getComponentIcon(manifest)
       const panel = createPanel()
       let done = false
       panel.display({

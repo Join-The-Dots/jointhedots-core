@@ -64,7 +64,7 @@ function GetLabelIcon(label: LabelProps): string {
 
 function DrawLabelIcon(label: LabelProps): React.ReactNode {
    const { icon, name, decorations } = label
-   let content = <Icon name={icon ? icon : "avatar:" + name} />
+   let content = <Icon name={getIconName(icon, name)} />
    if (decorations) {
       for (const deco of decorations) {
          if (deco.type === "shape") {

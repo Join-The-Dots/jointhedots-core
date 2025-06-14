@@ -41,7 +41,7 @@ export type ComponentItemDisplay = {
 }
 
 export function getComponentIcon(entry: ComponentPublication | ComponentManifest) {
-   return entry.icon || "avatar:" + entry.title
+   return entry.icon || ("avatar:" + entry.title)
 }
 
 export function ComponentLink(props: {
@@ -93,7 +93,7 @@ export function ComponentItem(props: {
       onActivate: async () => {
          createPanel({
             title: entry.title,
-            icon: entry.icon || `avatar:${entry.title}`,
+            icon: getComponentIcon(entry),
             content: <ComponentInfos entry={entry} />,
          }).open("side")
       },
