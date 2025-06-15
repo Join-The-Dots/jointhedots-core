@@ -1,18 +1,27 @@
-import React, { useContext, useEffect, useState } from "react"
+import React, { useContext, useEffect, useMemo, useState } from "react"
 import { Spinner } from "react-lightning-design-system"
 import { acquireServicePoint, listenServicePoints, ServiceChangeHandler, ServicePoint, unlistenServicePoints } from "../library/service-points"
-import { useAsyncMemo } from "./useAsyncMemo"
 import { ViewRequirements } from "../services"
 import { ErrorDisplayer } from "./ErrorBoundary"
 
 export type IService = unknown
 export type ServicePointsMap = Map<ServicePoint, IService[]>
 
+export enum ServiceStatus {
+   NotReady = 0,
+   Loading = 1,
+   Ready = 2,
+   Failed = 3,
+}
+
 export interface IServicePointsProvider {
    getService<IService>(svc: ServicePoint): IService[]
 }
 
 export interface IServicePointsController {
+   readonly provider: IServicePointsProvider
+   readonly error: MissingServiceError
+   readonly status: ServiceStatus
    notifyChange(svc: ServicePoint)
    dispose()
 }
@@ -59,20 +68,37 @@ class ServicePointsProxy implements IServicePointsProvider {
    }
 }
 
-type NewProviderHanlder = (provider: IServicePointsProvider | MissingServiceError) => void
+type ServiceControllerState = MissingServiceError | IServicePointsProvider | Promise<void> | null
+type ServiceUpdateHandler = (state: ServiceControllerState, prevState: ServiceControllerState, target: ServicePointsController) => void
 
 class ServicePointsController implements IServicePointsController {
    services: ServicePointsMap = new Map<ServicePoint, IService[]>
+   provider: IServicePointsProvider = null
+   state: ServiceControllerState = null
    constructor(
       public support: IServicePointsSupport,
       public requireds: ServicePoint[],
       public requirements: ViewRequirements,
-      public onNewProvider: NewProviderHanlder,
+      public onUpdate?: ServiceUpdateHandler,
    ) {
       support.addController(this)
    }
-   createProvider() {
-      return new ServicePointsProxy(this)
+   get status(): ServiceStatus {
+      if (this.state instanceof MissingServiceError) {
+         return ServiceStatus.Failed
+      }
+      if (this.state instanceof Promise) {
+         return ServiceStatus.Loading
+      }
+      if (this.state === null) {
+         return ServiceStatus.NotReady
+      }
+      return ServiceStatus.Ready
+   }
+   get error(): MissingServiceError {
+      if (this.state instanceof MissingServiceError) {
+         return this.state
+      }
    }
    getService<IService>(svc: ServicePoint): IService[] {
       let items = this.services.get(svc)
@@ -82,41 +108,74 @@ class ServicePointsController implements IServicePointsController {
       }
       return svc.services as IService[]
    }
-   async notifyChange(svc: ServicePoint) {
+   notifyChange(svc: ServicePoint) {
       if (this.services.has(svc)) {
-         await this.setup()
+         this.update()
       }
    }
-   async setup(): Promise<ServicePointsController> {
+   updateState(state: any) {
+      const prevState = this.state
+      if (prevState !== state) {
+         this.state = state
+         this.onUpdate?.(state, prevState, this)
+      }
+   }
+   update(): Promise<void> {
       const { requireds, requirements } = this
-      let missings = null
-      if (requireds) {
-         for (const svc of requireds) {
-            const items = svc.ready ? svc.services : await svc.fetch()
-            this.services.set(svc, items)
+      let pendings: Promise<unknown>[] = []
+
+      let error: MissingServiceError = null
+      function addMissingError(svc: ServicePoint) {
+         if (!error) error = new MissingServiceError([])
+         if (!error.missings.includes(svc)) {
+            error.missings.push(svc)
          }
       }
+
+      if (requireds) {
+         for (const svc of requireds) {
+            if (svc.ready) {
+               const items = svc.services
+               if (items) this.services.set(svc, items)
+            }
+            else pendings.push(svc.fetch())
+         }
+      }
+
       if (requirements) {
          const { servicePoints } = requirements
          for (const id in servicePoints) {
             const svc = acquireServicePoint(id)
-            const items = svc.ready ? svc.services : await svc.fetch()
-            const req = servicePoints[id]
-            if (req.service && svc.service !== req.service) {
-               if (!missings) missings = []
-               missings.push(svc)
+            if (svc.ready) {
+               const items = svc.services
+               const req = servicePoints[id]
+               if (req.service && svc.service !== req.service) {
+                  addMissingError(svc)
+               }
+               else if (items.length < (req.cardinality || 1)) {
+                  addMissingError(svc)
+               }
+               else {
+                  this.services.set(svc, items)
+               }
             }
-            else if (items.length < (req.cardinality || 1)) {
-               if (!missings) missings = []
-               missings.push(svc)
-            }
-            else {
-               this.services.set(svc, items)
-            }
+            else pendings.push(svc.fetch())
          }
       }
-      this.onNewProvider(new ServicePointsProxy(this))
-      return this
+
+      if (pendings.length > 0) {
+         const loading = Promise.all(pendings).then(() => this.update())
+         this.updateState(loading)
+         return loading
+      }
+      else if (error) {
+         this.updateState(error)
+      }
+      else {
+         this.provider = new ServicePointsProxy(this)
+         this.updateState(this.provider)
+      }
+      return null
    }
    dispose() {
       if (this.support) {
@@ -157,30 +216,20 @@ export function useService<IService>(servicePoint: ServicePoint<IService>, optio
    return useServices(servicePoint, optional ? 0 : 1)[0]
 }
 
-async function createServicesController(
-   support: IServicePointsSupport,
-   requireds: ServicePoint[],
-   requirements: ViewRequirements,
-   onNewProvider: (provider: IServicePointsProvider | MissingServiceError) => void
-): Promise<IServicePointsController> {
-   const ctl = new ServicePointsController(support, requireds, requirements, onNewProvider)
-   await ctl.setup()
-   return ctl
-}
-
-export function useServicesProvider(requireds: ServicePoint[], requirements: ViewRequirements): IServicePointsProvider | MissingServiceError | null {
+export function useServicesController(requireds: ServicePoint[], requirements: ViewRequirements): IServicePointsController | null {
    const support = useContext(ServicePointsSupportContext)
-   const [provider, setProvider] = useState<IServicePointsProvider | MissingServiceError>(null)
+   const [, setState] = useState(null)
 
-   const controller = useAsyncMemo(async () => {
-      return createServicesController(support, requireds, requirements, setProvider)
-   }, null, [requireds])
+   const controller = useMemo(() => {
+      return new ServicePointsController(support, requireds, requirements, setState)
+   }, [requireds, requirements])
 
    useEffect(() => {
+      controller.update()
       return () => controller?.dispose()
    }, [controller])
 
-   return provider
+   return controller
 }
 
 export type ServiceConfiguratorComponent = React.ComponentType<{
@@ -194,18 +243,20 @@ export function UseServicePoints(props: {
    children: any
 }) {
    const { requireds, requirements, children } = props
-   const result = useServicesProvider(requireds, requirements)
-   if (!result) {
-      return <Spinner />
-   }
-   else if (result instanceof MissingServiceError) {
+   const controller = useServicesController(requireds, requirements)
+   const { provider, error } = controller
+   if (error) {
       const ServiceConfigurator = props.configurator
-      if (ServiceConfigurator) return <ServiceConfigurator services={result.missings} />
-      else return <ErrorDisplayer error={result} />
+      if (ServiceConfigurator) return <ServiceConfigurator services={error.missings} />
+      else return <ErrorDisplayer error={error} />
+   }
+   else if (provider) {
+      return <ServicePointsProviderContext.Provider value={provider}>
+         {children}
+         {controller.status === ServiceStatus.Loading && <Spinner />}
+      </ServicePointsProviderContext.Provider>
    }
    else {
-      return <ServicePointsProviderContext.Provider value={result}>
-         {children}
-      </ServicePointsProviderContext.Provider>
+      return <Spinner />
    }
 }

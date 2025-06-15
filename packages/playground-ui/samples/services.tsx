@@ -77,7 +77,9 @@ function ApplicationContent() {
    return <div>
       <div>Services:</div>
       <ul>
-         {svc.map(x => <li>{x.location}</li>)}
+         {svc.map(x => <>
+            <li>{x.location}</li>
+         </>)}
       </ul>
    </div>
 }

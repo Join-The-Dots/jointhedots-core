@@ -71,6 +71,7 @@ export class ServicePoint<IService = unknown> implements ILogDispatcher {
             this.failure = null
             this.loading = null
             this.ready = false
+            ServiceChangeHandlers.forEach(l => l(this))
             await this.fetch()
          }
          ServiceChangeHandlers.forEach(l => l(this))

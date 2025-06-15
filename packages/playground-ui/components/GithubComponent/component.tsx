@@ -35,6 +35,9 @@ export const GithubController: ComponentController = {
             target: `command://${descriptor.$id}/reconnect`,
          }]
       })
+      return new Promise((resolve) => {
+         setTimeout(resolve, 1000)
+      })
    },
    async updateComponent(component: ComponentEntry<GithubService>, descriptor: GithubServiceManifest) {
       component.instance.update(descriptor)
@@ -81,7 +84,7 @@ export class GithubService implements StorageService, CommandsService {
       this.update(descriptor)
    }
    get location() {
-      return this.url
+      return this.descriptor.title
    }
    update(descriptor: GithubServiceManifest) {
       this.name = descriptor.title
