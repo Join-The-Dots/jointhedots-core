@@ -84,11 +84,11 @@ class ServicePointsController implements IServicePointsController {
       support.addController(this)
    }
    get status(): ServiceStatus {
-      if (this.state instanceof MissingServiceError) {
-         return ServiceStatus.Failed
-      }
       if (this.state instanceof Promise) {
          return ServiceStatus.Loading
+      }
+      if (this.state instanceof MissingServiceError) {
+         return ServiceStatus.Failed
       }
       if (this.state === null) {
          return ServiceStatus.NotReady
@@ -102,7 +102,7 @@ class ServicePointsController implements IServicePointsController {
    }
    getService<IService>(svc: ServicePoint): IService[] {
       let items = this.services.get(svc)
-      if (!items) {
+      if (!items && this.support) {
          items = this.support.getService(svc)
          this.services.set(svc, this.support.getService(svc))
       }
@@ -181,7 +181,6 @@ class ServicePointsController implements IServicePointsController {
       if (this.support) {
          this.support.removeController(this)
          this.support = null
-         this.services = null
       }
    }
 }

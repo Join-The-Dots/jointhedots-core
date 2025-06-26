@@ -242,7 +242,7 @@ export function ServicePointEditable(props: {
             const error_count = logstats?.[i]?.error_count || 0
             if (colormap) deco.push({ type: "shape", color: colormap[i] })
             if (error_count > 0) deco.push({ type: "badge", name: "bi:exclamation-triangle-fill" })
-            return <Popup content={onPopup} data={cnx}>
+            return <Popup key={i} content={onPopup} data={cnx}>
                <ItemComp
                   key={cnx.component_id}
                   name={cnx.title}
