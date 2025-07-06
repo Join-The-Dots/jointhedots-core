@@ -10,8 +10,8 @@ import { useAsyncState } from "@jointhedots/core/react"
 import { NewComponentButton, ComponentItem, ComponentItemDisplay, CreateComponentSelector } from "../ComponentsLibrary"
 import { Button } from "../Inputs"
 
-import { useNotificationInfos, useNotifications } from "../Notifications"
-import { openContextualMenu, Stack } from "../Layouts"
+import { useNotifications } from "../Notifications"
+import { createFloatingDock, Stack, usePanel } from "../Layouts"
 import { Popup } from "../Layouts/Popup"
 import { ComponentCard } from "../ComponentsLibrary/ComponentsInfos"
 import { ButtonGroup } from "@salesforce/design-system-react"
@@ -86,7 +86,7 @@ export function ServiceConnexionSelector(props: {
    multiple: boolean
    colormap?: any[]
    hasSelectMode?: boolean
-   onChange: (service: ServicePointSetting) => void
+   onChange: (service: ServicePointSetting, completed: boolean) => void
 }) {
    const { servicePoint, hasSelectMode, multiple, colormap, onChange } = props
    const [edited, setEdited] = useState(false)
@@ -117,14 +117,14 @@ export function ServiceConnexionSelector(props: {
    }, [servicePoint], null)
 
    const onSwitch = (data: ComponentPublication) => {
-      onChange(switchServiceConnexion(servicePoint, multiple, data.component_id))
+      onChange(switchServiceConnexion(servicePoint, multiple, data.component_id), !edited)
    }
 
    const onActivate = (data: ComponentPublication) => {
-      onChange(selectServiceConnexion(servicePoint, multiple, data.component_id))
+      onChange(selectServiceConnexion(servicePoint, multiple, data.component_id), !edited)
    }
 
-   return <div>
+   return <>
       {status.waiting(({ providers, remains }) => {
          const [service, _name] = servicePoint.id.split("/")
          if (providers.length === 0 && remains.length === 0) {
@@ -134,7 +134,7 @@ export function ServiceConnexionSelector(props: {
             />
          }
          else {
-            return <Stack vertical>
+            return <Stack vertical style={{ minWidth: 200 }}>
                {servicePoint.providers.map((id, i) => {
                   const cnx = providers.find(cnx => cnx.component_id === id)
                   return cnx && <div key={i}
@@ -184,7 +184,7 @@ export function ServiceConnexionSelector(props: {
             </Stack>
          }
       })}
-   </div>
+   </>
 }
 
 export function ServicePointEditable(props: {
@@ -201,17 +201,26 @@ export function ServicePointEditable(props: {
       return providers.map((item) => acquireComponent(item.component_id).getLogStats())
    }, [providers])
 
-   const onClick = useCallback((e) => {
-      openContextualMenu(e, (close) => {
-         return <ServiceConnexionSelector
+   const editPanel = usePanel((panel) => {
+      return {
+         icon: "",
+         title: "",
+         content: <ServiceConnexionSelector
             servicePoint={servicePoint}
             multiple={true}
             colormap={colormap}
             hasSelectMode={hasSelectMode}
-            onChange={(data) => close(onChange(data))}
+            onChange={(data, done) => {
+               if (done) panel.close()
+               onChange(data)
+            }}
          />
-      })
+      }
    }, [servicePoint, colormap])
+
+   const onClick = useCallback((e) => {
+      editPanel.open(createFloatingDock(e))
+   }, [editPanel])
 
    const onPopup = useCallback(async (cnx: ComponentPublication) => {
       return <div>
@@ -236,7 +245,7 @@ export function ServicePointEditable(props: {
    }
    else {
       const ItemComp = compact ? ItemIcon : ItemRowShort
-      return <div className="slds-button" onClick={onClick}>
+      return <Button variant="base" onClick={onClick}>
          {providers.map((cnx, i) => {
             const deco: LabelDecoration[] = []
             const error_count = logstats?.[i]?.error_count || 0
@@ -252,7 +261,7 @@ export function ServicePointEditable(props: {
             </Popup>
          })}
          {/* multiple && !compact && <IconButton icon="bi:plus-circle" onClick={onClick} /> */}
-      </div>
+      </Button>
    }
 }
 
