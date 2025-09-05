@@ -1,9 +1,9 @@
 {
    "name": "@jointhedots/gear",
-   "version": "1.0.14",
+   "version": "1.0.0-build.0",
    "type": "module",
    "bin": {
-      "jointhedots-gear": "./esm/cli.js"
+      "jointhedots-gear": "esm/cli.js"
    },
    "scripts": {
       "prepare": "tsc",
@@ -12,9 +12,9 @@
    "dependencies": {
       "@aws-sdk/client-s3": "^3.675.0",
       "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
-      "esbuild": "^0.23.0",
-      "esbuild-sass-plugin": "^3.3.1",
       "dotenv": "^16.5.0",
+      "esbuild": "^0.25.9",
+      "esbuild-sass-plugin": "^3.3.1",
       "express": "^4.19.2",
       "glob": "^11.0.1",
       "mime": "^4.0.4",

@@ -1,5 +1,5 @@
 import Express from 'express'
-import { AppEntry, ChromeAppDescriptor, ChromeAppManifest, } from "../model/workspace.js"
+import { matchComponentSelection, AppEntry, ChromeAppDescriptor, ChromeAppManifest, } from "../model/workspace.js"
 import { StorageFiles } from "../model/storage.js"
 import { BuildTarget, BuildTask, ComponentCatalogsTask, resolve_entry_path, WebviewTask } from "./build-target.js"
 import Path from "node:path"
@@ -24,7 +24,7 @@ export function create_application_target(opts: {
    watch: boolean
 }): BuildTarget {
    const { app, version } = opts
-   const { type, name, webviews, modules, assets } = app.descriptor
+   const { type, name, webviews, modules, assets, components } = app.descriptor
    const ws = app.library.workspace
    const target = new BuildTarget(name, opts.storage, ws, opts.devmode == true, opts.watch == true)
 
@@ -94,6 +94,7 @@ export function create_application_target(opts: {
    // Add workspace components
    for (const lib of ws.libraries) {
       for (const [path, desc] of lib.components) {
+         if (!matchComponentSelection (components, desc.selectors)) continue
          const baseDir = Path.dirname(path)
          target.add_component(desc, baseDir, lib)
       }
@@ -102,6 +103,7 @@ export function create_application_target(opts: {
    // Add workspace assets
    for (const lib of ws.libraries) {
       for (const [path, desc] of lib.declarations) {
+         if (!matchComponentSelection(components, desc.selectors)) continue
          if (desc.assets) {
             const baseDir = Path.dirname(path)
             for (const entry of desc.assets) {

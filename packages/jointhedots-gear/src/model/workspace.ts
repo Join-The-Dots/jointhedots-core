@@ -42,7 +42,9 @@ export interface AppDescriptorBase<Manifest = never> {
    webviews?: MapLike<WebviewEntry>
    modules?: MapLike<ModuleID>
    assets?: AssetsEntry[]
-
+   components?: {
+      selectors?: string[]
+   }
    manifest?: Manifest
 }
 
@@ -66,6 +68,7 @@ export type AppEntry = {
 }
 
 export type DeclarationDescriptor = {
+   selectors?: string[]
    assets?: AssetsEntry[]
 }
 
@@ -328,4 +331,17 @@ export async function open_workspace(workspace_path: string, devmode: boolean): 
    }
 
    return ws
+}
+
+export function matchComponentSelection(options: AppDescriptor["components"], selectors: string[]) {
+   if (options?.selectors) {
+      if (!selectors) selectors = ["default"]
+      for (const selector of selectors) {
+         if (options?.selectors.includes(selector)) return true
+      }
+      return false
+   }
+   else {
+      return true
+   }
 }

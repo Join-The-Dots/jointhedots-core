@@ -33,6 +33,7 @@ export type ComponentManifest = {
    tags?: string[]
    keywords?: string[]
    description?: string
+   selectors?: string[]
    specs?: MapLike<ComponentSpec>
    resources?: MapLike<ResourceEntry> // Resources catalog with undefined interface
    services?: MapLike<ResourceEntry> // Resources providing specific services interfaces
