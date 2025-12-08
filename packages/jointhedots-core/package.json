@@ -8,6 +8,7 @@
    "exports": {
       ".": "./index.ts",
       "./react": "./react/index.ts",
+      "./rest": "./rest/index.ts",
       "./services": "./services/index.ts"
    },
    "dependencies": {

@@ -1,7 +1,8 @@
 import { acquireComponent, ComponentsRegistry } from "./manifold"
-import { ComponentID, ServiceEntry, ServiceType } from "./components"
+import { ComponentID } from "./components"
 import { getSettings, listenSettings, WriteMode } from "./settings"
 import { ILogDispatcher, Log, LogObject } from "../logging"
+import { ServiceEntry, ServiceType } from "./services"
 
 export const ServicePoints: Map<string, ServicePoint> = new Map()
 

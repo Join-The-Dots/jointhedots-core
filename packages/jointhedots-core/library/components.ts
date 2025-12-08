@@ -2,20 +2,7 @@ import { URI } from 'vscode-uri'
 import { DocumentationSchema, JSONSchema, ResourceEntry } from "../ast/schema/schema"
 import { MapLike } from 'typescript'
 import { ComponentEntry } from './manifold'
-
-//-------------------------------------------------------------
-// Service: programming resource provided by a component
-//-------------------------------------------------------------
-
-export type ServiceType = string
-
-export class ServiceEntry<Instance extends any, Spec extends any> {
-   constructor(public resource: string) { }
-   get(entry: ComponentEntry): Instance { return entry.getResource(this.resource)?.get<Instance>() }
-   fetch(entry: ComponentEntry): Promise<Instance> { return entry.fetchResource<Instance>(this.resource) }
-   spec(entry: ComponentEntry): Spec { return entry.acquireResource(this.resource)?.spec as Spec }
-   subservice<T extends any>(name: string) { return new ServiceEntry<T, Spec>(`${this.resource}.${name}`) }
-}
+import { ServiceEntry, ServiceType } from './services'
 
 //-------------------------------------------------------------
 // Component model: distribuable unit providing services
@@ -36,7 +23,7 @@ export interface ComponentPublication {
 }
 
 // Component manifest
-export type ComponentManifest = {
+export type ComponentManifest<Data extends any = unknown> = {
    $id: string // Compoenent ID (into publication)
    type?: string // ID of component service to use (into publication)
 
@@ -54,6 +41,8 @@ export type ComponentManifest = {
    // Services
    services?: MapLike<ResourceEntry> // Resources providing specific services interfaces
 
+   // Configuration
+   data?: Data
 }
 
 //-------------------------------------------------------------

@@ -1,5 +1,4 @@
 import { MergeKind, Token, TokenBaseId, TokenizerFormat, TokenPattern, TokenStream } from "./tokenizer"
-import { print } from "@polycuber/script.cli"
 import * as Acorn from 'acorn'
 import * as AST from "../nodes"
 
@@ -196,7 +195,7 @@ function parse_jsx_document(stream: TokenStream, matchEnd?: (tok: Token) => bool
             line_chunks.push(embed)
          }
          else {
-            print.error(`Token ignored: ${tok.rule.name}`)
+            console.error(`Token ignored: ${tok.rule.name}`)
          }
       }
    }
@@ -329,7 +328,7 @@ const MARKUP_ElementHeader = new TokenPattern(XHTMLTokId.MARKUP_ElementHeader, "
       }
    }
    catch (e) {
-      print.error(e.message)
+      console.error(e.message)
    }
    return false
 }, /<([a-zA-Z][a-zA-Z0-9_\.\-\:]*)/g)
@@ -377,7 +376,7 @@ function parse_content_embeds(source: TokenStream, format: string, mark: string,
                pos = start
             }
             else {
-               print.error(`Bad content embed closure with '}'`)
+               console.error(`Bad content embed closure with '}'`)
                pos = embed_pos + mark.length
             }
          }
@@ -438,7 +437,7 @@ const MDX_Block = new TokenPattern(XHTMLTokId.MDX_Block, "MDX_Block", "```", (to
             if (tag && tag.length > 0) {
                attributes = parse_jsx_attributes(stream)
                if (stream.last.id !== XHTMLTokId.MARKUP_TagClosure && stream.last.id !== XHTMLTokId.MARKUP_TagEnding) {
-                  print.error(`Bad block jsx element ending`)
+                  console.error(`Bad block jsx element ending`)
                }
             }
             // Parse anonymous element [...]
@@ -446,12 +445,12 @@ const MDX_Block = new TokenPattern(XHTMLTokId.MDX_Block, "MDX_Block", "```", (to
                tag = "code"
                attributes = parse_jsx_attributes(stream)
                if (stream.last.id !== XHTMLTokId.HookR) {
-                  print.error(`Bad block anonymous element ending`)
+                  console.error(`Bad block anonymous element ending`)
                }
             }
          }
          catch (e) {
-            print.error(e.message)
+            console.error(e.message)
          }
       }
       else {

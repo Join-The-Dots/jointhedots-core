@@ -9,3 +9,5 @@ export * from "./useServices"
 export * from "./useLocation"
 export * from "./useLocalStorage"
 export * from "./useSessionStorage"
+
+export * from "./useForceUpdate"

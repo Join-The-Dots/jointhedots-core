@@ -1,7 +1,6 @@
 import React from "react"
 import { JSONSchema } from "../ast"
-import { ServiceEntry } from "../library/components"
-import { MapLike } from "../common/types"
+import { ServiceEntry } from "../library/services"
 
 export type ViewServicePoint = {
    service?: string

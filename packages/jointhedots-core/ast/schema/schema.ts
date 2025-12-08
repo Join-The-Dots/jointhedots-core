@@ -142,14 +142,18 @@ export type JSONSchemaCustom = {
    aliases?: MapLike<string>
 }
 
-export type ResourceEntry<ResourceInterface = any> = ResourceLink<ResourceInterface> | {
-   type: ResourceLink<ResourceFactory<ResourceInterface>>
-   data?: any
-}
+export type ResourceEntry<ResourceInterface = any> = ResourceLink<ResourceInterface> | ResourceImport<ResourceInterface>
 
 export type ResourceFactory<ResourceInterface = any> = (data: any) => Promise<ResourceInterface>
 
 export type ResourceLink<ResourceInterface = any> = string
+
+export type ResourceImport<ResourceInterface = any, ResourceProps = MapLike<any>> = {
+   type: ResourceLink<ResourceFactory<ResourceInterface>>
+   location?: string
+   identifier?: string
+   platform?: string
+} & ResourceProps
 
 export type SecurityGuard =
    "safe" |

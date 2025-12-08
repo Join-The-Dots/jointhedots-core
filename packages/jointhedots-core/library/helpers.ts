@@ -1,6 +1,7 @@
 import { URI } from 'vscode-uri'
 import { ComponentFilter, ComponentManifest, ComponentPublication } from './components'
 import { acquireComponent } from './manifold'
+import { ResourceEntry, ResourceImport } from '../ast'
 
 export function parseComponentURI(ref: string): URI {
    if (ref.startsWith("./")) {
@@ -108,4 +109,25 @@ export function matchComponentFilter(pub: ComponentPublication, filter?: Partial
    if (!match_list_in_list(pub.tags, filter.tags)) return false
    if (!match_item_in_list(pub.type, filter.types)) return false
    return true
+}
+
+export function parseResourceEntry(entry: ResourceEntry): ResourceImport {
+   if (typeof entry === "string") {
+      let [location, fragment] = entry.split("#", 2)
+
+      // Make resource data
+      const result: ResourceImport = { type: "module", location }
+      if (fragment) {
+         const [identifier, query] = fragment.split("?", 2)
+         result.identifier = identifier
+         if (query) {
+            for (const kv of query.split("&")) {
+               const [k, v] = kv.split("=")
+               result[k] = v === undefined ? true : v
+            }
+         }
+      }
+      return result
+   }
+   return entry
 }

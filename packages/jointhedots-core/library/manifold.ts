@@ -6,6 +6,8 @@ import { StaticComponentProvider } from "./providers/StaticComponentProvider"
 import { CombinedComponentProvider } from "./providers/CombinedComponentProvider"
 import { LocalComponentProvider } from "./providers/LocalComponentProvider"
 import { Log, queryLogInfos, queryLogObjects, QueryLogResult } from "../logging"
+import { parseResourceEntry } from "./helpers"
+import { __import_RESTService, RESTServiceImport } from "../services/RESTService"
 
 export type ComponentErrorManifest = ComponentManifest & {
    type: "<error>"
@@ -200,26 +202,24 @@ export class ComponentResource {
          if (loading) return loading
 
          loading = new Promise(async (resolve) => {
+            const { component } = this
             try {
                // Fetch manifest with resource catalog
-               const { component } = this
                if (component.installed === false) {
                   await component.install()
                }
 
                // Fetch resource data
                const { manifest } = component
-               const ref = manifest.services?.[this.resource]
-               if (typeof ref === "string") {
-                  let uri: string = ref
-                  let identifier: string = null
-                  const pos = ref.indexOf("#")
-                  if (pos > 0) {
-                     uri = ref.slice(0, pos)
-                     identifier = ref.slice(pos + 1) || null
-                  }
-                  this.entry = await ComponentsRegistry.resources_loader.load_resource(uri)
-                  this.identifier = identifier
+               const entry = parseResourceEntry(manifest.services?.[this.resource])
+               const type = entry?.type
+               if (type === "module") {
+                  this.entry = await ComponentsRegistry.resources_loader.load_resource(entry.location)
+                  this.identifier = entry.identifier
+               }
+               else if (type === "api.rest") {
+                  this.entry = __import_RESTService(entry as RESTServiceImport, component)
+                  this.identifier = null
                }
                else if (manifest.type) {
                   const controller = acquireComponent(manifest.type)
@@ -231,17 +231,19 @@ export class ComponentResource {
                      this.identifier = null
                   }
                   else {
-                     throw new Error(`Cannot provide service '${this.resource}'`)
+                     throw new Error(`Cannot provide resource '${this.resource}'`)
                   }
                }
                else {
-                  this.entry = null
-                  this.identifier = null
+                  throw new Error(`Cannot load resource '${this.resource}': ${JSON.stringify(entry)}`)
                }
-               ComponentsRegistry.datamap.set(this.get(), this)
+               const entrypoint = this.get()
+               if (entrypoint instanceof Object) {
+                  ComponentsRegistry.datamap.set(entrypoint, this)
+               }
             }
             catch (e) {
-               console.error(e)
+               console.error(`Cannot install service '${this.resource}' of '${component.id}':`, e)
                this.entry = null
                this.identifier = null
             }

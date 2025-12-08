@@ -16,6 +16,7 @@ export * from "./interpreter/elements"
 export * from "./interpreter/context"
 
 export * from "./library/components"
+export * from "./library/services"
 export * from "./library/manifold"
 export * from "./library/view-url"
 export * from "./library/settings"
