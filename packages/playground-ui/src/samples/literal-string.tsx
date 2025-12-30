@@ -1,0 +1,31 @@
+
+import { StandardLanguageProvider, CodeEditorHOC } from "@jointhedots/ui/CodeEditor"
+import { EmbedSyntax, parseTextTemplate } from "@jointhedots/core"
+import { renderRoot } from "../components/config"
+import { useState } from "react"
+
+const JsonEditor = CodeEditorHOC(new StandardLanguageProvider("json"))
+
+function ApplicationRoot() {
+   const [text, setText] = useState("My \\$(val1) = $( val1.map(x=>{return x*2}).join(';') )")
+   const [data, setData] = useState(`{"val1":[42,1,2]}`)
+   let result = ""
+   try {
+      const tmpl = parseTextTemplate(text, EmbedSyntax.DollarBracket)
+      const ctx = {
+         vars: JSON.parse(data)
+      }
+      result = tmpl.evaluate(ctx)
+   }
+   catch (e) {
+      console.error(e)
+      result = e.toString()
+   }
+   return <>
+      <JsonEditor value={text} onChange={(model) => setText(model.getValue())} />
+      <JsonEditor value={data} onChange={(model) => setData(model.getValue())} />
+      <pre>{result}</pre>
+   </>
+}
+
+renderRoot(<ApplicationRoot />)
