@@ -1,0 +1,37 @@
+.jtd-icons-avatar {
+   width: 1em;
+   height: 1em;
+   min-width: 1em;
+   min-height: 1em;
+   border-radius: 50%;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   background-color: var(--avatar-bgcolor);
+   user-select: none;
+
+   &>* {
+      color: white;
+      font-family: 'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif;
+      font-weight: bold;
+      font-size: 0.5em;
+   }
+}
+
+.jtd-icon {
+   position: relative;
+   height: 1em;
+   width: 1em;
+   min-height: 1em;
+   min-width: 1em;
+   max-height: 1em;
+   max-width: 1em;
+
+   &>* {
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      top: 0;
+   }
+}
