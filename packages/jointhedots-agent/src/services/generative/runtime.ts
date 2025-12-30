@@ -3,7 +3,7 @@ import { ActionUnit, Content, FeedbackUnit, SemanticUnit, TextualUnit } from "./
 import { Contribution as ContributionBase, IContributionContext, ContributionSpec, Target, ToolID, ToolGuide, IEnvironment, IToolsProvider, ToolSelector, ContributionData, StandardToolID } from "./context"
 import { Resource } from "./resource"
 import { ZodType } from "zod"
-import { Async, listOneOrMany, OneOrMany } from "../../common/types"
+import { Async, listOneOrMany, OneOrMany } from "@jointhedots/core"
 
 type ContributionEventCb = (target: Contribution, event: string) => void
 

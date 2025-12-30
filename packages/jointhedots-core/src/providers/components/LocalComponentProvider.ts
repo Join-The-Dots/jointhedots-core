@@ -1,5 +1,6 @@
 import { createComponentPublication, matchComponentFilter } from "../../components/helpers.ts"
 import { type ComponentFilter, type ComponentID, type ComponentManifest, type ComponentPublication, type IComponentProvider } from "../../components/components.ts"
+import { InMemComponentProvider } from "./InMemComponentProvider.ts"
 
 function openComponentDatabase(): Promise<IDBDatabase> {
    return new Promise((resolve, reject) => {
@@ -216,7 +217,7 @@ function deleteComponent(db: IDBDatabase, component_id: string): Promise<boolean
    })
 }
 
-export class LocalComponentProvider implements IComponentProvider {
+class BrowserComponentProvider implements IComponentProvider {
    db = openComponentDatabase()
    async get_component_publication(id: string): Promise<ComponentPublication> {
       const results = await getComponentsPublications(await this.db, [id])
@@ -237,4 +238,14 @@ export class LocalComponentProvider implements IComponentProvider {
    async delete_component(component_id: string): Promise<boolean> {
       return deleteComponent(await this.db, component_id)
    }
+}
+
+export function createLocalComponentProvider(): IComponentProvider {
+   try {
+      if (window) {
+         return new BrowserComponentProvider()
+      }
+   }
+   catch (_) { }
+   return new InMemComponentProvider()
 }

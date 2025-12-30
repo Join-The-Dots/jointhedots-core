@@ -1,7 +1,7 @@
 import { IContributionContext, IToolsProvider, IToolsSession, ToolGuide } from "../../services/generative/context"
 import { z, ZodAny } from "zod"
 import { SemanticUnit } from "../../services/generative/resource"
-import { OneOrMany } from "../../../jointhedots-core/common/types"
+import { OneOrMany } from "@jointhedots/core"
 
 // Function Tool types and factory
 export interface FunctionToolConfig<TInput extends z.ZodTypeAny, TOutput extends z.ZodTypeAny> {

@@ -1,0 +1,33 @@
+{
+   "compilerOptions": {
+      "target": "es2022",
+      "lib": [
+         "esnext",
+         "dom",
+         "dom.iterable"
+      ],
+      "allowJs": true,
+      "skipLibCheck": true,
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+      "allowImportingTsExtensions": true,
+      "noEmit": true,
+      "strictNullChecks": false,
+      "strict": false,
+      "downlevelIteration": true,
+      "module": "es2022",
+      "moduleResolution": "bundler",
+      "resolveJsonModule": true,
+      "sourceMap": true,
+      "jsx": "react-jsx",
+      "noImplicitThis": true,
+      "baseUrl": "./src",
+      "rootDir": "."
+   },
+   "include": [
+      "src"
+   ],
+   "exclude": [
+      "src/ui"
+   ]
+}

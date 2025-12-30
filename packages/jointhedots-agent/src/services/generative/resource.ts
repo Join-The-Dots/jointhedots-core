@@ -1,6 +1,5 @@
+import { OneOrMany } from "@jointhedots/core"
 import { ZodType } from "zod"
-import { OneOrMany } from "../../common/types"
-import { JSONSchema } from "../../scripting"
 
 export type Json = any
 

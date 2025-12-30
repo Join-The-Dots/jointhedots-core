@@ -20,8 +20,8 @@
       "react-toastify": "^9.1.3"
    },
    "devDependencies": {
-      "@jointhedots/core": "../jointhedots-core/dist/jointhedots-core",
-      "@jointhedots/ui": "../jointhedots-ui/dist/jointhedots-ui",
+      "@jointhedots/core": "../../packages/jointhedots-core/dist/jointhedots-core",
+      "@jointhedots/ui": "../../packages/jointhedots-ui/dist/jointhedots-ui",
       "typescript": "^5.9.3"
    },
    "scripts": {

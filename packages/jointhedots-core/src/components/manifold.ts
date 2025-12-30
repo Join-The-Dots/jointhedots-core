@@ -4,7 +4,7 @@ import { CommonResourceProvider } from "../providers/resources/CommonResourcePro
 import { StaticContentProvider } from "../providers/resources/StaticContentProvider.ts"
 import { StaticComponentProvider } from "../providers/components/StaticComponentProvider.ts"
 import { CombinedComponentProvider } from "../providers/components/CombinedComponentProvider.ts"
-import { LocalComponentProvider } from "../providers/components/LocalComponentProvider.ts"
+import { createLocalComponentProvider } from "../providers/components/LocalComponentProvider.ts"
 import { Log, queryLogInfos, queryLogObjects, type QueryLogResult } from "../logging/index.ts"
 import { parseResourceEntry } from "./helpers.ts"
 import { __import_RESTService, type RESTServiceImport } from "../interfaces/rest/interface.ts"
@@ -306,7 +306,7 @@ export class ComponentsManifold {
    constructor() {
       this.content_provider = new StaticContentProvider()
       this.components_provider.add_provider(new StaticComponentProvider(this.content_provider))
-      this.components_provider.add_provider(new LocalComponentProvider())
+      this.components_provider.add_provider(createLocalComponentProvider())
       this.resources_loader = new CommonResourceProvider(this.content_provider)
    }
    listen(l: ComponentsListener) {

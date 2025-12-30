@@ -1,7 +1,7 @@
 import { ZodType } from "zod"
 import { Content, SemanticUnit } from "./resource"
-import { Async, MapLike, OneOrMany } from "../../common/types"
 import { Blob, Resource } from "./resource"
+import { Async, MapLike, OneOrMany } from "@jointhedots/core"
 
 export type ToolID = string
 
