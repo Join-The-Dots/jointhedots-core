@@ -1,9 +1,9 @@
 import { IGenerativeModel, MessageFrame, CompletionResult } from "./model"
-import { ActionUnit, Content, FeedbackUnit, SemanticUnit, TextualUnit } from "./resource"
-import { Contribution as ContributionBase, IContributionContext, ContributionSpec, Target, ToolID, ToolGuide, IEnvironment, IToolsProvider, ToolSelector, ContributionData, StandardToolID } from "./context"
-import { Resource } from "./resource"
+import { ActionUnit, FeedbackUnit, SemanticUnit, TextualUnit } from "../semantic/units"
+import { Contribution as ContributionBase, ContributionSpec, Target, ToolID, ToolGuide, IAgenticWorkbench, IToolsProvider, ToolSelector, ContributionData, StandardToolID, Tooling, IAgenticPattern, ToolSet } from "./context"
 import { ZodType } from "zod"
 import { Async, listOneOrMany, OneOrMany } from "@jointhedots/core"
+import { Resource } from "../semantic/resource"
 
 type ContributionEventCb = (target: Contribution, event: string) => void
 
@@ -12,13 +12,13 @@ const HookSymbol = Symbol("hook")
 // Target condition based on function matching achievement
 export class TargetMatcher extends Target {
    constructor(
-      readonly matcher: (contrib: Contribution, ctx: IContributionContext) => Async<boolean>,
+      readonly matcher: (contrib: Contribution) => Async<boolean>,
    ) { super() }
-   getTool(ctx: IContributionContext): ToolGuide {
+   getTool(): ToolGuide {
       return null
    }
-   check(contrib: Contribution, ctx: IContributionContext): Async<boolean> {
-      return this.matcher(contrib, ctx)
+   check(contrib: Contribution): Async<boolean> {
+      return this.matcher(contrib)
    }
 }
 
@@ -26,10 +26,10 @@ export class TargetMatcher extends Target {
 // Target condition based on tool invokation
 export class TargetTool extends Target {
    tool_id: ToolID = null
-   getTool(ctx: StandardContributionContext): ToolGuide {
-      return ctx.env.getTool(this.tool_id)
+   getTool(env: IAgenticWorkbench): ToolGuide {
+      return env.selectTools(this.tool_id)[this.tool_id]
    }
-   check(contrib: Contribution, ctx: IContributionContext): Async<boolean> {
+   check(contrib: Contribution): Async<boolean> {
       const { data } = contrib
       const { actions } = data
       for (const key in actions) {
@@ -53,7 +53,7 @@ export class TargetTool extends Target {
 export class TargetOutput extends Target {
    id = StandardToolID.Output
    schema: ZodType = null
-   getTool(ctx: IContributionContext): ToolGuide {
+   getTool(): ToolGuide {
       return {
          id: StandardToolID.Output,
          label: "StructuredOutput",
@@ -61,7 +61,7 @@ export class TargetOutput extends Target {
          input: this.schema,
       }
    }
-   check(contrib: Contribution, ctx: IContributionContext): Async<boolean> {
+   check(contrib: Contribution): Async<boolean> {
       const { data } = contrib
       const { actions } = data
       for (const key in actions) {
@@ -92,9 +92,11 @@ export function mergeToolGuides(...lists: ToolGuide[][]): Record<ToolID, ToolGui
 
 class Contribution extends ContributionBase {
    [HookSymbol]: ContributionHook
-   constructor(id: string) {
+   constructor(
+      readonly id: string,
+      readonly env: IAgenticWorkbench,
+   ) {
       super()
-      this.id = id
    }
    wait(): Promise<Contribution> {
       let hook = this[HookSymbol]
@@ -135,35 +137,56 @@ class ContributionHook {
    }
 }
 
-class StandardEnvironment implements IEnvironment {
+class StandardEnvironment implements IAgenticWorkbench {
    private providers: IToolsProvider[] = []
    private toolIndex = new Map<string, IToolsProvider>()
+   resources = new Map<string, Resource>()
+   derived: StandardEnvironment = null
+   nextId = 0
+   model: IGenerativeModel = null
+
+   emit(spec: ContributionSpec, data?: ContributionData): Contribution {
+      const contrib = new Contribution(`c${this.nextId++}`, this)
+      contrib.spec = spec || null
+      this.putResource(contrib)
+      if (data !== undefined) {
+         contrib.status = "success"
+         Object.assign(contrib.data, data)
+      }
+      else {
+         contrib.status = "running"
+         setTimeout(() => {
+            const pattern = contrib.spec.pattern || new DirectAgenticPattern()
+            pattern.execute(contrib)
+         })
+      }
+      return contrib
+   }
+
+   getModel() {
+      return this.model
+   }
+   equipModel(model: IGenerativeModel) {
+      this.model = model
+   }
 
    getTool(tool_id: string): ToolGuide {
-      return this.selectTools([tool_id])?.[0]
+      return this.selectTools([tool_id])[tool_id]
    }
-   Tool(tool_id: string): ToolGuide {
-      return this.selectTools([tool_id])?.[0]
-   }
-
-   equip(provider: IToolsProvider): void {
+   equipTools(provider: IToolsProvider): void {
       this.providers.push(provider)
       for (const tool of provider.getTools()) {
          this.toolIndex.set(tool.id, provider)
       }
    }
-
-   selectTools(selector?: ToolSelector): ToolGuide[] {
-      if (!selector || selector.includes("*")) {
-         return this.providers.flatMap(p => p.getTools())
-      }
-      const tools = new Map<string, ToolGuide>()
+   selectTools(selector?: OneOrMany<ToolSelector>): ToolSet {
+      const tools: ToolSet = this.derived ? this.derived.selectTools(selector) : {}
       const list = this.providers.flatMap(p => p.getTools())
-      for (const sel of selector) {
+      for (const sel of listOneOrMany(selector)) {
          let matched = false
          for (const tool of list) {
             if (this.matchesSingleSelector(tool.id, sel)) {
-               tools.set(tool.id, tool)
+               tools[tool.id] = tool
                matched = true
             }
          }
@@ -171,7 +194,7 @@ class StandardEnvironment implements IEnvironment {
             throw new Error(`No tools matched selector: ${sel}`)
          }
       }
-      return Array.from(tools.values())
+      return tools
    }
 
    private matchesSingleSelector(toolId: string, sel: string): boolean {
@@ -180,7 +203,7 @@ class StandardEnvironment implements IEnvironment {
       return false
    }
 
-   async executeTool(task: ActionUnit, context: IContributionContext): Promise<OneOrMany<SemanticUnit>> {
+   async executeTool(task: ActionUnit): Promise<OneOrMany<SemanticUnit>> {
       console.log(task)
       const provider = this.toolIndex.get(task.tool_id)
       if (!provider) {
@@ -188,118 +211,193 @@ class StandardEnvironment implements IEnvironment {
       }
       const session = await provider.createSession()
       try {
-         return await provider.invokeTool(task.tool_id, task.tool_input, session, context)
+         return await provider.invokeTool(task.tool_id, task.tool_input, session, this)
       } finally {
          provider.disposeSession(session)
       }
    }
-}
-
-class StandardContributionContext implements IContributionContext {
-   env: IEnvironment
-   model: IGenerativeModel
-   contributions = new Map<string, Contribution>()
-   resources = new Map<string, Resource>()
-   nextId = 1
-
-   constructor(model: IGenerativeModel, env: IEnvironment) {
-      this.model = model
-      this.env = env
-   }
-
-   emit(data: ContributionData, spec?: ContributionSpec): Contribution {
-      const contrib = new Contribution(`c${this.nextId++}`)
-      contrib.status = "success"
-      contrib.spec = spec || null
-      contrib.data = data || contrib.data || {}
-      this.contributions.set(contrib.id, contrib)
-      return contrib
-   }
-
    getResource(uri: string): Resource {
       let res = this.resources.get(uri)
       if (res) return res
-
-      const [scheme, id] = uri.split(":", 2)
-      if (scheme === "contrib") {
-         return this.contributions.get(id)
-      }
-      return null
+      return this.derived ? this.derived.getResource(uri) : null
    }
-
+   putResource(res: Resource) {
+      this.resources.set(res.getURI(), res)
+   }
+   *listResources(): Generator<Resource> {
+      if (this.derived) {
+         yield* this.derived.listResources()
+      }
+      for (const res of this.resources.values()) {
+         yield res
+      }
+   }
    async fetchResource(uri: string): Promise<Resource> {
       const found = this.getResource(uri)
       if (found) return found
 
       throw new Error("Resource not found at: " + uri)
    }
-
-   generate(spec: ContributionSpec): Contribution {
-      const contrib = this.emit(null, spec)
-      setTimeout(() => generateContribution(contrib, this))
-      return contrib
-   }
 }
 
+class DirectAgenticPattern implements IAgenticPattern {
+   async execute(contrib: Contribution) {
+      const { spec, env } = contrib
+      const model = env.getModel()
 
-async function generateContribution(contrib: Contribution, ctx: StandardContributionContext) {
-   const { spec } = contrib
+      // Execute target reaching logic
+      if (spec.objective) {
 
-   // Execute target reaching logic
-   if (spec.objective) {
-
-      // Collect targeted tools
-      const targets: ToolGuide[] = []
-      for (const target of listOneOrMany(spec.objective)) {
-         const tool = target.getTool(ctx)
-         if (tool) targets.push(tool)
-      }
-
-      // Execute model
-      let requiredToolsTryCount = 0
-      while (1) {
-         const frames = enframeContributionSpec(spec, ctx)
-         const tools = mergeToolGuides(spec.tooling && ctx.env.selectTools(spec.tooling), targets)
-         const requiredTools = (requiredToolsTryCount > 0 && targets.length > 0) ? targets : false
-
-         // Generate semantic units
-         const response = await ctx.model.generate({ frames, tools, requiredTools })
-         contrib.emit("message", response.items)
-
-         // Execute tools
-         const called = await executeTools(contrib, ctx)
-
-         // Check for continuation
-         if (checkTargetReaching(contrib, ctx)) {
-            break
+         // Collect targeted tools
+         const targets: ToolGuide[] = []
+         for (const target of listOneOrMany(spec.objective)) {
+            const tool = target.getTool(env)
+            if (tool) targets.push(tool)
          }
-         if (called === 0) {
-            if (requiredToolsTryCount > 0) {
-               console.log("> Failed to reach target")
+
+         // Execute model
+         let requiredToolsTryCount = 0
+         while (1) {
+            const frames = enframeContributionSpec(spec)
+
+            const tools = selectTools(spec.tooling, env)
+            targets.forEach(x => tools[x.id] = x)
+
+            const requiredTools = (requiredToolsTryCount > 0 && targets.length > 0) ? targets : false
+
+            // Generate semantic units
+            const response = await model.generate({ frames, tools, requiredTools })
+            contrib.emit("message", response.items)
+
+            // Execute tools
+            const called = await executeTools(contrib)
+
+            // Check for continuation
+            if (checkTargetReaching(contrib)) {
+               break
             }
-            requiredToolsTryCount++
+            if (called === 0) {
+               if (requiredToolsTryCount > 0) {
+                  console.log("> Failed to reach target")
+               }
+               requiredToolsTryCount++
+            }
+            shiftContribution(contrib)
          }
-         shiftContribution(contrib, ctx)
       }
-   }
-   // Execute output without targets
-   else {
-      const frames = enframeContributionSpec(spec, ctx)
-      const tools = mergeToolGuides(spec.tooling && ctx.env.selectTools(spec.tooling))
-      const res = await ctx.model.generate({ frames, tools, requiredTools: false })
-      contrib.emit("message", res.items)
-   }
+      // Execute output without targets
+      else {
+         const frames = enframeContributionSpec(spec)
+         const tools: Record<string, ToolGuide> = {}
+         for (const tooling of listOneOrMany(spec.tooling)) {
+            for (const tool of tooling.getTools(env)) {
+               tools[tool.id] = tool
+            }
+         }
+         const res = await model.generate({ frames, tools, requiredTools: false })
+         contrib.emit("message", res.items)
+      }
 
-   contrib.status = "success"
-   contrib[HookSymbol]?.complete?.()
+      contrib.status = "success"
+      contrib[HookSymbol]?.complete?.()
+   }
 }
 
-async function executeTools(contrib: Contribution, ctx: StandardContributionContext): Promise<number> {
-   const { data } = contrib
+class ReActAgenticPattern implements IAgenticPattern {
+   async execute(contrib: Contribution) {
+      const { spec, env } = contrib
+      const model = env.getModel()
+
+      // Execute target reaching logic
+      if (spec.objective) {
+
+         // Collect targeted tools
+         const targets: ToolGuide[] = []
+         for (const target of listOneOrMany(spec.objective)) {
+            const tool = target.getTool(env)
+            if (tool) targets.push(tool)
+         }
+
+         // Execute model
+         let requiredToolsTryCount = 0
+         while (1) {
+            const frames = enframeContributionSpec(spec)
+
+            const tinking = await model.generate({
+               frames: [
+                  ...frames,
+                  {
+                     role: "directive",
+                     items: [TextualUnit.New("Explain the issue, and plan actions")],
+                  },
+               ],
+               tools: {},
+               requiredTools: false,
+            })
+            frames.push({
+               role: "self",
+               items: tinking.items
+            })
+
+            const tools = selectTools(spec.tooling, env)
+            targets.forEach(x => tools[x.id] = x)
+
+            const requiredTools = (requiredToolsTryCount > 0 && targets.length > 0) ? targets : false
+
+            // Generate semantic units
+            const response = await model.generate({ frames, tools, requiredTools })
+            contrib.emit("message", response.items)
+
+            // Execute tools
+            const called = await executeTools(contrib)
+
+            // Check for continuation
+            if (checkTargetReaching(contrib)) {
+               break
+            }
+            if (called === 0) {
+               if (requiredToolsTryCount > 0) {
+                  console.log("> Failed to reach target")
+               }
+               requiredToolsTryCount++
+            }
+            shiftContribution(contrib)
+         }
+      }
+      // Execute output without targets
+      else {
+         const frames = enframeContributionSpec(spec)
+         const tools: Record<string, ToolGuide> = {}
+         for (const tooling of listOneOrMany(spec.tooling)) {
+            for (const tool of tooling.getTools(env)) {
+               tools[tool.id] = tool
+            }
+         }
+         const res = await model.generate({ frames, tools, requiredTools: false })
+         contrib.emit("message", res.items)
+      }
+
+      contrib.status = "success"
+      contrib[HookSymbol]?.complete?.()
+   }
+}
+
+function selectTools(toolings: OneOrMany<Tooling>, env: IAgenticWorkbench) {
+   const tools: Record<string, ToolGuide> = {}
+   for (const tooling of listOneOrMany(toolings)) {
+      for (const tool of tooling.getTools(env)) {
+         tools[tool.id] = tool
+      }
+   }
+   return tools
+}
+
+async function executeTools(contrib: Contribution): Promise<number> {
+   const { data, env } = contrib
    let called = 0
    for (const item of contrib.iter("message")) {
       if (item instanceof ActionUnit) {
-         const result = await ctx.env.executeTool(item, ctx)
+         const result = await env.executeTool(item)
          if (!data.actions) data.actions = {}
          data.actions[item.action_id] = {
             tool_id: item.tool_id,
@@ -316,12 +414,12 @@ async function executeTools(contrib: Contribution, ctx: StandardContributionCont
    return called
 }
 
-function checkTargetReaching(contrib: Contribution, ctx: IContributionContext): boolean {
+function checkTargetReaching(contrib: Contribution): boolean {
    const { spec } = contrib
    let unmatched = 0
    if (spec) {
       for (const target of listOneOrMany(spec.objective)) {
-         if (target.check(contrib, ctx)) {
+         if (target.check(contrib)) {
             return true
          }
          unmatched++
@@ -330,14 +428,15 @@ function checkTargetReaching(contrib: Contribution, ctx: IContributionContext): 
    return unmatched === 0
 }
 
-function shiftContribution(base: Contribution, ctx: IContributionContext) {
+function shiftContribution(base: Contribution) {
+   const { env } = base
 
    // Move some state into an intermediate contribution
-   const inserted = ctx.emit({
-      message: base.data.message,
-   }, {
+   const inserted = env.emit({
       ...base.spec,
       objective: undefined,
+   }, {
+      message: base.data.message,
    })
 
    // Remove duplication from base
@@ -347,7 +446,7 @@ function shiftContribution(base: Contribution, ctx: IContributionContext) {
    base.data.message = undefined
 }
 
-function enframeContributionSpec(spec: ContributionSpec, ctx: IContributionContext): MessageFrame[] {
+function enframeContributionSpec(spec: ContributionSpec): MessageFrame[] {
    const frames: MessageFrame[] = []
 
    const serializeContent = (val: any, out: SemanticUnit[]): SemanticUnit[] => {
@@ -366,7 +465,7 @@ function enframeContributionSpec(spec: ContributionSpec, ctx: IContributionConte
       return out
    }
 
-   const unrollContent = (value: OneOrMany<Content>, role: MessageFrame["role"]) => {
+   const unrollContent = (value: OneOrMany<SemanticUnit>, role: MessageFrame["role"]) => {
       if (!value) return
       const items = serializeContent(value, [])
       if (items.length > 0) {
@@ -378,13 +477,13 @@ function enframeContributionSpec(spec: ContributionSpec, ctx: IContributionConte
       if (!value) return
       for (const contrib of listOneOrMany(value)) {
          if (contrib.spec) {
-            let historyFrames = enframeContributionSpec(contrib.spec, ctx)
+            let historyFrames = enframeContributionSpec(contrib.spec)
             if (excludeSystem) {
                historyFrames = historyFrames.filter(f => f.role !== "system")
             }
             frames.push(...historyFrames)
          }
-         unrollContent(contrib, "self")
+         unrollContent(contrib.toSemantic(), "self")
       }
    }
 
@@ -396,10 +495,11 @@ function enframeContributionSpec(spec: ContributionSpec, ctx: IContributionConte
    return frames
 }
 
-export function createEnvironment(): StandardEnvironment {
+export function createWorkbench(): IAgenticWorkbench {
    return new StandardEnvironment()
 }
 
-export function createContext(model: IGenerativeModel, env: IEnvironment): IContributionContext {
-   return new StandardContributionContext(model, env)
+export const AgenticPatterns = {
+   "Direct": new DirectAgenticPattern(),
+   "ReAct": new ReActAgenticPattern(),
 }

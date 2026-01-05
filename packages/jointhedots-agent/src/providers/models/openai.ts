@@ -2,7 +2,7 @@ import { z } from "zod"
 import OpenAI from "openai"
 import { AzureOpenAI } from "openai"
 import { IGenerativeModel, MessageFrame, CompletionResult, ModelCapabilities, ModelIdentity, CompletionQuery } from "../../services/generative/model"
-import { TextualUnit, ActionUnit, SemanticUnit, VisualUnit, FeedbackUnit } from "../../services/generative/resource"
+import { TextualUnit, ActionUnit, SemanticUnit, VisualUnit, FeedbackUnit, AudioUnit } from "../../services/semantic/units"
 import type { ChatCompletionMessageParam, ChatCompletionTool, ChatCompletionContentPart, ChatCompletionSystemMessageParam } from "openai/resources/chat/completions"
 import { ChatCompletionCreateParamsNonStreaming } from "openai/resources.js"
 import { ToolGuide } from "../../services/generative/context"
@@ -143,11 +143,26 @@ export class OpenAIAgentModel implements IGenerativeModel {
          if (item.type === TextualUnit.type) {
             const unit = item as TextualUnit
             (msg.content as ChatCompletionContentPart[]).push({ type: "text", text: unit.text })
-
          }
          else if (item.type === VisualUnit.type) {
             const unit = item as VisualUnit
-            (msg.content as ChatCompletionContentPart[]).push({ type: "image_url", image_url: { url: unit.url } })
+            (msg.content as ChatCompletionContentPart[]).push({
+               type: "image_url",
+               image_url: { url: unit.toURI() }
+            })
+         }
+         else if (item.type === AudioUnit.type) {
+            const unit = item as AudioUnit
+            const { format } = unit.data
+            if (format === "wav" || format === "mp3") {
+               (msg.content as ChatCompletionContentPart[]).push({
+                  type: "input_audio",
+                  input_audio: { data: unit.data.toBase64(), format }
+               })
+            }
+            else {
+               console.log("Audio semantic unit ignore")
+            }
          }
          else if (item.type === ActionUnit.type) {
             const unit = item as ActionUnit

@@ -1,9 +1,18 @@
 import { ZodType } from "zod"
-import { Content, SemanticUnit } from "./resource"
-import { Blob, Resource } from "./resource"
 import { Async, MapLike, OneOrMany } from "@jointhedots/core"
+import { ActionUnit, AttachmentUnit, SemanticUnit } from "../semantic/units"
+import { Blob, Resource } from "../semantic/resource"
+import { IGenerativeModel } from "./model"
 
 export type ToolID = string
+
+export type ToolSet = Record<ToolID, ToolGuide>
+
+// Tool selector define what agent can use
+// - All tools: `*`
+// - All provider tools: `${provider_id}.*`
+// - All provider tools subset: `${provider_id}.${subset_id}.*`
+export type ToolSelector = string
 
 export enum StandardToolID {
    WebSearch = "std.web-search",
@@ -28,71 +37,86 @@ export interface IToolsSession {
    // Can be anything
 }
 
-// Tool selector define what agent can use
-// - All tools: `*`
-// - All provider tools: `${provider_id}.*`
-// - All provider tools subset: `${provider_id}.${subset_id}.*`
-export type ToolSelector = string[]
-
 export interface IToolsProvider {
    readonly id: string
 
    // Tooling
    getTools(): ToolGuide[] // Liste of tools provided
-   invokeTool(tool_id: string, tool_input: any, session: IToolsSession, context: IContributionContext): Promise<OneOrMany<SemanticUnit>>
+   invokeTool(tool_id: string, tool_input: any, session: IToolsSession, env: IAgenticWorkbench): Promise<OneOrMany<SemanticUnit>>
 
    // Provider state management
    createSession(): Promise<IToolsSession> // Return null when provider is stateless
    disposeSession(session: IToolsSession)
 }
 
-export interface IEnvironment {
-   equip(provider: IToolsProvider): void
-   getTool(tool_id: string): ToolGuide
-   selectTools(selector?: ToolSelector): ToolGuide[]
-   executeTool(input: any, context: IContributionContext): Promise<OneOrMany<Content>>
+export interface IAgenticPattern {
+   execute(contrib: Contribution)
+}
+
+export interface IAgenticWorkbench {
+
+   emit(spec: ContributionSpec, data?: ContributionData): Contribution
+
+   equipModel(model: IGenerativeModel)
+   getModel(criterion?: any): IGenerativeModel
+
+   equipTools(provider: IToolsProvider): void
+   selectTools(selector?: OneOrMany<ToolSelector>): ToolSet
+   executeTool(task: ActionUnit): Promise<OneOrMany<SemanticUnit>>
+
+   getResource(uri: string): Resource
+   putResource(res: Resource)
+   listResources(): Generator<Resource>
+   fetchResource(uri: string): Promise<Resource>
 }
 
 // Target condition (defined when contribution reach expected state)
 export abstract class Target {
-   abstract getTool(ctx: IContributionContext): ToolGuide
-   abstract check(contrib: Contribution, ctx: IContributionContext): Async<boolean>
+   abstract getTool(env: IAgenticWorkbench): ToolGuide
+   abstract check(contrib: Contribution): Async<boolean>
+}
+
+// Target condition (defined when contribution reach expected state)
+export abstract class Tooling {
+   abstract getTools(env: IAgenticWorkbench): ToolGuide[]
 }
 
 export type ContributionSpec = {
+
+   // Agentic pattern
+   pattern?: IAgenticPattern
+
    // History propagation
    history?: OneOrMany<Contribution>
 
    // Environment
-   tooling?: ToolSelector // Tools available
-   private?: OneOrMany<Content> // Privates messages
-   message?: OneOrMany<Content> // Messages
+   tooling?: OneOrMany<Tooling> // Tools available
+   private?: OneOrMany<SemanticUnit> // Privates messages
+   message?: OneOrMany<SemanticUnit> // Messages
 
    // Conditionning
-   system?: OneOrMany<Content> // System prompt for this contribution
-   directive?: OneOrMany<Content> // Directive for this contribution
+   system?: OneOrMany<SemanticUnit> // System prompt for this contribution
+   directive?: OneOrMany<SemanticUnit> // Directive for this contribution
    objective?: OneOrMany<Target> // Target that define the goals achievement condition
 }
 
-export type OutputResult = {
-   guide: ToolGuide
-   data: any
-}
 
 export type Invokation = {
    tool_id?: string
    input?: unknown
-   output?: OneOrMany<Content>
+   output?: OneOrMany<SemanticUnit>
    failure?: Error
 }
 
 export type StreamPacket = {
-   message?: OneOrMany<Content>
+   message?: OneOrMany<SemanticUnit>
 }
 
 export type Streamlet<T> = T[]
 
 export type ContributionData = {
+   pattern?: IAgenticPattern
+
    // Semantic items
    message?: Streamlet<SemanticUnit>
 
@@ -112,11 +136,14 @@ export type ContributionData = {
    output?: unknown
 }
 
+export type ContributionStatus = "success" | "failed" | "pending" | "running"
+
 export abstract class Contribution extends Resource {
 
    // Definition
-   id: string = null
-   status: "success" | "failed" | "pending" | "running" = "pending"
+   readonly id: string = null
+   readonly env: IAgenticWorkbench
+   status: ContributionStatus = "pending"
    spec?: ContributionSpec = null
    data: ContributionData = {}
 
@@ -144,6 +171,31 @@ export abstract class Contribution extends Resource {
    has<K extends keyof ContributionData>(channel: K): boolean {
       return !!this.data[channel]
    }
+   share(fragment?: string): AttachmentUnit {
+      return AttachmentUnit.New(this, fragment)
+   }
+
+   getDependencies(): Resource[] {
+      const deps: Resource[] = []
+      function collectConnectedContributions(value) {
+         if (value instanceof Resource) {
+            if (!deps.includes(value)) deps.push(value)
+         }
+         else if (value instanceof SemanticUnit) {
+            //TODO
+         }
+         else if (Array.isArray(value)) {
+            value.forEach(collectConnectedContributions)
+         }
+         else if (value.constructor === Object) {
+            for (const key in value) {
+               collectConnectedContributions(value[key])
+            }
+         }
+      }
+      collectConnectedContributions(this.spec)
+      return deps
+   }
 
    getURI(): string {
       return `contrib:${this.id}`
@@ -167,9 +219,3 @@ export abstract class Contribution extends Resource {
    }
 }
 
-export interface IContributionContext {
-   getResource(id: string): Resource
-   fetchResource(id: string): Promise<Resource>
-   emit(data: ContributionData, spec?: ContributionSpec): Contribution
-   generate(spec: ContributionSpec): Contribution
-}

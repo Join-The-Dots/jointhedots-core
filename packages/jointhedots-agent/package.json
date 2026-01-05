@@ -3,42 +3,38 @@
    "private": true,
    "version": "0.0.1",
    "type": "module",
+   "componentsContainer": true,
    "scripts": {
       "watch": "tsc --watch --noEmit",
       "build": "jointhedots-gear make --libs @jointhedots/agent --devmode --dist ./dist",
       "dev": "jointhedots-gear make --libs @jointhedots/agent --watch --devmode --dist ./dist",
-      "lint": "eslint .",
-      "preview": "vite preview",
-      "test": "vitest",
-      "test:run": "vitest run",
-      "cli": "set NODE_TLS_REJECT_UNAUTHORIZED=0&& tsx src/cli/index.ts"
+      "test": "npx tsx --test test/textual-segmenter.test.ts",
+      "cli": "set NODE_TLS_REJECT_UNAUTHORIZED=0&& tsx src/cli/index.ts",
+      "serve": "jointhedots-gear serve --app playground:agent --devmode --port 3001"
    },
    "dependencies": {
       "@jointhedots/core": "^0.0.0",
+      "@jointhedots/ui": "^0.0.0",
       "@langchain/core": "^1.1.7",
       "@langchain/ollama": "^1.1.0",
       "@langchain/openai": "^1.2.0",
       "@modelcontextprotocol/sdk": "^1.25.1",
+      "@vscode/vscode-languagedetection": "^1.0.22",
       "ollama": "^0.6.3",
-      "openai": "^6.14.0"
+      "openai": "^6.14.0",
+      "d3-dag": "^1.1.0"
    },
    "devDependencies": {
       "@jointhedots/core": "../jointhedots-core/dist/jointhedots-core",
-      "react": "^18.3.1",
-      "react-dom": "^18.3.1",
-      "@eslint/js": "^9.17.0",
+      "@jointhedots/ui": "../jointhedots-ui/dist/jointhedots-ui",
+      "bootstrap-icons": "^1.11.3",
+      "font-awesome": "~4.7.0",
       "@types/node": "^22.0.3",
       "@types/react": "^18.3.18",
       "@types/react-dom": "^18.3.5",
-      "@vitejs/plugin-react": "^4.3.4",
-      "eslint": "^9.17.0",
-      "eslint-plugin-react-hooks": "^5.1.0",
-      "eslint-plugin-react-refresh": "^0.4.16",
-      "globals": "^15.14.0",
+      "react": "^18.3.1",
+      "react-dom": "^18.3.1",
       "tsx": "^4.19.2",
-      "typescript": "~5.7.2",
-      "typescript-eslint": "^8.18.1",
-      "vite": "^6.0.3",
-      "vitest": "^2.1.8"
+      "typescript": "~5.7.2"
    }
 }

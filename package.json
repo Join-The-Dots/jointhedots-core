@@ -13,5 +13,8 @@
    "scripts": {
       "prepare": "node install.mjs",
       "test": "mocha -r ts-node/register \"packages/**/test/**/*.ts\""
+   },
+   "dependencies": {
+      "nats": "^2.29.3"
    }
 }

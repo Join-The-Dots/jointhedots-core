@@ -27,11 +27,5 @@ export function areSimilarObjects(x: MapLike<any>, y: MapLike<any>): boolean {
 
 export function* listOneOrMany<T>(cnt: OneOrMany<T>): Generator<T> {
    if (Array.isArray(cnt)) { for (const c of cnt) yield c }
-   else yield cnt
-}
-
-export const OneOrMany={
-   list(){
-      
-   }
+   else if (cnt) yield cnt
 }

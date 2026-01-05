@@ -1,7 +1,7 @@
-import { IContributionContext, IToolsProvider, IToolsSession, ToolGuide } from "../../services/generative/context"
+import { IAgenticWorkbench, IToolsProvider, IToolsSession, ToolGuide } from "../../services/generative/context"
 import { z, ZodAny } from "zod"
-import { SemanticUnit } from "../../services/generative/resource"
 import { OneOrMany } from "@jointhedots/core"
+import { SemanticUnit } from "../../services/semantic/units"
 
 // Function Tool types and factory
 export interface FunctionToolConfig<TInput extends z.ZodTypeAny, TOutput extends z.ZodTypeAny> {
@@ -12,7 +12,7 @@ export interface FunctionToolConfig<TInput extends z.ZodTypeAny, TOutput extends
    procedure?: string
    input: TInput
    output?: TOutput
-   executor: (input: z.infer<TInput>, session: IToolsSession, context: IContributionContext) => Promise<OneOrMany<SemanticUnit>>
+   executor: (input: z.infer<TInput>, session: IToolsSession, env: IAgenticWorkbench) => Promise<OneOrMany<SemanticUnit>>
 }
 
 export function createFunctionTool<TInput extends z.ZodTypeAny, TOutput extends z.ZodTypeAny>(
@@ -40,12 +40,12 @@ export function createFunctionTool<TInput extends z.ZodTypeAny, TOutput extends 
          }]
       }
 
-      async invokeTool(tool_id: string, input: unknown, session: IToolsSession, context: IContributionContext): Promise<OneOrMany<SemanticUnit>> {
+      async invokeTool(tool_id: string, input: unknown, session: IToolsSession, env: IAgenticWorkbench): Promise<OneOrMany<SemanticUnit>> {
          if (tool_id !== this.id) {
             throw new Error(`Unknown tool: ${tool_id}`)
          }
          const parsed = this.config.input.parse(input)
-         return await this.config.executor(parsed, session, context)
+         return await this.config.executor(parsed, session, env)
       }
 
       async createSession(): Promise<IToolsSession> {

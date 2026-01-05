@@ -21,13 +21,12 @@
       "sourceMap": true,
       "jsx": "react-jsx",
       "noImplicitThis": true,
-      "baseUrl": "./src",
-      "rootDir": "."
+      "rootDir": "./src"
    },
    "include": [
       "src"
    ],
    "exclude": [
       "src/ui"
-   ]
+   ],
 }

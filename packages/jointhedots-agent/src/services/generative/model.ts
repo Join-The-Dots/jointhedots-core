@@ -1,5 +1,5 @@
+import { SemanticUnit } from "../semantic/units"
 import { ToolGuide, ToolID } from "./context"
-import { SemanticUnit } from "./resource"
 
 export interface ModelInputCapabilities {
    text: boolean

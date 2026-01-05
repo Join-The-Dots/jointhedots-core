@@ -1,11 +1,10 @@
 import * as DAGLayout from 'd3-dag'
 import './index.scss'
-import Icon from '../Icon'
 import { GraphOrderingAlgorithm } from '../../utils/graphOrdering'
 import { Fragment, useCallback, useMemo, useState } from 'react'
-import { ContributionItem } from '../../agent/ContributionsFlow'
 import { createPortal } from "react-dom"
 import { addGlobalStylesToShadowRoot } from '../../utils/stylesheet'
+import Icon from '@jointhedots/ui/Icon'
 
 const node_radius = 20
 const node_gap = 10
@@ -27,7 +26,7 @@ export enum EdgeKind {
 
 export interface DiagramHandler<Node, Edge> {
    getEdges(n: Node, visitor: (target: Node, edge: Edge, kind: EdgeKind) => void)
-   getNodes(n: Node, visitor: (target: Node, version: string) => void)
+   getNodes(visitor: (target: Node, version: string) => void)
    getNodeOrder(n: Node): number
    getNodeName(n: Node): string
    getNodeIcon(n: Node): string
@@ -259,7 +258,7 @@ export function updateDiagram<Node, Edge>(diag: DiagramDisplayer<Node, Edge>) {
       return blk
    }
 
-   graph.getNodes(null, (node: Node, version: Version) => {
+   graph.getNodes((node: Node, version: Version) => {
       let blk = acquireBlock(node)
       if (blk.version !== version) {
          hasChanged = true
@@ -313,35 +312,38 @@ export function createDiagram<Node, Edge>(graph: DiagramHandler<Node, Edge>): Di
    return diag
 }
 
+export type BlockViewer = (block: DiagramBlock) => React.ReactNode
 
 function DiagramBlockView(props: {
-   block: DiagramBlock,
-   selected: boolean,
-   onSelect: (target: DiagramBlock) => void,
+   block: DiagramBlock
+   selected: boolean
+   viewer: BlockViewer
+   onSelect: (target: DiagramBlock) => void
 }) {
-   const { block, selected, onSelect } = props
+   const { block, selected, viewer, onSelect } = props
    return (<div
       style={{ border: selected ? "thin solid #aaa" : "thin dashed #aaa4" }}
       title={block.name}
       onClick={() => onSelect(block)}
    >
-      <ContributionItem cn={block.node} />
+      {viewer(block.node)}
    </div>)
 }
 
 export function DiagramBlockMinimap(props: {
-   diag: DiagramDisplayer,
-   selection?: DiagramBlock,
-   onSelect: (target: DiagramBlock) => void,
+   diag: DiagramDisplayer
+   selection?: DiagramBlock
+   onSelect: (target: DiagramBlock) => void
 }) {
 }
 
 export function DiagramView(props: {
-   diag: DiagramDisplayer,
-   selection?: DiagramBlock,
-   onSelect: (target: DiagramBlock) => void,
+   diag: DiagramDisplayer
+   viewer: BlockViewer
+   selection?: DiagramBlock
+   onSelect: (target: DiagramBlock) => void
 }) {
-   const { diag, selection, onSelect } = props
+   const { diag, selection, viewer, onSelect } = props
    const [widget, setWidget] = useState<JTDDiagramGraph>(null)
 
    const root = useCallback((elm: JTDDiagramGraph) => {
@@ -378,6 +380,7 @@ export function DiagramView(props: {
                <DiagramBlockView
                   key={block.id}
                   block={block}
+                  viewer={viewer}
                   selected={selected}
                   onSelect={onSelect}
                />,
