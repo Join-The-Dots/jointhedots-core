@@ -73,6 +73,7 @@ export interface IAgenticWorkbench {
 // Target condition (defined when contribution reach expected state)
 export abstract class Target {
    abstract getTool(env: IAgenticWorkbench): ToolGuide
+   abstract executeTool(action: ActionUnit, env: IAgenticWorkbench): Async<OneOrMany<SemanticUnit>>
    abstract check(contrib: Contribution): Async<boolean>
 }
 
@@ -103,7 +104,7 @@ export type ContributionSpec = {
 
 export type Invokation = {
    tool_id?: string
-   input?: unknown
+   input?: SemanticUnit
    output?: OneOrMany<SemanticUnit>
    failure?: Error
 }

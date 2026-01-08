@@ -17,6 +17,9 @@ export class TargetMatcher extends Target {
    getTool(): ToolGuide {
       return null
    }
+   executeTool(action: ActionUnit) {
+      return undefined
+   }
    check(contrib: Contribution): Async<boolean> {
       return this.matcher(contrib)
    }
@@ -28,6 +31,9 @@ export class TargetTool extends Target {
    tool_id: ToolID = null
    getTool(env: IAgenticWorkbench): ToolGuide {
       return env.selectTools(this.tool_id)[this.tool_id]
+   }
+   executeTool(action: ActionUnit, env: IAgenticWorkbench) {
+      return env.executeTool(action)
    }
    check(contrib: Contribution): Async<boolean> {
       const { data } = contrib
@@ -60,6 +66,9 @@ export class TargetOutput extends Target {
          intent: "Fill output based on schema",
          input: this.schema,
       }
+   }
+   executeTool(action: ActionUnit) {
+      return action.tool_input
    }
    check(contrib: Contribution): Async<boolean> {
       const { data } = contrib
@@ -397,7 +406,17 @@ async function executeTools(contrib: Contribution): Promise<number> {
    let called = 0
    for (const item of contrib.iter("message")) {
       if (item instanceof ActionUnit) {
-         const result = await env.executeTool(item)
+         let result: OneOrMany<SemanticUnit> = undefined
+         for (const target of listOneOrMany(contrib.spec?.objective)) {
+            const tool = target.getTool(env)
+            if (item.tool_id === tool.id) {
+               result = await target.executeTool(item, env)
+               break
+            }
+         }
+         if (result === undefined) {
+            result = await env.executeTool(item)
+         }
          if (!data.actions) data.actions = {}
          data.actions[item.action_id] = {
             tool_id: item.tool_id,

@@ -2,10 +2,11 @@ import { z } from "zod"
 import OpenAI from "openai"
 import { AzureOpenAI } from "openai"
 import { IGenerativeModel, MessageFrame, CompletionResult, ModelCapabilities, ModelIdentity, CompletionQuery } from "../../services/generative/model"
-import { TextualUnit, ActionUnit, SemanticUnit, VisualUnit, FeedbackUnit, AudioUnit } from "../../services/semantic/units"
+import { TextualUnit, ActionUnit, SemanticUnit, VisualUnit, FeedbackUnit, AudioUnit, DataUnit } from "../../services/semantic/units"
 import type { ChatCompletionMessageParam, ChatCompletionTool, ChatCompletionContentPart, ChatCompletionSystemMessageParam } from "openai/resources/chat/completions"
 import { ChatCompletionCreateParamsNonStreaming } from "openai/resources.js"
 import { ToolGuide } from "../../services/generative/context"
+import { transformUnitToData } from "../../services/semantic/transform"
 
 export interface OpenAIModelConfig {
    apiKey: string
@@ -168,14 +169,13 @@ export class OpenAIAgentModel implements IGenerativeModel {
             const unit = item as ActionUnit
             if (msg.role === "assistant") {
                if (!msg.tool_calls) msg.tool_calls = []
+               const input = transformUnitToData(unit.tool_input)
                msg.tool_calls.push({
                   type: "function",
                   id: unit.action_id,
                   function: {
                      name: unit.tool_id,
-                     arguments: typeof unit.tool_input === "string"
-                        ? unit.tool_input
-                        : JSON.stringify(unit.tool_input ?? {}),
+                     arguments: typeof input === "string" ? input : JSON.stringify(input ?? {}),
                   },
                })
             }
@@ -185,11 +185,10 @@ export class OpenAIAgentModel implements IGenerativeModel {
          }
          else if (item.type === FeedbackUnit.type) {
             const unit = item as FeedbackUnit
+            const output = transformUnitToData(unit.output)
             const content = unit.status === "failed"
                ? unit.message ?? "Tool execution failed"
-               : typeof unit.output === "string"
-                  ? unit.output
-                  : JSON.stringify(unit.output ?? "")
+               : typeof output === "string" ? output : JSON.stringify(output ?? "")
             if (msg.role === "assistant") {
                messages.push({
                   role: "tool",
@@ -236,11 +235,11 @@ export class OpenAIAgentModel implements IGenerativeModel {
                // Handle both standard function tool calls
                if (toolCall.type === "function") {
                   const funcCall = toolCall as { id: string; type: "function"; function: { name: string; arguments: string } }
-                  let input: any
+                  let input: SemanticUnit
                   try {
-                     input = JSON.parse(funcCall.function.arguments)
+                     input = DataUnit.New(JSON.parse(funcCall.function.arguments))
                   } catch {
-                     input = funcCall.function.arguments
+                     input = TextualUnit.New(funcCall.function.arguments)
                   }
 
                   units.push(ActionUnit.New(

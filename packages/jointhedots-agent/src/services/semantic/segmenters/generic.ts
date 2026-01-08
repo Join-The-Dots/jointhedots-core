@@ -1,8 +1,7 @@
 import languageDetection from "@vscode/vscode-languagedetection"
-import { SemanticUnit, TextualUnit } from "./units"
-import { segmentMarkdown } from "./segmenters/markdown"
-import { segmentHtml } from "./segmenters/html"
-import { segmentCode } from "./segmenters/code"
+import { SemanticUnit, TextualUnit } from "../units"
+import { segmentMarkdown } from "./markdown"
+import { segmentIndenticCode } from "./indentic"
 
 export type TextFormat = "md" | "html" | string
 
@@ -45,11 +44,10 @@ export async function segmentText(unit: TextualUnit, format?: TextFormat): Promi
 
    // Check if it's a code language
    if (detected && CODE_LANGUAGES.has(detected.toLowerCase())) {
-      return segmentCode(text, detected)
+      return segmentIndenticCode(text)
    }
 
    switch (detected) {
-      case "html": return segmentHtml(text)
       case "md": return segmentMarkdown(text)
       default: return unit
    }

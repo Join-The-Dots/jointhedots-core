@@ -1,3 +1,5 @@
+import yargs from "yargs"
+import { hideBin } from "yargs/helpers"
 import { createOpenAIModel } from "../providers/models/openai"
 import { z } from "zod"
 import { IGenerativeModel } from "../services/generative/model"
@@ -179,7 +181,7 @@ async function createModel(name: string) {
       case "gpt-5-nano":
          return createOpenAIModel({
             model: "gpt-5-nano",
-            baseUrl: "https://wmodel-openai.openai.azure.com/openai/deployments/gpt-5-nano-2/chat/completions?api-version=2025-01-01-preview",
+            baseUrl: "https://wmodel-openai.openai.azure.com/openai/deployments/gpt-5-nano/chat/completions?api-version=2025-01-01-preview",
             apiKey: "4gEBnzj65ooK76R69TJqeL1u0iWcAlSSD9xBXXuJfYRoTdR4d7ybJQQJ99BLAC5T7U2XJ3w3AAABACOGAddN",
          })
       /*case "ministral-3":
@@ -196,16 +198,50 @@ async function createModel(name: string) {
    }
 }
 
-const bus = await NatsTenantBus.New("test", {
-   servers: "nats://localhost:4222",
-})
+async function serveCommand() {
+   console.log("Starting NATS mode...")
+   
+   const bus = await NatsTenantBus.New("test", {
+      servers: "nats://localhost:4222",
+   })
 
-const model = await createModel("gpt-5-nano")
+   const model = await createModel("gpt-5-nano")
 
-bus.subscribe("agent1.input", async (msg) => {
-   console.log(msg.toString())
+   bus.subscribe("agent1.input", async (msg) => {
+      console.log(msg.toString())
 
+      await listSynonyms("book", model)
+
+      await chessPlayerAgents(model)
+   })
+}
+
+async function demoCommand() {
+   console.log("Running demo...")
+   
+   const model = await createModel("gpt-5-nano")
+   
    await listSynonyms("book", model)
+}
 
-   await chessPlayerAgents(model)
-})
+// CLI setup
+yargs(hideBin(process.argv))
+   .command(
+      'serve',
+      'Start the agent in NATS mode',
+      () => {},
+      async () => {
+         await serveCommand()
+      }
+   )
+   .command(
+      'demo',
+      'Run demo mode',
+      () => {},
+      async () => {
+         await demoCommand()
+      }
+   )
+   .demandCommand(1, 'You must specify a command (serve or demo)')
+   .help()
+   .argv

@@ -15,6 +15,7 @@ export type Primitives = OneOrMany<Primitive>
 
 export abstract class SemanticUnit {
    static type = "?"
+   transcript?: TextualUnit
    get type(): string {
       return this.constructor["type"]
    }
@@ -93,9 +94,22 @@ export class DataUnit extends PrimitiveUnit {
 
 export class TabularUnit extends SemanticUnit {
    static type = "table"
-   // TODO
+   headers: string[] = []
+   rows: string[][] = []
    toPrimitives(): Primitives {
-      throw "TODO"
+      return TextualUnit.New(this.toMarkdown(), "markdown")
+   }
+   toMarkdown(): string {
+      const header = `| ${this.headers.join(" | ")} |`
+      const separator = `| ${this.headers.map(() => "---").join(" | ")} |`
+      const rows = this.rows.map(row => `| ${row.join(" | ")} |`).join("\n")
+      return `${header}\n${separator}\n${rows}`
+   }
+   static New(headers: string[], rows: string[][]) {
+      const unit = new TabularUnit()
+      unit.headers = headers
+      unit.rows = rows
+      return unit
    }
 }
 
@@ -162,11 +176,12 @@ export class SectionUnit extends SemanticUnit {
    toPrimitives(): Primitives {
       throw "TODO"
    }
-   static New(layout: SectionLayout, label: any, content: any) {
+   static New(layout: SectionLayout, label: any, content: any, language?: SectionLanguage | string) {
       const unit = new SectionUnit()
       unit.layout = layout
       unit.label = convertAnyToSemanticUnit(label)
       unit.content = appendAnyToSemanticUnits(content, [])
+      unit.language = language
       return unit
    }
 }
@@ -175,11 +190,11 @@ export class ActionUnit extends SemanticUnit {
    static type = "action"
    action_id: string // Future contribution id receiving the result
    tool_id: string // Tool to invoke
-   tool_input?: DataUnit // Tool invokation inputs
+   tool_input?: SemanticUnit // Tool invokation inputs
    toPrimitives(): Primitives {
       return this
    }
-   static New(action_id: string, tool_id: string, tool_input?: DataUnit) {
+   static New(action_id: string, tool_id: string, tool_input?: SemanticUnit) {
       const unit = new ActionUnit()
       unit.action_id = action_id
       unit.tool_id = tool_id
