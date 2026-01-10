@@ -1,13 +1,14 @@
 import yargs from "yargs"
 import { hideBin } from "yargs/helpers"
-import { createOpenAIModel } from "../providers/models/openai"
+import { createOpenAIModel } from "../providers/generative-models/openai"
 import { z } from "zod"
 import { IGenerativeModel } from "../framework/interfaces/generative"
 import { createFunctionTool } from "../providers/tools/function"
 import { AgenticPatterns, createWorkbench, TargetOutput, TargetTool, traceContribution } from "../framework/workbench/bench"
 import { DataUnit, TextualUnit } from "../framework/semantic/units"
-import { getNanoEmbedder } from "../providers/similarity-vector/nano-embedder/index"
-import { getDenseEmbeddingSimilarity, VectorMetricType } from "../framework/interfaces/embedder"
+import { getMiniEmbedder } from "../providers/text-matching-models/all-MiniLM-L6-v2/index"
+import { getJinaReranker } from "../providers/text-matching-models/jina-reranker-v1-turbo-en/index"
+import { getVectorSimilarity, VectorMetricType } from "../common/vector_f32"
 
 async function listSynonyms(word: string, model: IGenerativeModel) {
    const env = createWorkbench()
@@ -119,7 +120,7 @@ async function chessPlayerAgents(model: IGenerativeModel) {
 
 async function embeddingDemo() {
    console.log("Initializing MiniLM embedder...")
-   const embedder = getNanoEmbedder()
+   const embedder = getMiniEmbedder()
    
    const sentences = [
       "The cat sat on the mat.",
@@ -149,7 +150,7 @@ async function embeddingDemo() {
    for (let i = 0; i < embeddings.length; i++) {
       const row = [shortLabels[i].padEnd(4)]
       for (let j = 0; j < embeddings.length; j++) {
-         const similarity = getDenseEmbeddingSimilarity(
+         const similarity = getVectorSimilarity(
             embeddings[i].embedding,
             embeddings[j].embedding,
             VectorMetricType.Cosine
@@ -170,7 +171,7 @@ async function embeddingDemo() {
          pairs.push({
             i,
             j,
-            similarity: getDenseEmbeddingSimilarity(
+            similarity: getVectorSimilarity(
                embeddings[i].embedding,
                embeddings[j].embedding,
                VectorMetricType.Cosine
@@ -186,6 +187,50 @@ async function embeddingDemo() {
    }
    
    await embedder.dispose()
+   console.log("\n✓ Demo complete")
+}
+
+async function rerankerDemo() {
+   console.log("Initializing Jina Reranker...")
+   const reranker = getJinaReranker()
+
+   const query = "What are the benefits of exercise for mental health?"
+   
+   const documents = [
+      "Regular physical activity has been shown to reduce symptoms of depression and anxiety.",
+      "The stock market experienced significant volatility this quarter.",
+      "Exercise releases endorphins, which are natural mood boosters that improve mental wellbeing.",
+      "A balanced diet includes proteins, carbohydrates, and healthy fats.",
+      "Studies show that just 30 minutes of walking can help reduce stress levels.",
+      "The new smartphone features an improved camera and longer battery life.",
+      "Yoga and meditation combined with physical movement can enhance cognitive function.",
+      "Climate change is affecting weather patterns globally.",
+   ]
+
+   console.log(`\nQuery: "${query}"`)
+   console.log(`\nReranking ${documents.length} documents...\n`)
+
+   const results = await reranker.rerank(query, documents)
+
+   console.log("--- Ranked Results ---\n")
+   for (let rank = 0; rank < results.length; rank++) {
+      const result = results[rank]
+      const doc = documents[result.index]
+      const relevance = result.score >= 0.5 ? "✓ RELEVANT" : result.score >= 0.1 ? "~ PARTIAL" : "✗ NOT RELEVANT"
+      console.log(`#${rank + 1} [${result.score.toFixed(4)}] ${relevance}`)
+      console.log(`   "${doc}"\n`)
+   }
+
+   // Show score distribution
+   console.log("--- Score Distribution ---")
+   const highRelevance = results.filter(r => r.score >= 0.5).length
+   const partialRelevance = results.filter(r => r.score >= 0.1 && r.score < 0.5).length
+   const lowRelevance = results.filter(r => r.score < 0.1).length
+   console.log(`High relevance (≥0.5):    ${highRelevance}`)
+   console.log(`Partial relevance (0.1-0.5): ${partialRelevance}`)
+   console.log(`Low relevance (<0.1):     ${lowRelevance}`)
+
+   await reranker.dispose()
    console.log("\n✓ Demo complete")
 }
 
@@ -224,6 +269,9 @@ async function demoCommand(name: string) {
       case "embedding":
          await embeddingDemo()
          break
+      case "reranker":
+         await rerankerDemo()
+         break
       case "synonyms": {
          const model = await createModel("gpt-5-nano")
          await listSynonyms("book", model)
@@ -249,7 +297,7 @@ yargs(hideBin(process.argv))
          return yargs.positional('name', {
             describe: 'Name of the demo to run',
             type: 'string',
-            choices: ['synonyms', 'chess', 'embedding']
+            choices: ['synonyms', 'chess', 'embedding', 'reranker']
          })
       },
       async (argv) => {

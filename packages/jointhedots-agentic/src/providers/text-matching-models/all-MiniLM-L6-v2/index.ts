@@ -3,14 +3,21 @@ import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { readFileSync } from 'fs'
 import {
-   DenseTextEmbedder,
-   DenseVec,
+   IDenseTextEmbedder,
    TextPerspective,
-   VectorMetricType,
 } from '../../../framework/interfaces/embedder.js'
+import { normalizeVector, VectorF32, VectorMetricType } from '../../../common/vector_f32.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
+
+interface SpecialTokensMap {
+   unk_token: string
+   sep_token: string
+   pad_token: string
+   cls_token: string
+   mask_token: string
+}
 
 // Basic WordPiece tokenizer for BERT-based models
 class BertTokenizer {
@@ -20,15 +27,15 @@ class BertTokenizer {
    private sepTokenId: number
    private padTokenId: number
 
-   constructor(vocab: Map<string, number>) {
+   constructor(vocab: Map<string, number>, specialTokens: SpecialTokensMap) {
       this.vocab = vocab
-      this.unkTokenId = vocab.get('[UNK]') ?? 100
-      this.clsTokenId = vocab.get('[CLS]') ?? 101
-      this.sepTokenId = vocab.get('[SEP]') ?? 102
-      this.padTokenId = vocab.get('[PAD]') ?? 0
+      this.unkTokenId = vocab.get(specialTokens.unk_token) ?? 100
+      this.clsTokenId = vocab.get(specialTokens.cls_token) ?? 101
+      this.sepTokenId = vocab.get(specialTokens.sep_token) ?? 102
+      this.padTokenId = vocab.get(specialTokens.pad_token) ?? 0
    }
 
-   static async load(vocabPath: string): Promise<BertTokenizer> {
+   static async load(vocabPath: string, specialTokensPath: string): Promise<BertTokenizer> {
       const vocabContent = readFileSync(vocabPath, 'utf-8')
       const vocab = new Map<string, number>()
       vocabContent.split('\n').forEach((line, index) => {
@@ -37,7 +44,8 @@ class BertTokenizer {
             vocab.set(token, index)
          }
       })
-      return new BertTokenizer(vocab)
+      const specialTokens: SpecialTokensMap = JSON.parse(readFileSync(specialTokensPath, 'utf-8'))
+      return new BertTokenizer(vocab, specialTokens)
    }
 
    private normalizeText(text: string): string {
@@ -152,23 +160,7 @@ function meanPooling(lastHiddenState: ort.Tensor, attentionMask: BigInt64Array):
    return output
 }
 
-function normalize(vec: Float32Array): Float32Array {
-   let norm = 0
-   for (let i = 0; i < vec.length; i++) {
-      norm += vec[i] * vec[i]
-   }
-   norm = Math.sqrt(norm)
-
-   if (norm > 0) {
-      for (let i = 0; i < vec.length; i++) {
-         vec[i] /= norm
-      }
-   }
-
-   return vec
-}
-
-class MiniLMEmbedder implements DenseTextEmbedder {
+class MiniLMEmbedder implements IDenseTextEmbedder {
    readonly dimension = 384 // all-MiniLM-L6-v2 produces 384-dim embeddings
    readonly metric = VectorMetricType.Cosine
 
@@ -176,14 +168,16 @@ class MiniLMEmbedder implements DenseTextEmbedder {
    private tokenizer: BertTokenizer | null = null
    private readonly modelPath: string
    private readonly vocabPath: string
+   private readonly specialTokensPath: string
    private readonly maxLength = 256
    private initPromise: Promise<void> | null = null
 
-   constructor(modelPath?: string, vocabPath?: string) {
+   constructor(modelPath?: string, vocabPath?: string, specialTokensPath?: string) {
       // Navigate from src/providers/similarity-vector/small-embedder to package root
       const packageRoot = join(__dirname, '..', '..', '..', '..')
       this.modelPath = modelPath ?? join(packageRoot, 'models', 'all-MiniLM-L6-v2', 'model_O4.onnx')
       this.vocabPath = vocabPath ?? join(packageRoot, 'models', 'all-MiniLM-L6-v2', 'vocab.txt')
+      this.specialTokensPath = specialTokensPath ?? join(packageRoot, 'models', 'all-MiniLM-L6-v2', 'special_tokens_map.json')
    }
 
    private async initialize(): Promise<void> {
@@ -198,13 +192,13 @@ class MiniLMEmbedder implements DenseTextEmbedder {
          this.session = await ort.InferenceSession.create(this.modelPath, {
             executionProviders: ['cpu'],
          })
-         this.tokenizer = await BertTokenizer.load(this.vocabPath)
+         this.tokenizer = await BertTokenizer.load(this.vocabPath, this.specialTokensPath)
       })()
 
       await this.initPromise
    }
 
-   async embed(text: string, _perspective?: TextPerspective): Promise<DenseVec> {
+   async embed(text: string, _perspective?: TextPerspective): Promise<VectorF32> {
       await this.initialize()
 
       if (!this.session || !this.tokenizer) {
@@ -233,7 +227,7 @@ class MiniLMEmbedder implements DenseTextEmbedder {
       const pooled = meanPooling(lastHiddenState, attentionMask)
 
       // L2 normalize the output
-      return normalize(pooled)
+      return normalizeVector(pooled)
    }
 
    async dispose(): Promise<void> {
@@ -247,7 +241,7 @@ class MiniLMEmbedder implements DenseTextEmbedder {
 // Singleton instance for convenience
 let defaultEmbedder: MiniLMEmbedder | null = null
 
-export function getNanoEmbedder(): MiniLMEmbedder {
+export function getMiniEmbedder(): MiniLMEmbedder {
    if (!defaultEmbedder) {
       defaultEmbedder = new MiniLMEmbedder()
    }
