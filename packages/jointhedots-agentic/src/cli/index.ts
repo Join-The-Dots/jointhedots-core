@@ -7,6 +7,7 @@ import { createFunctionTool } from "../providers/tools/function"
 import { AgenticPatterns, createWorkbench, TargetOutput, TargetTool, traceContribution } from "../framework/workbench/bench"
 import { DataUnit, TextualUnit } from "../framework/semantic/units"
 import { getMiniEmbedder } from "../providers/text-matching-models/all-MiniLM-L6-v2/index"
+import { getBgeSmallEmbedder } from "../providers/text-matching-models/bge-small-en-v1.5/index"
 import { getJinaReranker } from "../providers/text-matching-models/jina-reranker-v1-turbo-en/index"
 import { getVectorSimilarity, VectorMetricType } from "../common/vector_f32"
 
@@ -234,6 +235,78 @@ async function rerankerDemo() {
    console.log("\n✓ Demo complete")
 }
 
+async function bgeEmbeddingDemo() {
+   console.log("Initializing BGE-small-en-v1.5 embedder...")
+   const embedder = getBgeSmallEmbedder()
+   
+   const sentences = [
+      "The cat sat on the mat.",
+      "A feline rested on the rug.",
+      "Dogs are loyal companions.",
+      "The weather is sunny today.",
+      "Machine learning is transforming technology.",
+      "AI and deep learning are revolutionizing software.",
+   ]
+   
+   console.log("\nEmbedding sentences...")
+   const embeddings = await Promise.all(
+      sentences.map(async (text) => ({
+         text,
+         embedding: await embedder.embed(text),
+      }))
+   )
+   
+   console.log(`\nEmbedded ${embeddings.length} sentences (dimension: ${embedder.dimension})`)
+   console.log("\n--- Similarity Matrix ---\n")
+   
+   // Print header
+   const shortLabels = sentences.map((_, i) => `S${i + 1}`)
+   console.log("     " + shortLabels.map(l => l.padStart(6)).join(" "))
+   
+   // Print similarity matrix
+   for (let i = 0; i < embeddings.length; i++) {
+      const row = [shortLabels[i].padEnd(4)]
+      for (let j = 0; j < embeddings.length; j++) {
+         const similarity = getVectorSimilarity(
+            embeddings[i].embedding,
+            embeddings[j].embedding,
+            VectorMetricType.Cosine
+         )
+         row.push(similarity.toFixed(3).padStart(6))
+      }
+      console.log(row.join(" "))
+   }
+   
+   console.log("\n--- Sentences ---")
+   sentences.forEach((s, i) => console.log(`S${i + 1}: ${s}`))
+   
+   // Find most similar pairs
+   console.log("\n--- Most Similar Pairs ---")
+   const pairs: { i: number; j: number; similarity: number }[] = []
+   for (let i = 0; i < embeddings.length; i++) {
+      for (let j = i + 1; j < embeddings.length; j++) {
+         pairs.push({
+            i,
+            j,
+            similarity: getVectorSimilarity(
+               embeddings[i].embedding,
+               embeddings[j].embedding,
+               VectorMetricType.Cosine
+            ),
+         })
+      }
+   }
+   pairs.sort((a, b) => b.similarity - a.similarity)
+   
+   for (const pair of pairs.slice(0, 3)) {
+      console.log(`\n[${pair.similarity.toFixed(3)}] "${sentences[pair.i]}"`)
+      console.log(`         "${sentences[pair.j]}"`)
+   }
+   
+   await embedder.dispose()
+   console.log("\n✓ Demo complete")
+}
+
 async function createModel(name: string) {
    switch (name) {
       case "gpt-5-mini":
@@ -269,6 +342,9 @@ async function demoCommand(name: string) {
       case "embedding":
          await embeddingDemo()
          break
+      case "bge-embedding":
+         await bgeEmbeddingDemo()
+         break
       case "reranker":
          await rerankerDemo()
          break
@@ -297,7 +373,7 @@ yargs(hideBin(process.argv))
          return yargs.positional('name', {
             describe: 'Name of the demo to run',
             type: 'string',
-            choices: ['synonyms', 'chess', 'embedding', 'reranker']
+            choices: ['synonyms', 'chess', 'embedding', 'bge-embedding', 'reranker']
          })
       },
       async (argv) => {

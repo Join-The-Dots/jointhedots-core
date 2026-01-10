@@ -10,6 +10,7 @@
       "dev": "jointhedots-gear make --libs @jointhedots/agent --watch --devmode --dist ./dist",
       "test:segmenter": "npx tsx --test test/textual-segmenter.test.ts",
       "demo:embedding": "tsx src/cli/index.ts demo embedding",
+      "demo:bge-embedding": "tsx src/cli/index.ts demo bge-embedding",
       "demo:synonyms": "tsx src/cli/index.ts demo synonyms",
       "demo:chess": "tsx src/cli/index.ts demo chess"
    },
