@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react"
 import { createDiagram, DiagramBlock, DiagramView, EdgeKind, type DiagramHandler } from "../../components/DiagramV2Panel"
-import { Contribution, IAgenticEnvironment } from "../../../services/generative/context"
+import { Contribution, IAgenticWorkbench } from "@jointhedots/cortex"
 import { ContributionView } from "./ContributionView"
 
 class ContributionGraph implements DiagramHandler<Contribution, unknown> {
-   constructor(readonly env: IAgenticEnvironment) {
+   constructor(readonly env: IAgenticWorkbench) {
 
    }
    getEdges(n: Contribution, visitor: (node: Contribution, edge: unknown, kind: EdgeKind) => void) {
@@ -39,7 +39,7 @@ function ContributionViewer(block: DiagramBlock<Contribution>) {
    return <ContributionView contrib={block.node} onCheckout={null} />
 }
 
-export function ShowGraph(props: { env: IAgenticEnvironment }) {
+export function ShowGraph(props: { env: IAgenticWorkbench }) {
    const { env } = props
    const [select, onSelect] = useState(null)
    const diag = useMemo(() => createDiagram(new ContributionGraph(env)), [env])

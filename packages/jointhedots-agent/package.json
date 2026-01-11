@@ -12,14 +12,14 @@
    },
    "dependencies": {
       "@jointhedots/core": "^0.0.0",
-      "@jointhedots/agentic": "^0.0.0",
+      "@jointhedots/cortex": "^0.0.0",
       "@jointhedots/ui": "^0.0.0",
       "d3-dag": "^1.1.0",
       "marked": "^17.0.1"
    },
    "devDependencies": {
       "@jointhedots/core": "../jointhedots-core/dist/jointhedots-core",
-      "@jointhedots/agentic": "../jointhedots-agentic/dist/jointhedots-agentic",
+      "@jointhedots/cortex": "../jointhedots-cortex/dist/jointhedots-cortex",
       "@jointhedots/ui": "../jointhedots-ui/dist/jointhedots-ui",
       "@types/node": "^22.0.3",
       "@types/react": "^18.3.18",

@@ -1,16 +1,19 @@
-import { command } from "@polycuber/script.cli"
+import { command, directory, file } from "@polycuber/script.cli"
+import { dirname } from "node:path"
 
-command.exec("npm install", { cwd: "packages/jointhedots-core" })
-command.exec("npm run build", { cwd: "packages/jointhedots-core", ignoreError: true })
+function installPackage(path, url) {
+   if (!directory.exists(path) && url) command.exec(`git clone ${url}`, { cwd: dirname(path) })
+   else if (url) command.exec(`git pull`, { cwd: path, ignoreError: true })
+   else if (!directory.exists(path)) throw `Package '${path}'not found`
+   command.exec("npm install", { cwd: path })
+   command.exec("npm run build", { cwd: path, ignoreError: true })
+}
 
-command.exec("npm install", { cwd: "packages/jointhedots-agentic" })
-command.exec("npm run build", { cwd: "packages/jointhedots-agentic", ignoreError: true })
+// Install packages
+installPackage("packages/jointhedots-cortex", "https://github.com/Join-The-Dots/jointhedots-cortex.git")
+installPackage("packages/jointhedots-core")
+installPackage("packages/jointhedots-ui")
+installPackage("packages/jointhedots-agent")
 
-command.exec("npm install", { cwd: "packages/jointhedots-ui" })
-command.exec("npm run build", { cwd: "packages/jointhedots-ui", ignoreError: true })
-
-command.exec("npm install", { cwd: "packages/jointhedots-agent" })
-command.exec("npm run build", { cwd: "packages/jointhedots-agent", ignoreError: true })
-
-command.exec("npm install", { cwd: "playgrounds/playground-ui" })
-command.exec("npm run build", { cwd: "playgrounds/playground-ui", ignoreError: true })
+// Install playgrounds
+installPackage("playgrounds/playground-ui")
