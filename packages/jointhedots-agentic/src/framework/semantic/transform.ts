@@ -40,7 +40,8 @@ function printSectionToText(unit: SectionUnit, chunks: string[], ctx: TransformT
       ctx.headingLevel++
       const { label_lines, content } = ctx.generateParts(unit)
       const headingTag = "#".repeat(ctx.headingLevel) + " "
-      chunks.push("\n", ...label_lines.map(l => headingTag + l), "\n", content, "\n")
+      chunks.push("\n", ...label_lines.map(l => headingTag + l), "\n\n", content, "\n")
+      ctx.headingLevel--
    }
    else if (unit.layout == SectionLayout.Code) {
       const { content } = ctx.generateParts(unit)
@@ -51,6 +52,7 @@ function printSectionToText(unit: SectionUnit, chunks: string[], ctx: TransformT
       chunks.push("\n[", label, "] ", content, "\n")
    }
 }
+
 export function transformTextToUnits(text: string, format?: string): Promise<OneOrMany<SemanticUnit>> {
    return segmentText(TextualUnit.New(text), format)
 }
