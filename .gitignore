@@ -1,3 +1,6 @@
+/dist
+packages/jointhedots-cortex
+consolidated-lock.json
 
 # Node.js / npm
 node_modules*
@@ -5,12 +8,3 @@ npm-debug.log*
 
 # tests results
 **/__tests__/_output*
-
-# react-intl messages
-intl/messages.json
-
-/dist
-build
-.output
-.dev
-

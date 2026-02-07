@@ -1,0 +1,35 @@
+{
+   "type": "composable",
+   "name": "playground:ui:host",
+   "title": "Playground for JTD",
+   "icon": "../../../logo.png",
+   "webviews": {
+      "panels.html": {
+         "title": "Panels",
+         "entry": "./samples/panels"
+      },
+      "literal-string.html": {
+         "title": "Literal String",
+         "entry": "./samples/literal-string"
+      },
+      "icons.html": {
+         "title": "Icons",
+         "entry": "./samples/icons"
+      },
+      "layouts.html": {
+         "title": "Layouts",
+         "entry": "./samples/layouts"
+      },
+      "inputs.html": {
+         "title": "Inputs",
+         "entry": "./samples/inputs"
+      },
+      "services.html": {
+         "title": "Services",
+         "entry": "./samples/services"
+      }
+   },
+   "manifest": {
+      "background_color": ""
+   }
+}

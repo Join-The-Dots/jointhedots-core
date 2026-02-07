@@ -1,0 +1,14 @@
+{
+   "type": "bundle",
+   "data": {
+      "namespaces": [
+         "jtd"
+      ],
+      "distribueds": {
+         "react": "*",
+         "react-dom": "*",
+         "react/jsx-runtime": "*",
+         "react-dom/client": "*"
+      }
+   }
+}
