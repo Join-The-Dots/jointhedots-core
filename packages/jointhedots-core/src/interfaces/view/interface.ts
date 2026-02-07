@@ -35,7 +35,7 @@ export const ViewServiceKey = new ServiceEntry<any, JSONSchema>("view")
 
 export type ViewInfos = {
    name: string
-   params?: Record<string, ViewParam | ViewParam[] | MapLike<ViewParam>>
+   params?: Record<string, ViewParam | ViewParam[] | Record<string, ViewParam>>
    content?: string
    nested?: ViewInfos
 }
@@ -44,7 +44,7 @@ export type ViewParam = string | boolean | number
 
 export type ViewInvokable = {
    component: ComponentEntry
-   properties?: MapLike<string>
+   properties?: Record<string, string>
 }
 
 export function getViewReferenceFrom(data: string | ViewInfos): string {
@@ -133,8 +133,8 @@ function parseValue(schema: JSONSchema, data: any, safe: boolean): any {
    }
 }
 
-function parseViewProps(component: ComponentEntry, manifest: ComponentManifest, view: ViewInfos, origin: string): MapLike<any> {
-   const props = {} as MapLike<any>
+function parseViewProps(component: ComponentEntry, manifest: ComponentManifest, view: ViewInfos, origin: string): Record<string, any> {
+   const props = {} as Record<string, any>
    const schema = ViewServiceKey.spec(component)
 
    const safe = origin === "safe"

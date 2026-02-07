@@ -1,36 +1,23 @@
-import { type ComponentFilter, type ComponentManifest, type ComponentPublication, type IComponentProvider, type IContentProvider } from "../../components/components.ts"
+import { type BundleManifest, type ComponentFilter, type ComponentManifest, type ComponentPublication, type IComponentProvider, type IContentProvider } from "../../components/components.ts"
 import { InMemComponentPublisher } from "./InMemComponentProvider.ts"
-import type { MapLike } from "../../common/types.ts"
 import { ContentBlob } from "../../common/contents.ts"
 import { parseComponentURI } from "../../components/helpers.ts"
 
-export type StaticManifest = {
-   name: string
-   baseline: string
-   components: MapLike<string>
-   catalogs: MapLike<string>
-}
-
 export class StaticComponentProvider implements IComponentProvider {
-   library: StaticManifest = null
+   manifest: BundleManifest = null
    catalog: InMemComponentPublisher = null
    constructor(readonly content_provider: IContentProvider) {
    }
-   async get_provider_library(): Promise<StaticManifest> {
-      if (!this.library) {
-         this.library = await (await fetch("./components.manifest.json")).json()
+   async get_provider_bundle(): Promise<BundleManifest> {
+      if (!this.manifest) {
+         this.manifest = await (await fetch("./bundle.manifest.json")).json()
       }
-      return this.library
+      return this.manifest
    }
    async get_component_catalog(): Promise<InMemComponentPublisher> {
       if (!this.catalog) {
-         const library = await this.get_provider_library()
-         const catalog_uri = parseComponentURI(`./${library.catalogs.every}`)
-         const catalog_blob = await this.content_provider.load_content(catalog_uri)
-         if (catalog_blob) {
-            const catalog = await ContentBlob.object.read<ComponentPublication[]>(catalog_blob)
-            this.catalog = new InMemComponentPublisher(catalog)
-         }
+         const manifest = await this.get_provider_bundle()
+         this.catalog = new InMemComponentPublisher(manifest.data?.components)
       }
       return this.catalog
    }
@@ -46,10 +33,10 @@ export class StaticComponentProvider implements IComponentProvider {
 
    async get_component_manifest(id: string): Promise<ComponentManifest> {
       try {
-         const library = await this.get_provider_library()
-         const manifest_file = library.components[id]
-         if (manifest_file) {
-            const manifest_uri = parseComponentURI(`./${manifest_file}`)
+         const bundle = await this.get_provider_bundle()
+         const pub = bundle.data.components.find(pub => pub.id === id)
+         if (pub) {
+            const manifest_uri = parseComponentURI(pub.ref ? `./${pub.ref}` : `./${id}.json`)
             const manifest_blob = await this.content_provider.load_content(manifest_uri)
             if (manifest_blob) {
                return ContentBlob.object.read(manifest_blob)

@@ -40,7 +40,7 @@ export async function getComponentServicesList(manif: ComponentManifest): Promis
 export async function createComponentPublication(manif: ComponentManifest): Promise<ComponentPublication> {
    const { $id } = manif
    return {
-      component_id: $id,
+      id: $id,
       type: manif.type,
       icon: manif.icon,
       title: manif.title || $id,
@@ -103,7 +103,7 @@ export function matchComponentFilter(pub: ComponentPublication, filter?: Partial
       }
       return false
    }
-   if (!match_text(pub.title || pub.component_id, filter.pattern) && !match_text(pub.description, filter.pattern)) return false
+   if (!match_text(pub.title || pub.id, filter.pattern) && !match_text(pub.description, filter.pattern)) return false
    if (!match_list_in_list(pub.services, filter.services)) return false
    if (!match_list_in_list(pub.keywords, filter.keywords)) return false
    if (!match_list_in_list(pub.tags, filter.tags)) return false

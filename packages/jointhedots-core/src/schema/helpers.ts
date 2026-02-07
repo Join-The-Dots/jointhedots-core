@@ -41,7 +41,7 @@ export const CommonMakers = {
    array(base: JSONSchema): JSONSchema {
       return { type: "array", items: base }
    },
-   record(fields: MapLike<JSONSchema>): JSONSchema {
+   record(fields: Record<string, JSONSchema>): JSONSchema {
       return { type: "object", properties: fields }
    },
    collection(items: JSONSchema): JSONSchema {
@@ -52,7 +52,7 @@ export const CommonMakers = {
    },
 }
 
-export const ErrorTypes: MapLike<JSONSchema> = {
+export const ErrorTypes: Record<string, JSONSchema> = {
    invalid: {
       $error: "Cannot determine the type"
    }

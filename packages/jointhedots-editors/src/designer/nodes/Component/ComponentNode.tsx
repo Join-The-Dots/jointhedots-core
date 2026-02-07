@@ -3,9 +3,9 @@ import {
     ElementJSON, DisplayType, serializeElement,
     DXDisplay
 } from '@jointhedots/core'
-import { stringify_document } from '@jointhedots/core/ast/serde/printer'
+import { stringify_document } from '@jointhedots/core'
 import { InvokeView } from '@jointhedots/core/react'
-import { DisplayInfos, ElementBoundingBox, ElementController, InstrumentationLayout, InstrumentationZone } from '@jointhedots/ui/Instrumentation'
+import { DisplayInfos, ElementBoundingBox, ElementController, InstrumentationLayout, InstrumentationZone } from '@jointhedots/ui/Layouts'
 import type { EditorConfig, LexicalEditor, NodeKey, SerializedLexicalNode, Spread } from 'lexical'
 import { $getEditor, DecoratorNode } from 'lexical'
 import React, { createRef } from 'react'

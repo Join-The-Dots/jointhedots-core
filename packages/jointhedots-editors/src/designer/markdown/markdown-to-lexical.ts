@@ -2,7 +2,7 @@ import { Transformer, $convertFromMarkdownString, $convertToMarkdownString, Elem
 import { EditorState, $getRoot, ElementNode, LexicalNode } from 'lexical'
 import { ComponentNode } from '../nodes/Component/ComponentNode'
 import { DXDocumentLayout, DXDisplay, DocumentLayer } from '@jointhedots/core'
-import { stringify_document } from '@jointhedots/core/ast/serde/printer'
+import { stringify_document } from '@jointhedots/core'
 
 export const MARKDOWN_TRANSFORMERS: Transformer[] = [
    CHECK_LIST,

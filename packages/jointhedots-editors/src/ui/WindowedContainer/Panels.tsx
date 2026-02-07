@@ -15,6 +15,7 @@ type PropsType = {
 }
 
 class SidePanel extends Component<PropsType> {
+   declare props: PropsType
    container: SidePanelContainer
    shouldComponentUpdate(nextProps) {
       const curProps = this.props

@@ -132,7 +132,7 @@ export function ApplicationSelector() {
       types: ["jtd:application.board.component"]
    }), [])
    const onGoto = (infos: ComponentPublication) => {
-      gotoURLView({ name: infos.component_id })
+      gotoURLView({ name: infos.id })
    }
    return <div className="slds-grid slds-grid_vertical-align-center slds-grid_align-center" style={{ minWidth: "100vw", minHeight: "100vh" }}>
       <div className="slds-box">

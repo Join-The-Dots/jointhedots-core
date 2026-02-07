@@ -39,7 +39,7 @@ export interface LogObject {
 
    icon?: string // Object icon
    title?: string // Object name
-   attributes?: MapLike<string | number>
+   attributes?: Record<string, string | number>
    actions?: LogAction[] // Object tooling list
 }
 

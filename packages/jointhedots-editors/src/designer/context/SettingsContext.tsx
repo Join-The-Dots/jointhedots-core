@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { createContext, useContext } from 'react';
-import { useLocalStorage } from '@jointhedots/core/react/useLocalStorage';
+import { useLocalStorage } from '@jointhedots/core/react';
 
 export type SettingsType = {
   isAutocomplete: boolean

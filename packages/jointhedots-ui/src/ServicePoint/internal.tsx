@@ -102,13 +102,13 @@ export function ServiceConnexionSelector(props: {
 
       const remains = []
       for (const cnx of providers) {
-         if (cnx && !servicePoint.providers.includes(cnx.component_id) && cnx.services.includes(service)) {
+         if (cnx && !servicePoint.providers.includes(cnx.id) && cnx.services.includes(service)) {
             remains.push(cnx)
          }
       }
 
       for (const cnx_id of servicePoint.providers) {
-         if (!providers.find(cnx => cnx.component_id === cnx_id)) {
+         if (!providers.find(cnx => cnx.id === cnx_id)) {
             providers.push(failedComponentPublication(cnx_id))
          }
       }
@@ -117,11 +117,11 @@ export function ServiceConnexionSelector(props: {
    }, [servicePoint], null)
 
    const onSwitch = (data: ComponentPublication) => {
-      onChange(switchServiceConnexion(servicePoint, multiple, data.component_id), !edited)
+      onChange(switchServiceConnexion(servicePoint, multiple, data.id), !edited)
    }
 
    const onActivate = (data: ComponentPublication) => {
-      onChange(selectServiceConnexion(servicePoint, multiple, data.component_id), !edited)
+      onChange(selectServiceConnexion(servicePoint, multiple, data.id), !edited)
    }
 
    return <>
@@ -136,7 +136,7 @@ export function ServiceConnexionSelector(props: {
          else {
             return <Stack vertical style={{ minWidth: 200 }}>
                {servicePoint.providers.map((id, i) => {
-                  const cnx = providers.find(cnx => cnx.component_id === id)
+                  const cnx = providers.find(cnx => cnx.id === id)
                   return cnx && <div key={i}
                      style={colormap && { "--item-shape-color": colormap[i] || "red" } as any}
                   >
@@ -198,7 +198,7 @@ export function ServicePointEditable(props: {
    const { servicePoint, compact, providers, colormap, hasSelectMode, onChange } = props
 
    const logstats = useNotifications(() => {
-      return providers.map((item) => acquireComponent(item.component_id).getLogStats())
+      return providers.map((item) => acquireComponent(item.id).getLogStats())
    }, [providers])
 
    const editPanel = usePanel((panel) => {
@@ -225,7 +225,7 @@ export function ServicePointEditable(props: {
    const onPopup = useCallback(async (cnx: ComponentPublication) => {
       return <div>
          <ItemRowShort
-            key={cnx.component_id}
+            key={cnx.id}
             name={cnx.title}
             icon={cnx.icon}
          />
@@ -253,7 +253,7 @@ export function ServicePointEditable(props: {
             if (error_count > 0) deco.push({ type: "badge", name: "bi:exclamation-triangle-fill" })
             return <Popup key={i} content={onPopup} data={cnx}>
                <ItemComp
-                  key={cnx.component_id}
+                  key={cnx.id}
                   name={cnx.title}
                   icon={cnx.icon}
                   decorations={deco}

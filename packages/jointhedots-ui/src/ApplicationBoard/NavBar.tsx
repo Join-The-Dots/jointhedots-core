@@ -105,7 +105,7 @@ export function ApplicationMenu(props: {
     }), [])
     const onGoto = (infos: ComponentPublication) => {
         onClose()
-        gotoURLView({ name: infos.component_id })
+        gotoURLView({ name: infos.id })
     }
     return <div ref={ref} className="slds-dropdown slds-dropdown_left">
         <div style={{ display: "flex", fontSize: "130%", justifyContent: "flex-start", paddingLeft: 5, borderBottom: "solid thin #0005" }}>

@@ -4,7 +4,6 @@
    "type": "module",
    "private": true,
    "license": "MIT",
-   "componentsContainer": true,
    "dependencies": {
       "@emotion/css": "^11.11.2",
       "@emotion/react": "^11.11.1",

@@ -5,7 +5,7 @@ export class InMemComponentPublisher implements IComponentPublisher {
    pubs = new Map<string, ComponentPublication>()
    constructor(catalog: ComponentPublication[] = []) {
       for (const entry of catalog) {
-         this.pubs.set(entry.component_id, entry)
+         this.pubs.set(entry.id, entry)
       }
    }
    async get_component_publication(id: string): Promise<ComponentPublication> {
@@ -26,8 +26,8 @@ export class InMemComponentProvider extends InMemComponentPublisher implements I
    manifests = new Map<string, ComponentManifest>()
    async add_component(manifest: ComponentManifest): Promise<ComponentPublication> {
       const entry = await createComponentPublication(manifest)
-      this.manifests.set(entry.component_id, manifest)
-      this.pubs.set(entry.component_id, entry)
+      this.manifests.set(entry.id, manifest)
+      this.pubs.set(entry.id, entry)
       return entry
    }
    async delete_component(component_id: string): Promise<boolean> {

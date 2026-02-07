@@ -4,7 +4,7 @@ import { InMemComponentProvider } from "./InMemComponentProvider.ts"
 
 function openComponentDatabase(): Promise<IDBDatabase> {
    return new Promise((resolve, reject) => {
-      const request = window.indexedDB.open("LocalComponents", 2)
+      const request = window.indexedDB.open("LocalComponents", 3)
 
       request.onerror = (e) => {
          console.error('Database error:', e.target["error"])
@@ -120,6 +120,11 @@ function filterComponentsPublications(db: IDBDatabase, filter: (value: Component
    })
 }
 
+type ServiceIndexRecord = {
+   service: string
+   component_id: string
+}
+
 function findComponentsByService(db: IDBDatabase, services: string[], results: Set<ComponentID>): Promise<unknown> {
    const transaction = db.transaction(["components_services"], "readonly")
    const components_services_store = transaction.objectStore("components_services")
@@ -127,7 +132,7 @@ function findComponentsByService(db: IDBDatabase, services: string[], results: S
    const pendings = []
    for (const service of services) {
       pendings.push(new Promise((resolve, reject) => {
-         const components_ids_req = service_index.getAll(service)
+         const components_ids_req = service_index.getAll(service) as IDBRequest<ServiceIndexRecord[]>
          components_ids_req.onsuccess = async () => {
             for (const found of components_ids_req.result) {
                if (found.service === service) results.add(found.component_id)
@@ -173,14 +178,14 @@ function storeComponent(db: IDBDatabase, manifest: ComponentManifest): Promise<C
       const components_services = db_T.objectStore("components_services")
       for (const srv of entry.services) {
          components_services.put({
-            component_id: entry.component_id,
+            component_id: entry.id,
             service: srv,
          })
       }
 
       const components_manifests = db_T.objectStore("components_manifests")
       components_manifests.put({
-         component_id: entry.component_id,
+         component_id: entry.id,
          manifest: manifest,
       })
 

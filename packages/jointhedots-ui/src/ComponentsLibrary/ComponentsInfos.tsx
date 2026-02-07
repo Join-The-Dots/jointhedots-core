@@ -9,7 +9,7 @@ export function ComponentCard(props: {
 }) {
    const { entry } = props
    const infos = useAsyncMemo(async () => {
-      const comp = acquireComponent(entry.component_id)
+      const comp = acquireComponent(entry.id)
       const manifest = await comp.fetch()
       const editor = await EditorKey.fetch(comp)
       return {
@@ -32,6 +32,6 @@ export function ComponentInfos(props: {
    const { entry } = props
    return <>
       <ComponentCard entry={entry} />
-      <NotificationsList subject_uri={entry.component_id} />
+      <NotificationsList subject_uri={entry.id} />
    </>
 }

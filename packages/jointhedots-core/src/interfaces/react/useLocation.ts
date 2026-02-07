@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { MapLike } from '../../common/types'
+import type { MapLike } from 'typescript'
 
 export function useLocation(): Location {
    const [location, setLocation] = useState(window.location)
@@ -36,7 +36,7 @@ export function useLocationHash(): string {
    return location
 }
 
-export function getLocationQuery(): MapLike<string> {
+export function getLocationQuery(): Record<string, string> {
    const { search } = window.location
    const query = {}
    if (search.startsWith("?")) {

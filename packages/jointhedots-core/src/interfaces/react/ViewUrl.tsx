@@ -1,7 +1,7 @@
 
-import React, { ReactElement, useContext, useEffect, useMemo, useState } from "react"
+import React, { useContext, useEffect, useMemo, useState, type ReactElement } from "react"
 import { ErrorDisplayer } from "./ErrorBoundary"
-import { evaluateViewInfos, getViewInfosFrom, ViewInfos, ViewServiceKey } from "../view/interface"
+import { evaluateViewInfos, getViewInfosFrom, ViewServiceKey, type ViewInfos } from "../view/interface"
 import { useLocationHash } from "./useLocation"
 import { UseServicePoints } from "./useServices"
 import { ViewReactKey } from "./interface"

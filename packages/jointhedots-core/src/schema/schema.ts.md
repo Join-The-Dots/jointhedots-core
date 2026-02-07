@@ -128,7 +128,7 @@ export type JSONSchemaCustom = {
    // Programming interface
    args?: JSONSchema[]
    placeholder?: boolean // require a placeholder structure when empty
-   resources?: MapLike<ResourceEntry> // Resources catalog with undefined interface
+   resources?: Record<string, ResourceEntry> // Resources catalog with undefined interface
    security?: SecurityGuard
    "allow-origin"?: string
 
@@ -136,7 +136,7 @@ export type JSONSchemaCustom = {
    docking?: DockingSchema
    templates?: TemplateSchema[] // descriptor to create a valid expression for this schema
    binding?: BindingSchema
-   aliases?: MapLike<string>
+   aliases?: Record<string, string>
 }
 
 export type JSONSchema = JSONSchemaStandard & JSONSchemaCustom | ServiceSchema
@@ -159,7 +159,7 @@ export type SecurityGuard =
    }
 
 export interface SecurityRule {
-   check(data: any, params?: MapLike<any>): Error
+   check(data: any, params?: Record<string, any>): Error
 }
 
 export type BindingSchema = {
@@ -181,7 +181,7 @@ export type ExpressionSchema = {
 
 export type DockingSchema = {
    view: string
-   properties: MapLike<JSONSchema7Definition> | undefined
+   properties: Record<string, JSONSchema7Definition> | undefined
 }
 
 export type ChapterSchema = {

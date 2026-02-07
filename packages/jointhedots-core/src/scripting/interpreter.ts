@@ -14,7 +14,7 @@ export class LocalScope<C = unknown> implements InterpreterScope {
    constructor(
       readonly $parentScope: InterpreterScope | null,
       readonly $thisScope: unknown,
-      readonly locals: MapLike<unknown> = {},
+      readonly locals: Record<string, unknown> = {},
    ) { }
 
    getThis(): unknown {

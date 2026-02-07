@@ -173,7 +173,7 @@ export interface ElementPrimitive extends Primitive {
 
 export interface DocumentPrimitive extends Primitive {
    type: "Document"
-   metadata?: MapLike<any>
+   metadata?: Record<string, any>
    content: AnyPrimitive[]
 }
 

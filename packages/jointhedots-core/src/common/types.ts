@@ -11,7 +11,7 @@ export type Async<T> = T | Promise<T>
 
 export type OneOrMany<T> = T | T[]
 
-export function areSimilarObjects(x: MapLike<any>, y: MapLike<any>): boolean {
+export function areSimilarObjects(x: Record<string, any>, y: Record<string, any>): boolean {
    for (const key in x) {
       if (x[key] !== y[key]) {
          return false

@@ -32,7 +32,7 @@ export class TextBinding {
 export class TextTemplate {
    constructor(
       public pattern: string,
-      public bindings: MapLike<TextBinding>,
+      public bindings: Record<string, TextBinding>,
       public issues: Error[],
    ) {
    }
@@ -97,7 +97,7 @@ export function parseTextTemplate(code: string, syntax: EmbedSyntax, placeholder
    const { startToken, endToken, escapeCode } = embedSyntaxStyles[syntax]
    const options: ACorn.Options = { ecmaVersion: 2020 }
 
-   const bindings: MapLike<TextBinding> = {}
+   const bindings: Record<string, TextBinding> = {}
    const binding_placeholder = placeholder(code)
    let binding_count = 0
 

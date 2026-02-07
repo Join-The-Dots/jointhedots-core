@@ -1,6 +1,6 @@
 import type { MapLike } from "typescript"
 
-export type CommonSetting = MapLike<any>
+export type CommonSetting = Record<string, any>
 
 export type SettingGroup =
    "service_points" |
@@ -8,7 +8,7 @@ export type SettingGroup =
    "shareds"
 
 export type SettingStores<T> = {
-   [id in SettingGroup]: MapLike<T>
+   [id in SettingGroup]: Record<string, T>
 }
 
 export enum WriteMode {

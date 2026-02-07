@@ -92,7 +92,7 @@ export const InputData: React.FC<InputProps> = ({ value, onChange, schema, icon,
                <div className="slds-spinner__dot-b"></div>
             </div>
 
-            {tooling.map((tool, index) => (
+            {tooling && tooling.map((tool, index) => (
                <button className="slds-button slds-button_icon slds-input__icon slds-input__icon_right" title="Clear">
                   <Icon className="" name={tool.icon} />
                   <span className="slds-assistive-text">Clear</span>

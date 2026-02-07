@@ -1,5 +1,4 @@
-import { ServiceEntry } from "services"
-
+import { ServiceEntry } from "../../services"
 
 export type NameSpaceId = string
 export type FileKey = string

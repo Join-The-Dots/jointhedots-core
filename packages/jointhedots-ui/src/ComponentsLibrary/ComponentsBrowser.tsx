@@ -26,7 +26,7 @@ export function getComponentSmallName(id: string) {
 export function groupComponentPublications(items: ComponentPublication[]): MapLike<ComponentPublication[]> {
    const result = {}
    for (const item of items) {
-      const pack = getComponentGroupName(item.component_id)
+      const pack = getComponentGroupName(item.id)
       let list = result[pack] = result[pack] || []
       list.push(item)
    }
@@ -85,7 +85,7 @@ export function ComponentItem(props: {
       })
    }
 
-   const logstats = acquireComponent(entry.component_id).getLogStats()
+   const logstats = acquireComponent(entry.id).getLogStats()
    const hasIssues = logstats.error_count > 0
    tooling.push({
       name: hasIssues ? "Issues" : "Infos",
@@ -105,8 +105,7 @@ export function ComponentItem(props: {
          icon: "bi:pencil",
          optional: true,
          onActivate: async () => {
-            const { component_id } = entry
-            await editComponent(acquireComponent(component_id))
+            await editComponent(acquireComponent(entry.id))
          },
       })
       if (display?.allowDelete) tooling.push({
@@ -116,7 +115,7 @@ export function ComponentItem(props: {
          onActivate: async () => {
             if (await askQuestion(`Do you want to destroy component '${entry.title}' ?`)) {
                if (selected & LabelSelected.Enabled) onSelect(entry)
-               deleteComponent(entry.component_id)
+               deleteComponent(entry.id)
             }
          }
       })
@@ -128,7 +127,7 @@ export function ComponentItem(props: {
    return <ItemRow
       data={entry}
       icon={getComponentIcon(entry)}
-      name={entry.title || entry.component_id}
+      name={entry.title || entry.id}
       summary={summary}
       selected={selected}
       tooling={tooling}

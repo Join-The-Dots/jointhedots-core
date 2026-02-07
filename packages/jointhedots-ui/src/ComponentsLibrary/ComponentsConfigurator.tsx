@@ -24,7 +24,7 @@ export function CreateComponentSelector(props: {
    }, [service, props.entries])
 
    const create = async function (pub: ComponentPublication) {
-      const driver = acquireComponent(pub.component_id)
+      const driver = acquireComponent(pub.id)
       const component = await createComponent(driver, service)
       if (component && props.onCreate) {
          props.onCreate(await createComponentPublication(component.manifest))

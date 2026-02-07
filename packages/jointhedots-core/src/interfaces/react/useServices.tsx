@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { Spinner } from "react-lightning-design-system"
-import { acquireServicePoint, listenServicePoints, ServiceChangeHandler, ServicePoint, unlistenServicePoints } from "../../services/service-points"
+import { acquireServicePoint, listenServicePoints, ServicePoint, unlistenServicePoints, type ServiceChangeHandler } from "../../services/service-points"
 import { ErrorDisplayer } from "./ErrorBoundary"
-import { ViewRequirements } from "./interface"
+import type { ViewRequirements } from "./interface"
 
 export type IService = unknown
 export type ServicePointsMap = Map<ServicePoint, IService[]>

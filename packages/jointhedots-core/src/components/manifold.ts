@@ -462,7 +462,7 @@ export async function fetchComponentsPublications(components_ids: string[]): Pro
 
 export function failedComponentPublication(id: string, title?: string): ComponentPublication {
    return {
-      component_id: id,
+      id: id,
       title: title ? title : "! Not found: " + id,
    }
 }

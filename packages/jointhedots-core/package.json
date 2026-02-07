@@ -4,7 +4,6 @@
    "type": "module",
    "private": true,
    "license": "MIT",
-   "componentsContainer": true,
    "exports": {
       ".": "./src/index.ts",
       "./commands": "./src/interfaces/commands/interface.ts",
@@ -17,7 +16,6 @@
       "acorn": "^8.15.0",
       "astring": "^1.9.0",
       "json-schema": "^0.4.0",
-      "lexical": "0.18.0",
       "query-string": "^9.1.0",
       "react-lightning-design-system": "^5.9.1",
       "vscode-uri": "^3.1.0",
