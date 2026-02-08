@@ -47,6 +47,6 @@
    },
    "scripts": {
       "watch": "tsc --watch --noEmit",
-      "build": "jointhedots-gear make --libs @jointhedots/ui --devmode --dist ./dist"
+      "build": "jointhedots-gear make --libs @jointhedots/ui --dist ./dist"
    }
 }

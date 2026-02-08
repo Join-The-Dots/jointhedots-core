@@ -39,7 +39,7 @@
    },
    "scripts": {
       "watch": "tsc --watch --noEmit",
-      "build": "jointhedots-gear make --libs @jointhedots/core --devmode --dist ./dist",
+      "build": "jointhedots-gear make --libs @jointhedots/core --dist ./dist",
       "dev": "jointhedots-gear make --libs @jointhedots/core --devmode --watch --dist ./dist"
    }
 }
