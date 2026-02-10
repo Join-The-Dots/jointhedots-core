@@ -2,9 +2,11 @@ import { createComponentPublication, matchComponentFilter } from "../../componen
 import { type ComponentFilter, type ComponentID, type ComponentManifest, type ComponentPublication, type IComponentProvider } from "../../components/components.ts"
 import { InMemComponentProvider } from "./InMemComponentProvider.ts"
 
+const STORAGE_VERSION = 5
+
 function openComponentDatabase(): Promise<IDBDatabase> {
    return new Promise((resolve, reject) => {
-      const request = window.indexedDB.open("LocalComponents", 3)
+      const request = window.indexedDB.open("LocalComponents", STORAGE_VERSION)
 
       request.onerror = (e) => {
          console.error('Database error:', e.target["error"])
@@ -12,26 +14,30 @@ function openComponentDatabase(): Promise<IDBDatabase> {
       }
 
       request.onupgradeneeded = () => {
+         console.log("Upgrade LocalComponents to ", STORAGE_VERSION)
+         debugger
          const db = request.result
 
-         // Create "components" object store
-         if (!db.objectStoreNames.contains("components")) {
-            const componentsStore = db.createObjectStore("components", { keyPath: "component_id" })
-            componentsStore.createIndex("name", "name", { unique: false })
+         // Purge and recreate object stores on upgrade.
+         if (db.objectStoreNames.contains("components_manifests")) {
+            db.deleteObjectStore("components_manifests")
+         }
+         if (db.objectStoreNames.contains("components_services")) {
+            db.deleteObjectStore("components_services")
+         }
+         if (db.objectStoreNames.contains("components")) {
+            db.deleteObjectStore("components")
          }
 
-         // Create "components_services" object store
-         if (!db.objectStoreNames.contains("components_services")) {
-            const servicesStore = db.createObjectStore("components_services", { keyPath: ["component_id", "service"] })
-            servicesStore.createIndex("component_id", "component_id", { unique: false })
-            servicesStore.createIndex("service", "service", { unique: false })
-         }
+         const componentsStore = db.createObjectStore("components", { keyPath: "id" })
+         componentsStore.createIndex("title", "title", { unique: false })
 
-         // Create "components_manifests" object store
-         if (!db.objectStoreNames.contains("components_manifests")) {
-            const servicesStore = db.createObjectStore("components_manifests", { keyPath: "component_id" })
-            servicesStore.createIndex("component_id", "component_id", { unique: false })
-         }
+         const servicesStore = db.createObjectStore("components_services", { keyPath: ["component_id", "service"] })
+         servicesStore.createIndex("component_id", "component_id", { unique: false })
+         servicesStore.createIndex("service", "service", { unique: false })
+
+         const manifestsStore = db.createObjectStore("components_manifests", { keyPath: "component_id" })
+         manifestsStore.createIndex("component_id", "component_id", { unique: false })
       }
 
       request.onsuccess = () => {

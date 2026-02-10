@@ -17,6 +17,8 @@ function ApplicationRoot() {
       <Icon size="10.0em" name={icon_0} />
 
       <ButtonIcon size="5.0em" icon="avatar:Hello World" />
+      <ButtonIcon size="5.0em" icon={42 as any} />
+      <ButtonIcon size="5.0em" icon={[] as any} />
       <ButtonIcon size="5.0em" icon="bad:Hello World" />
       <ButtonIcon size="5.0em" icon="[error]bi:house-door-fill" />
       

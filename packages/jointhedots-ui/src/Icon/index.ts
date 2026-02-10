@@ -2,6 +2,7 @@ import { Icon } from "./Icon"
 import "./style.scss"
 
 export * from "./Icon"
+export * from "./collections/badge"
 export * from "./collections/avatar"
 export * from "./collections/font"
 export * from "./collections/svg"

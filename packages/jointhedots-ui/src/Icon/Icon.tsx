@@ -211,6 +211,12 @@ function parseIconStack(name: string): IconComposed {
 function getIconParsed(name: string): IconComposed {
    let parsed = IconParsedCache.get(name)
    if (!parsed) {
+      if (typeof name !== "string") {
+         if (name === undefined) name = "blank"
+         else if (name === null) name = "blank"
+         else if (typeof name === "number") name = `badge:${name}`
+         else name = `error:typeof ${typeof name}`
+      }
       parsed = parseIconStack(name)
       IconParsedCache.set(name, parsed)
    }
