@@ -1,10 +1,10 @@
 {
    "name": "jointhedots",
-   "version": "2.0.21",
+   "version": "2.0.22",
    "type": "module",
    "license": "MIT",
    "devDependencies": {
-      "@jointhedots/gear": "^1.1.6",
+      "@jointhedots/gear": "../jointhedots-gear",
       "@polycuber/script.cli": "^1.0.5",
       "@types/mocha": "^10.0.8",
       "@types/node": "^22.7.4"

@@ -3,7 +3,7 @@
    "version": "0.0.0",
    "type": "module",
    "private": true,
-   "license": "MIT",
+   "singleton": true,
    "exports": {
       ".": "./src/index.ts",
       "./commands": "./src/interfaces/commands/interface.ts",
