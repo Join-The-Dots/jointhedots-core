@@ -19,3 +19,39 @@
       background-color: rgb(255, 142, 142);
    }
 }
+
+.JDT-Spinner {
+   display: inline-flex;
+   align-items: center;
+   gap: 6px;
+   padding: 8px 0;
+   justify-content: center;
+   width: 100%;
+}
+
+.JDT-Spinner__dot {
+   width: 8px;
+   height: 8px;
+   border-radius: 50%;
+   background-color: currentColor;
+   opacity: 0.6;
+   animation: JDT-SpinnerBounce 1.4s ease-in-out infinite both;
+
+   &:nth-child(1) {
+      animation-delay: -0.32s;
+   }
+   &:nth-child(2) {
+      animation-delay: -0.16s;
+   }
+}
+
+@keyframes JDT-SpinnerBounce {
+   0%, 80%, 100% {
+      transform: scale(0.4);
+      opacity: 0.4;
+   }
+   40% {
+      transform: scale(1);
+      opacity: 1;
+   }
+}

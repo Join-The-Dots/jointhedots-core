@@ -1,7 +1,8 @@
 import { URI } from 'vscode-uri'
 import type { DocumentationSchema, JSONSchema, ResourceEntry } from "../schema/schema.ts"
 import type { ComponentEntry } from './manifold.ts'
-import { ServiceEntry, type ServiceType } from '../services/service-entry.ts'
+import { ServiceAccessor, type ServiceType } from '../services/service-accessor.ts'
+import React from "react"
 
 //-------------------------------------------------------------
 // Component model: distribuable unit providing services
@@ -121,7 +122,7 @@ export interface ComponentController {
    checkDescriptor(descriptor: ComponentManifest): Promise<ComponentChecking>
 }
 
-export const ComponentControllerKey = new ServiceEntry<ComponentController, ComponentSchema>("component")
+export const ComponentControllerKey = ServiceAccessor.About<ComponentController, ComponentSchema>("component")
 
 export type ComponentEditorProps<T extends ComponentManifest = ComponentManifest> = {
    descriptor: ComponentSchema
@@ -143,7 +144,7 @@ export type ComponentEditor<T extends ComponentManifest = ComponentManifest> = {
    preview?: React.ComponentType<ComponentPreviewProps<T>>
 }
 
-export const EditorKey = new ServiceEntry<ComponentEditor, unknown>("editor")
+export const EditorKey = ServiceAccessor.About<ComponentEditor, unknown>("editor")
 
 //-------------------------------------------------------------
 // Component providers

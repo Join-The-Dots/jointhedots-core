@@ -2,7 +2,7 @@ import { acquireComponent, ComponentsRegistry } from "../components/manifold.ts"
 import { type ComponentID } from "../components/components.ts"
 import { getSettings, listenSettings, WriteMode } from "./settings.ts"
 import { type ILogDispatcher, Log, type LogObject } from "../logging/index.ts"
-import { ServiceEntry, type ServiceType } from "./service-entry.ts"
+import { ServiceAccessor, type ServiceType } from "./service-accessor.ts"
 
 export const ServicePoints: Map<string, ServicePoint> = new Map()
 
@@ -184,7 +184,7 @@ export function acquireServicePoint<IService>(id: string): ServicePoint<IService
    return svc
 }
 
-export function createServicePoint<S extends any, D extends any>(service: ServiceEntry<S, D>, name: ServicePointID, properties?: ServicePointProperties): ServicePoint<S> {
+export function createServicePoint<S extends any, D extends any>(service: ServiceAccessor<S, D>, name: ServicePointID, properties?: ServicePointProperties): ServicePoint<S> {
    const id = service.resource + "/" + name
    updateServicePointDescriptor(id, properties)
    return acquireServicePoint(id)

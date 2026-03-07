@@ -1,6 +1,7 @@
 import { z, type ZodObject, type ZodRawShape } from "zod"
-import { ServiceEntry, type ServiceDefinition, type ServiceInterface } from "../../services"
+import { type ServiceDefinition, type ServiceInterface } from "../../services"
 import { ViewServiceKey } from "../view/interface"
+import React from "react"
 
 export type ViewServicePoint = {
    service?: string

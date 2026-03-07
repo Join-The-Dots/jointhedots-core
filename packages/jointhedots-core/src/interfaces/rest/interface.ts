@@ -1,13 +1,13 @@
 import { URI } from "vscode-uri"
 import { acquireComponent, ComponentEntry } from "../../components/manifold.ts"
-import { ServiceEntry } from "../../services/service-entry.ts"
+import { ServiceAccessor } from "../../services/service-accessor.ts"
 
 export interface RESTService {
    getUrl(path: string): string
    invoke(path: string, init?: RequestInit): Promise<Response>
 }
 
-export const RESTServiceKey = new ServiceEntry<RESTService, unknown>("api.rest")
+export const RESTServiceKey = ServiceAccessor.About<RESTService, unknown>("api.rest")
 
 export type RESTServiceImport = {
    type?: "api.rest"

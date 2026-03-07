@@ -3,7 +3,7 @@ import type { MapLike } from "typescript"
 import type { JSONSchema, SecurityRule, SecurityGuard } from "../../schema/schema.ts"
 import { acquireComponent, acquireResource, ComponentEntry } from "../../components/manifold.ts"
 import type { ComponentManifest } from "../../components/components.ts"
-import { ServiceEntry } from "../../services/service-entry.ts"
+import { ServiceAccessor } from "../../services/service-accessor.ts"
 
 // Simple query string utilities to replace query-string package
 const qs = {
@@ -31,7 +31,7 @@ const qs = {
 }
 
 // View service key for accessing view schemas
-export const ViewServiceKey = new ServiceEntry<any, JSONSchema>("view")
+export const ViewServiceKey = ServiceAccessor.About<any, JSONSchema>("view")
 
 export type ViewInfos = {
    name: string

@@ -1,5 +1,6 @@
 import type { AST } from "../ast/api.ts"
 import { type Node, type ContextInstance, GetterFeature, type FeatureID } from "./model.ts"
+import React from "react"
 
 export type ValueRecast = (x: any) => any
 

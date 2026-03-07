@@ -1,11 +1,20 @@
 import React, { useContext, useEffect, useMemo, useState } from "react"
-import { Spinner } from "react-lightning-design-system"
 import { acquireServicePoint, listenServicePoints, ServicePoint, unlistenServicePoints, type ServiceChangeHandler } from "../../services/service-points"
 import { ErrorDisplayer } from "./ErrorBoundary"
 import type { ViewRequirements } from "./interface"
 
 export type IService = unknown
 export type ServicePointsMap = Map<ServicePoint, IService[]>
+
+function Spinner() {
+   return (
+      <div className="JDT-Spinner">
+         <div className="JDT-Spinner__dot" />
+         <div className="JDT-Spinner__dot" />
+         <div className="JDT-Spinner__dot" />
+      </div>
+   )
+}
 
 export enum ServiceStatus {
    NotReady = 0,

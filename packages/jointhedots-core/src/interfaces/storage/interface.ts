@@ -1,4 +1,4 @@
-import { ServiceEntry } from "../../services"
+import { ServiceAccessor } from "../../services"
 
 export type NameSpaceId = string
 export type FileKey = string
@@ -78,5 +78,5 @@ export interface StorageService {
 
 export type StorageDescriptor = void
 
-export const StorageServiceKey = new ServiceEntry<StorageService, StorageDescriptor>("storage")
+export const StorageServiceKey = ServiceAccessor.About<StorageService, StorageDescriptor>("storage")
 

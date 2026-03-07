@@ -2,9 +2,10 @@ import type { AST } from "../../ast/api.ts"
 import type { DocumentPrimitive } from "../../ast/primitives.ts"
 import { ContextInstance, Node, Task, State, type NodeSymbol, type Executor, type ContextController, type NodeNamespace, ContextModel, type FeatureID, GetterFeature, DisplayFeature } from "../model.ts"
 import { Model } from "../register.ts"
-import { AnyType, JSXType, UseAggregate, UseLink, UseList, UseReadable, ValueConstraint, type Use } from "../uses.ts"
+import { UseAggregate, UseLink, UseReadable, ValueConstraint, type Use } from "../uses.ts"
 import { Pipeline } from "../values.ts"
 import { Literal } from "./nodes-expr.ts"
+import React from "react"
 
 export class DXElement extends Node<AST.ElementPrimitive> {
    get symbol(): NodeSymbol {

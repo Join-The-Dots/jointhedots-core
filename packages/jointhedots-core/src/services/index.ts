@@ -2,5 +2,5 @@
 export * from "./service-definitions"
 export * from "./service-points"
 export * from "./service-specification"
-export * from "./service-entry"
+export * from "./service-accessor"
 export * from "./settings"
