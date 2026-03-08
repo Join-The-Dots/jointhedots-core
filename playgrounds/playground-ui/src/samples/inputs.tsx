@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { renderRoot } from "../components/config"
-import { CommonTypes, JSONSchema } from "@jointhedots/core"
+import { CommonTypes, type JSONSchema } from "@jointhedots/core"
 import { InputData } from "@jointhedots/ui/Inputs"
 import { Button, ButtonIcon } from "@jointhedots/ui/Inputs"
 
@@ -50,9 +50,9 @@ function ApplicationRoot() {
          <Button icon="bi:house" label="Click here" iconPosition="right" variant="destructive" />
          <Button icon="bi:house" label="Click here" variant="brand" />
          <ButtonIcon icon="bi:house" />
-         <ButtonIcon icon="bi:house" variant="primary"/>
-         <ButtonIcon icon="bi:house" variant="secondary"/>
-         <ButtonIcon icon="bi:house" variant="watermark"/>
+         <ButtonIcon icon="bi:house" variant="primary" />
+         <ButtonIcon icon="bi:house" variant="secondary" />
+         <ButtonIcon icon="bi:house" variant="watermark" />
       </div>
    </>
 }

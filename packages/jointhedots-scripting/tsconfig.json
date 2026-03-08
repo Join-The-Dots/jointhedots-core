@@ -1,0 +1,36 @@
+{
+   "compilerOptions": {
+      "module": "nodenext",
+      "moduleResolution": "nodenext",
+      "target": "es2022",
+      "skipLibCheck": true,
+      "allowSyntheticDefaultImports": true,
+      "rewriteRelativeImportExtensions": true,
+      "allowArbitraryExtensions": false,
+      "allowImportingTsExtensions": true,
+      "verbatimModuleSyntax": true,
+      "strict": false,
+      "noImplicitThis": true,
+      "noUnusedLocals": false,
+      "sourceMap": true,
+      "outDir": "esm",
+      "jsx": "react-jsx",
+      "lib": [
+         "es2022",
+         "dom",
+         "dom.iterable"
+      ],
+      "paths": {
+         "jsr:@std/assert": [
+            "./node_modules/@std/assert/_dist/mod.d.ts"
+         ],
+         "jsr:@std/testing/bdd": [
+            "./node_modules/@std/testing/_dist/bdd.d.ts"
+         ]
+      }
+   },
+   "include": [
+      "src",
+      "test"
+   ]
+}

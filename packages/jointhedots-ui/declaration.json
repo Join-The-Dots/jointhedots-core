@@ -1,0 +1,15 @@
+{
+   "exports": {
+      "./ApplicationBoard": "./src/ApplicationBoard",
+      "./ComponentsLibrary": "./src/ComponentsLibrary",
+      "./CodeEditor": "./src/CodeEditor",
+      "./Dialog": "./src/Dialog",
+      "./Icon": "./src/Icon",
+      "./Items": "./src/Items",
+      "./ServicePoint": "./src/ServicePoint",
+      "./Layouts": "./src/Layouts",
+      "./Notifications": "./src/Notifications",
+      "./Inputs": "./src/Inputs",
+      "./theme": "./src/theme"
+   }
+}

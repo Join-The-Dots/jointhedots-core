@@ -1,11 +1,10 @@
-import type { AST } from "../../ast/api.ts"
+import type { AST } from "../../ast/mod.ts"
 import type { DocumentPrimitive } from "../../ast/primitives.ts"
-import { ContextInstance, Node, Task, State, type NodeSymbol, type Executor, type ContextController, type NodeNamespace, ContextModel, type FeatureID, GetterFeature, DisplayFeature } from "../model.ts"
+import { ContextInstance, Node, Task, State, type NodeSymbol, type Executor, type ContextController, type NodeNamespace, ContextModel, type FeatureID, GetterFeature, DisplayFeature, type RenderNode } from "../model.ts"
 import { Model } from "../register.ts"
 import { UseAggregate, UseLink, UseReadable, ValueConstraint, type Use } from "../uses.ts"
 import { Pipeline } from "../values.ts"
 import { Literal } from "./nodes-expr.ts"
-import React from "react"
 
 export class DXElement extends Node<AST.ElementPrimitive> {
    get symbol(): NodeSymbol {
@@ -100,7 +99,7 @@ class DXDocument extends Node<DocumentPrimitive> implements ContextController, N
    context = new ContextModel(this)
    content: UseAggregate = null
    task: Task = null
-   output: State<Pipeline<React.ReactNode>> = null
+   output: State<Pipeline<RenderNode>> = null
    get $namespace(): NodeNamespace {
       return this
    }
@@ -112,7 +111,7 @@ class DXDocument extends Node<DocumentPrimitive> implements ContextController, N
    }
    apply(parent: ContextInstance) {
       const ctx = new ContextInstance(this.context, parent)
-      const result = new Pipeline<React.ReactNode>()
+      const result = new Pipeline<RenderNode>()
       this.output.write(ctx, result)
       ctx.execute()
       result.emit(this.content.get(ctx)[0])

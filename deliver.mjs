@@ -11,4 +11,5 @@ function publishPackage(path, url) {
 // Publish packages
 publishPackage("packages/jointhedots-core")
 publishPackage("packages/jointhedots-ui")
+publishPackage("packages/jointhedots-scripting")
 

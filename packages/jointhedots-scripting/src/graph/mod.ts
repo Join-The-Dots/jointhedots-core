@@ -5,11 +5,12 @@
 import { createGlobalResolver, GraphBuilder, updateModel } from "./builder.ts"
 import { DocumentModel } from "./model.ts"
 import { createDocumentFromAST } from "./log.ts"
+import { loadScriptASTFromText } from "./loader.ts"
 
 import "./nodes/nodes-states.tsx"
 import "./nodes/nodes-expr.ts"
 import "./nodes/nodes-render.tsx"
-import type { AST } from "../ast/api.ts"
+import type { AST } from "../ast/mod.ts"
 import { file } from "@polycuber/script.cli"
 
 export async function loadScriptGraphFromAST(ast: AST.DocumentPrimitive) {
@@ -21,4 +22,9 @@ export async function loadScriptGraphFromAST(ast: AST.DocumentPrimitive) {
    file.write.json("test-results/flow/flamap.json", data.serialize())
    // file.write.text("test-results/flow/graph.json", stringifyGraph(model.entrypoint))
    return model
+}
+
+export async function createFlowFromMdx(text: string) {
+   const ast = loadScriptASTFromText(text)
+   return loadScriptGraphFromAST(ast)
 }

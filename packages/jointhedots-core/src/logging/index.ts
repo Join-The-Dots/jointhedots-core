@@ -1,6 +1,6 @@
-import type { MapLike } from "../common/types.ts"
 import { getComponentFromData } from "../components/manifold.ts"
-import type { Command } from "../interfaces/commands/interface"
+import type { Command } from "../interfaces/commands/interface.ts"
+export { print } from "./trace.ts"
 
 export type LogObjectID = string
 

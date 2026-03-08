@@ -1,4 +1,4 @@
-import type { AST } from "../../ast/api.ts"
+import type { AST } from "../../ast/mod.ts"
 import { ENHANCED_BINARY_OPERATIONS } from "../../interpreter.ts"
 import { ContextInstance, ContextModel, FlowControl, Node, State, GetterFeature, type ContextController, type FeatureID, SetterFeature, DisplayFeature } from "../model.ts"
 import { Model } from "../register.ts"

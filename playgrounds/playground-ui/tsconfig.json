@@ -11,6 +11,7 @@
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true,
       "allowImportingTsExtensions": true,
+      "verbatimModuleSyntax": true,
       "noEmit": true,
       "strictNullChecks": false,
       "strict": false,

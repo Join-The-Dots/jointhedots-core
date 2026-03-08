@@ -1,6 +1,5 @@
-import type { AST } from "../ast/api.ts"
-import { type Node, type ContextInstance, GetterFeature, type FeatureID } from "./model.ts"
-import React from "react"
+import type { AST } from "../ast/mod.ts"
+import { type Node, type ContextInstance, GetterFeature, type FeatureID, type RenderNode } from "./model.ts"
 
 export type ValueRecast = (x: any) => any
 
@@ -172,7 +171,7 @@ export function isInheritedOf(cls: ObjectClass, parent: ObjectClass): boolean {
 
 
 export interface Displayable {
-   display(ctx: ContextInstance): React.ReactNode
+   display(ctx: ContextInstance): RenderNode
 }
 export class UseDisplayable implements Use {
    constructor(readonly node: Displayable, constraint: ValueConstraint) {
@@ -180,7 +179,7 @@ export class UseDisplayable implements Use {
    get link() {
       return UseLink.Strong
    }
-   get(ctx: ContextInstance): React.ReactNode {
+   get(ctx: ContextInstance): RenderNode {
       return this.node.display(ctx)
    }
 }
@@ -195,7 +194,7 @@ export class UseReadable implements Use {
    get link() {
       return UseLink.Strong
    }
-   get(ctx: ContextInstance): React.ReactNode {
+   get(ctx: ContextInstance): RenderNode {
       return this.node.read(ctx)
    }
 }

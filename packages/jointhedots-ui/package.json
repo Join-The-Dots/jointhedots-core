@@ -4,27 +4,14 @@
    "type": "module",
    "private": true,
    "singleton": true,
-   "exports": {
-      "./ApplicationBoard": "./src/ApplicationBoard",
-      "./ComponentsLibrary": "./src/ComponentsLibrary",
-      "./CodeEditor": "./src/CodeEditor",
-      "./Dialog": "./src/Dialog",
-      "./Icon": "./src/Icon",
-      "./Items": "./src/Items",
-      "./ServicePoint": "./src/ServicePoint",
-      "./Layouts": "./src/Layouts",
-      "./Notifications": "./src/Notifications",
-      "./Inputs": "./src/Inputs",
-      "./theme": "./src/theme"
-   },
    "dependencies": {
-      "@jointhedots/core": "^0.0.0",
+      "@jointhedots/core": "*",
       "@mui/material": "^6.4.7",
       "@rjsf/core": "^5.23.2",
       "@rjsf/utils": "^5.23.2",
       "@rjsf/validator-ajv8": "^5.23.2",
-      "@salesforce-ux/design-system": "2.25.4",
-      "@salesforce/design-system-react": "0.10.64",
+      "@salesforce-ux/design-system": "^2.29.0",
+      "@salesforce/design-system-react": "^0.10.65",
       "react-toastify": "^11.0.5"
    },
    "peerDependencies": {
@@ -39,11 +26,6 @@
       "typescript": "^5.9.3",
       "react": "^18.2.0",
       "react-dom": "^18.2.0"
-   },
-   "overrides": {
-      "react-lightning-design-system": {
-         "react-relative-portal": "../../deps/react-relative-portal-1.3.1.tgz"
-      }
    },
    "scripts": {
       "watch": "tsc --watch --noEmit",

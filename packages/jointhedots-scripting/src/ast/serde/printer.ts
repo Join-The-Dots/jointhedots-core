@@ -1,6 +1,6 @@
 import * as AString from 'astring'
-import * as  AST from '../primitives'
-import { BlockFormat } from '../primitives'
+import * as  AST from '../primitives.ts'
+import { BlockFormat } from '../primitives.ts'
 
 type ElementPrinters = Record<string, (generator: Generator, element: AST.ElementPrimitive, state: State) => void>
 

@@ -1,12 +1,9 @@
 import { Octokit } from "@octokit/rest"
-import { ComponentEntry, ComponentManifest, ComponentController, Log, ComponentEditor, getComponentFromData } from "@jointhedots/core"
-import {
-   ChangeSetId, FileKey, StorageChangeLog, StorageChangeSet,
-   StorageChangeStatus, StorageService, StorageStats, StorageTransaction
-} from "@jointhedots/core/storage"
 import { GithubSSOEditor } from "./sso"
-import { Cmdlet, CmdPayload, CmdResult, CommandsService } from "@jointhedots/core/commands"
 import { toast } from "react-toastify"
+import { getComponentFromData, Log, type ComponentController, type ComponentEditor, type ComponentEntry, type ComponentManifest } from "@jointhedots/core"
+import type { ChangeSetId, FileKey, StorageChangeLog, StorageChangeSet, StorageChangeStatus, StorageService, StorageStats, StorageTransaction } from "@jointhedots/core/storage"
+import type { Cmdlet, CmdPayload, CmdResult, CommandsService } from "@jointhedots/core/commands"
 
 interface CommittedFile {
    path: string

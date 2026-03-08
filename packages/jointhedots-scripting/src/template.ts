@@ -1,6 +1,4 @@
-import * as ACorn from "acorn"
-import * as AString from "astring"
-import { type MapLike } from "../common/types.ts"
+import { generateExpression, parseExpressionAt, type AST } from "./ast/mod.ts"
 import { evaluateExpression, type InterpreterScope, LocalScope } from "./interpreter.ts"
 
 export enum EmbedSyntax {
@@ -18,14 +16,14 @@ export class TextBinding {
    constructor(
       public start: number,
       public end: number,
-      public node: ACorn.AnyNode,
+      public node: AST.AnyNode,
    ) {
    }
    evaluate(scope: InterpreterScope) {
       return evaluateExpression(this.node, scope)
    }
    toString() {
-      return AString.generate(this.node)
+      return generateExpression(this.node)
    }
 }
 
@@ -49,7 +47,7 @@ export class TextTemplate {
             text = text.replace(key, encoder(value))
          }
          catch (e) {
-            const code = AString.generate(binding.node)
+            const code = generateExpression(binding.node)
             console.log(`Invalid binding '${code}':`, e)
             throw new Error(`Invalid binding '${code}': ${e.message}`)
          }
@@ -95,7 +93,7 @@ const embedSyntaxStyles = [
 
 export function parseTextTemplate(code: string, syntax: EmbedSyntax, placeholder: PlaceholderGenerator = defaultPlaceholderGen): TextTemplate {
    const { startToken, endToken, escapeCode } = embedSyntaxStyles[syntax]
-   const options: ACorn.Options = { ecmaVersion: 2020 }
+   const options: AST.Options = { ecmaVersion: 2020 }
 
    const bindings: Record<string, TextBinding> = {}
    const binding_placeholder = placeholder(code)
@@ -118,7 +116,7 @@ export function parseTextTemplate(code: string, syntax: EmbedSyntax, placeholder
       }
       else {
          try {
-            const ast = ACorn.parseExpressionAt(code, cur_pos + startToken.length, options)
+            const ast = parseExpressionAt(code, cur_pos + startToken.length, options)
             const embed_end = code.indexOf(endToken, ast.end)
             if (embed_end > 0 && code.slice(ast.end, embed_end).trim() === "") {
                const placeholder = binding_placeholder(binding_count)

@@ -1,11 +1,12 @@
-import { acquireComponent, createComponentFilter, createComponentPublication, createServicePoint, saveComponentManifest, searchComponentsPublications, ServicePoint } from "@jointhedots/core"
+import { acquireComponent, createComponentFilter, createComponentPublication, createServicePoint, saveComponentManifest, searchComponentsPublications } from "@jointhedots/core"
 import { StorageServiceKey } from "@jointhedots/core/storage"
-import { GithubServiceManifest } from "../components/GithubComponent/component"
 import { createComponent } from "@jointhedots/ui/ComponentsLibrary"
 import { getLocationQuery, useAsyncMemo, UseServicePoints, useServices } from "@jointhedots/core/react"
 import { renderRoot } from "../components/config"
 import { DefaultServiceConfigurator, ServicePointsConfigurator, ServicePointStatus, ServiceRequirementBoundary } from "@jointhedots/ui/ServicePoint"
 import { NotificationsBell } from "@jointhedots/ui/Notifications"
+import { ServicePoint } from "@jointhedots/core"
+import type { GithubServiceManifest } from "components/GithubComponent/component"
 
 await saveComponentManifest({
    "$id": "config:main-repo",
@@ -45,9 +46,9 @@ async function connectGitService(servicePoint: ServicePoint, driver_id: string, 
       keywords: [url],
    })
    for (const found of await searchComponentsPublications(filter)) {
-      const manifest = await acquireComponent(found.component_id).fetch<GithubServiceManifest>()
+      const manifest = await acquireComponent(found.id).fetch<GithubServiceManifest>()
       if (manifest.url === url) {
-         servicePoint.override([found.component_id])
+         servicePoint.override([found.id])
          return found
       }
    }
@@ -57,7 +58,7 @@ async function connectGitService(servicePoint: ServicePoint, driver_id: string, 
    const component = await createComponent(driver, servicePoint.service)
    if (component) {
       const found = await createComponentPublication(component.manifest)
-      servicePoint.override([found.component_id])
+      servicePoint.override([found.id])
       return found
    }
 }

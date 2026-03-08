@@ -1,0 +1,27 @@
+{
+   "name": "@jointhedots/scripting",
+   "version": "0.0.0",
+   "type": "module",
+   "private": true,
+   "singleton": true,
+   "dependencies": {
+      "@jointhedots/core": "*",
+      "acorn": "^8.15.0",
+      "astring": "^1.9.0",
+      "yaml": "^2.8.2",
+      "zod": "^4.2.1"
+   },
+   "devDependencies": {
+      "@jointhedots/core": "../jointhedots-core/dist/jointhedots-core",
+      "@std/assert": "npm:@jsr/std__assert@^1.0.19",
+      "@std/testing": "npm:@jsr/std__testing@^1.0.17",
+      "typescript": "^5.9.3"
+   },
+   "scripts": {
+      "watch": "tsc --watch --noEmit",
+      "build": "jointhedots-gear make --libs @jointhedots/scripting --dist ./dist",
+      "dev": "jointhedots-gear make --libs @jointhedots/scripting --devmode --watch --dist ./dist",
+      "deliver": "npm run build && cd ./dist/jointhedots-scripting && npm publish --access public",
+      "test": "deno test --allow-all --sloppy-imports ./test/interpreter.test.ts"
+   }
+}

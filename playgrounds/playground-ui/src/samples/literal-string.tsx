@@ -1,6 +1,6 @@
 
 import { StandardLanguageProvider, CodeEditorHOC } from "@jointhedots/ui/CodeEditor"
-import { EmbedSyntax, parseTextTemplate } from "@jointhedots/core"
+import { EmbedSyntax, parseTextTemplate } from "@jointhedots/scripting"
 import { renderRoot } from "../components/config"
 import { useState } from "react"
 

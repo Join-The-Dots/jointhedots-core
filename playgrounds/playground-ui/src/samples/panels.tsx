@@ -11,7 +11,8 @@ function Input2(props: {
 }) {
    const { value, onChange, state } = props
    return <InputData
-      label=""
+      icon="bi:home"
+      tooling={null}
       value={state?.[0] || value}
       schema={z.string().toJSONSchema()}
       onChange={onChange}

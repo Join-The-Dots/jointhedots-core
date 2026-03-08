@@ -1,4 +1,4 @@
-import type { AST } from "../ast/api.ts"
+import type { AST } from "../ast/mod.ts"
 import type { NodeKey } from "../ast/primitives.ts"
 
 export class DocumentData {

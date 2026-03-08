@@ -1,5 +1,4 @@
-import type { AST } from "./ast/api.ts"
-import type { MapLike } from '../common/types.ts'
+import type { AST } from "./ast/mod.ts"
 
 // Type definitions for better performance and type safety
 type NodeType = AST.Any['type']

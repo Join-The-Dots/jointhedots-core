@@ -1,4 +1,4 @@
-import type { AST } from "../ast/api.ts"
+import type { AST } from "../ast/mod.ts"
 import type { NodeKey } from "../ast/primitives.ts"
 import type { GraphBuilder } from "./builder.ts"
 import type { DocumentData } from "./log.ts"
@@ -7,6 +7,8 @@ import { type Use, type ValueConstraint } from "./uses.ts"
 // DX...: Document core node
 // DS...: Document Script node
 // DR...: Document Render node
+
+export type RenderNode<T = unknown | unknown[]> = T // Represent potentially React.ReactNode
 
 export type NodeSymbol = string | Symbol
 

@@ -1,0 +1,19 @@
+{
+   "exports": {
+      ".": "./src/index.ts",
+      "./commands": "./src/interfaces/commands/interface.ts",
+      "./storage": "./src/interfaces/storage/interface.ts",
+      "./view": "./src/interfaces/view/interface.ts",
+      "./react": "./src/interfaces/react/index.ts",
+      "./rest": "./src/interfaces/rest/interface.ts"
+   },
+   "namespaces": [
+      "jtd"
+   ],
+   "distribueds": {
+      "react": "*",
+      "react-dom": "*",
+      "react/jsx-runtime": "*",
+      "react-dom/client": "*"
+   }
+}

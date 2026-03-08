@@ -5,7 +5,6 @@ export * from "./observable"
 export * from "./schema"
 export * from "./components"
 export * from "./services"
-export * from "./scripting"
 
 export * from "./providers/resources/StaticContentProvider"
 export * from "./providers/resources/CommonResourceProvider"

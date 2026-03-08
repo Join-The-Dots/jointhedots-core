@@ -2,10 +2,10 @@
  * Flow Document: Editable/readable flow representation
 **********/
 
-import type { AST } from "./api.ts"
+import type { AST } from "../ast/mod.ts"
 //import { file } from "@polycuber/script.cli"
-import { parseDocumentFromMDX } from "./serde/parser.ts"
-import { BlockFormat, type BlockContent, type BlockPrimitive, type ElementPrimitive, type ExpressiveValue, type Primitive, type SourceLink, type SourceLocation } from "./primitives.ts"
+import { parseDocumentFromMDX } from "../ast/serde/parser.ts"
+import { BlockFormat, type BlockContent, type BlockPrimitive, type ElementPrimitive, type ExpressiveValue, type Primitive, type SourceLink, type SourceLocation } from "../ast/primitives.ts"
 
 export type FlowAny =
    ElementPrimitive

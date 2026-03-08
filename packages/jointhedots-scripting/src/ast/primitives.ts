@@ -1,5 +1,4 @@
 import * as Acorn from "acorn"
-import type { MapLike } from "typescript"
 export * from "acorn"
 
 /******************************************************

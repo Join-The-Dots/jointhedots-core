@@ -8,8 +8,9 @@
       "@emotion/css": "^11.11.2",
       "@emotion/react": "^11.11.1",
       "@emotion/styled": "^11.11.0",
-      "@jointhedots/core": "^0.0.0",
-      "@jointhedots/ui": "^0.0.0",
+      "@jointhedots/core": "*",
+      "@jointhedots/scripting": "*",
+      "@jointhedots/ui": "*",
       "@salesforce-ux/design-system": "2.25.4",
       "bootstrap-icons": "^1.11.3",
       "font-awesome": "^4.7.0",
@@ -22,6 +23,7 @@
    },
    "devDependencies": {
       "@jointhedots/core": "../../packages/jointhedots-core/dist/jointhedots-core",
+      "@jointhedots/scripting": "../../packages/jointhedots-scripting/dist/jointhedots-scripting",
       "@jointhedots/ui": "../../packages/jointhedots-ui/dist/jointhedots-ui",
       "typescript": "^5.9.3"
    },

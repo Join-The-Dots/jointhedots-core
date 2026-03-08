@@ -1,4 +1,4 @@
-import type { AST } from "../../ast/api.ts"
+import type { AST } from "../../ast/mod.ts"
 import { DisplayFeature, GetterFeature, Node, type ContextInstance, type FeatureID } from "../model.ts"
 import { Model } from "../register.ts"
 import { AnyType, JSXType, UseAggregate, UseDisplayable, UseLink, UseList, UseReadable, ValueConstraint, type Use } from "../uses.ts"
@@ -46,20 +46,3 @@ class GRBlock extends Node<AST.BlockPrimitive> {
       return new UseDisplayable(this, constraint)
    }
 }
-
-@Model.Node({
-   type: "ui:input",
-   async updateNode(n) {
-
-   }
-})
-class DRInput extends Node<AST.ElementPrimitive> {
-   get link() { return UseLink.Strong }
-   display(ctx: ContextInstance) {
-      return <input title="input" value={"value"} />
-   }
-   use(feature: FeatureID, constraint: ValueConstraint): Use {
-      return new UseDisplayable(this, constraint)
-   }
-}
-

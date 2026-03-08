@@ -1,6 +1,7 @@
 /dist
 packages/jointhedots-cortex
 consolidated-lock.json
+deno.lock
 
 # Node.js / npm
 node_modules*

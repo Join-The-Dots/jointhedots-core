@@ -12,6 +12,7 @@ function installPackage(path, url) {
 // Install packages
 installPackage("packages/jointhedots-cortex", "https://github.com/Join-The-Dots/jointhedots-cortex.git")
 installPackage("packages/jointhedots-core")
+installPackage("packages/jointhedots-scripting")
 installPackage("packages/jointhedots-ui")
 //installPackage("packages/jointhedots-agent")
 //installPackage("packages/jointhedots-editors")
