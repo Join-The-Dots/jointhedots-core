@@ -4,7 +4,7 @@
    "type": "module",
    "license": "MIT",
    "devDependencies": {
-      "@jointhedots/gear": "^1.1.13",
+      "@jointhedots/gear": "^1.1.17",
       "@polycuber/script.cli": "^1.0.5",
       "@types/mocha": "^10.0.8",
       "@types/node": "^22.7.4"

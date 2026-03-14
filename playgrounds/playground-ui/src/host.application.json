@@ -2,7 +2,7 @@
    "type": "composable",
    "name": "playground:ui:host",
    "title": "Playground for JTD",
-   "icon": "../../../logo.png",
+   "icon": "../../logo.png",
    "webviews": {
       "panels.html": {
          "title": "Panels",

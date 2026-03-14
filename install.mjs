@@ -5,12 +5,12 @@ function installPackage(path, url) {
    if (!directory.exists(path) && url) command.exec(`git clone ${url}`, { cwd: dirname(path) })
    else if (url) command.exec(`git pull`, { cwd: path, ignoreError: true })
    else if (!directory.exists(path)) throw `Package '${path}'not found`
-   command.exec("npm install --force", { cwd: path })
-   command.exec("npm run build", { cwd: path, ignoreError: true })
+   command.exec("pnpm install --force", { cwd: path })
+   command.exec("pnpm run build", { cwd: path, ignoreError: true })
 }
 
 // Install packages
-installPackage("packages/jointhedots-cortex", "https://github.com/Join-The-Dots/jointhedots-cortex.git")
+//installPackage("packages/jointhedots-cortex", "https://github.com/Join-The-Dots/jointhedots-cortex.git")
 installPackage("packages/jointhedots-core")
 installPackage("packages/jointhedots-scripting")
 installPackage("packages/jointhedots-ui")

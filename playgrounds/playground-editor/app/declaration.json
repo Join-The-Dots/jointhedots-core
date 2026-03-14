@@ -1,7 +1,0 @@
-{
-   "application": {
-      "name": "playground-editor",
-      "entry": "./startup.tsx",
-      "favicon": "../favicon.webp"
-   }
-}

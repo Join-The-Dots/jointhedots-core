@@ -2,7 +2,7 @@
   "type": "chrome",
   "name": "playground:app-chrome",
   "title": "Playground for JTD",
-  "icon": "../../../logo.png",
+  "icon": "../../logo.png",
   "webviews": {
     "popup.html": {
       "entry": "./startup.tsx",

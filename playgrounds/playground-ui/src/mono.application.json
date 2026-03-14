@@ -2,7 +2,7 @@
    "type": "web",
    "name": "playground:ui",
    "title": "Playground for JTD",
-   "icon": "../../../logo.png",
+   "icon": "../../logo.png",
    "webviews": {
       "panels.html": {
          "title": "Panels",

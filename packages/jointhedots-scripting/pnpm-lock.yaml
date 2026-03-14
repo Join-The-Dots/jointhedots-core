@@ -1,0 +1,185 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@jointhedots/core':
+        specifier: '*'
+        version: 2.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      acorn:
+        specifier: ^8.15.0
+        version: 8.16.0
+      astring:
+        specifier: ^1.9.0
+        version: 1.9.0
+      yaml:
+        specifier: ^2.8.2
+        version: 2.8.2
+      zod:
+        specifier: ^4.2.1
+        version: 4.3.6
+    devDependencies:
+      '@std/assert':
+        specifier: npm:@jsr/std__assert@^1.0.19
+        version: '@jsr/std__assert@1.0.19'
+      '@std/testing':
+        specifier: npm:@jsr/std__testing@^1.0.17
+        version: '@jsr/std__testing@1.0.17'
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+packages:
+
+  '@jointhedots/core@2.1.0':
+    resolution: {integrity: sha512-TtUXOaTpXz7vRw5Ea8gQXEXcz9weVBx3ug8/XsRaZtyPlLoKdOt1GVTHT7pi1b+2keE0tStHy8aoQtmmbUavNw==}
+    peerDependencies:
+      react: ^18.2.0
+      react-dom: ^18.2.0
+
+  '@jsr/std__assert@1.0.19':
+    resolution: {integrity: sha512-pEj6RPkGbqlgRmyKwATp4cUs6+ijxtdrv3bq8v1d2I2CEcMEyPaO8cVKro61wGRDH4cNg8Zx6haztvK/9m7gkA==, tarball: https://npm.jsr.io/~/11/@jsr/std__assert/1.0.19.tgz}
+
+  '@jsr/std__async@1.2.0':
+    resolution: {integrity: sha512-/vlTKrVwDp9iBCi1BUlz4ghyvHNkzGHdvhdHTdPKGJoklBcwnRjm4yC0n+oB97LtRRFpruWmBobABZHD/t/SkQ==, tarball: https://npm.jsr.io/~/11/@jsr/std__async/1.2.0.tgz}
+
+  '@jsr/std__data-structures@1.0.10':
+    resolution: {integrity: sha512-NUlT54X5Ob7AUvl0nVdeOcXPdrKbg1TnaZnh72rhNIvaWprTT1jriFL+UilSAFtImo2OMEVajuudBFWoGre1pg==, tarball: https://npm.jsr.io/~/11/@jsr/std__data-structures/1.0.10.tgz}
+
+  '@jsr/std__fs@1.0.23':
+    resolution: {integrity: sha512-e8jspB3M44E5YhWiLCTqibBBTwVmxQaHN06WvFa/elAKm5E/LfAe8Hj5XGNC8P7a0MIPASlNJsnF1bgO/g+aqg==, tarball: https://npm.jsr.io/~/11/@jsr/std__fs/1.0.23.tgz}
+
+  '@jsr/std__internal@1.0.12':
+    resolution: {integrity: sha512-6xReMW9p+paJgqoFRpOE2nogJFvzPfaLHLIlyADYjKMUcwDyjKZxryIbgcU+gxiTygn8yCjld1HoI0ET4/iZeA==, tarball: https://npm.jsr.io/~/11/@jsr/std__internal/1.0.12.tgz}
+
+  '@jsr/std__path@1.1.4':
+    resolution: {integrity: sha512-SK4u9H6NVTfolhPdlvdYXfNFefy1W04AEHWJydryYbk+xqzNiVmr5o7TLJLJFqwHXuwMRhwrn+mcYeUfS0YFaA==, tarball: https://npm.jsr.io/~/11/@jsr/std__path/1.1.4.tgz}
+
+  '@jsr/std__testing@1.0.17':
+    resolution: {integrity: sha512-szX1c5vuBvEo4LKLhaPCPZ4X7LO4nqGYwEhKnWwuPbqG0wnCRUY0IVZ4X191EZNgu+4qciYeQap1O4QCooulow==, tarball: https://npm.jsr.io/~/11/@jsr/std__testing/1.0.17.tgz}
+
+  acorn@8.16.0:
+    resolution: {integrity: sha512-UVJyE9MttOsBQIDKw1skb9nAwQuR5wuGD3+82K6JgJlm/Y+KI92oNsMNGZCYdDsVtRHSak0pcV5Dno5+4jh9sw==}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
+
+  astring@1.9.0:
+    resolution: {integrity: sha512-LElXdjswlqjWrPpJFg1Fx4wpkOCxj1TDHlSV4PlaRxHGWko024xICaa97ZkMfs6DRKlCguiAI+rbXv5GWwXIkg==}
+    hasBin: true
+
+  js-tokens@4.0.0:
+    resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
+
+  json-schema@0.4.0:
+    resolution: {integrity: sha512-es94M3nTIfsEPisRafak+HDLfHXnKBhV3vU5eqPcS3flIWqcxJWgXHXiey3YrpaNsanY5ei1VoYEbOzijuq9BA==}
+
+  loose-envify@1.4.0:
+    resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
+    hasBin: true
+
+  react-dom@18.3.1:
+    resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
+    peerDependencies:
+      react: ^18.3.1
+
+  react@18.3.1:
+    resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
+    engines: {node: '>=0.10.0'}
+
+  scheduler@0.23.2:
+    resolution: {integrity: sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==}
+
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
+  vscode-uri@3.1.0:
+    resolution: {integrity: sha512-/BpdSx+yCQGnCvecbyXdxHDkuk55/G3xwnC0GqY4gmQ3j+A+g8kzzgB4Nk/SINjqn6+waqw3EgbVF2QKExkRxQ==}
+
+  yaml@2.8.2:
+    resolution: {integrity: sha512-mplynKqc1C2hTVYxd0PU2xQAc22TI1vShAYGksCCfxbn/dFwnHTNi1bvYsBTkhdUNtGIf5xNOg938rrSSYvS9A==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+
+snapshots:
+
+  '@jointhedots/core@2.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      json-schema: 0.4.0
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      vscode-uri: 3.1.0
+      zod: 4.3.6
+
+  '@jsr/std__assert@1.0.19':
+    dependencies:
+      '@jsr/std__internal': 1.0.12
+
+  '@jsr/std__async@1.2.0': {}
+
+  '@jsr/std__data-structures@1.0.10':
+    dependencies:
+      '@jsr/std__assert': 1.0.19
+
+  '@jsr/std__fs@1.0.23':
+    dependencies:
+      '@jsr/std__internal': 1.0.12
+      '@jsr/std__path': 1.1.4
+
+  '@jsr/std__internal@1.0.12': {}
+
+  '@jsr/std__path@1.1.4':
+    dependencies:
+      '@jsr/std__internal': 1.0.12
+
+  '@jsr/std__testing@1.0.17':
+    dependencies:
+      '@jsr/std__assert': 1.0.19
+      '@jsr/std__async': 1.2.0
+      '@jsr/std__data-structures': 1.0.10
+      '@jsr/std__fs': 1.0.23
+      '@jsr/std__internal': 1.0.12
+      '@jsr/std__path': 1.1.4
+
+  acorn@8.16.0: {}
+
+  astring@1.9.0: {}
+
+  js-tokens@4.0.0: {}
+
+  json-schema@0.4.0: {}
+
+  loose-envify@1.4.0:
+    dependencies:
+      js-tokens: 4.0.0
+
+  react-dom@18.3.1(react@18.3.1):
+    dependencies:
+      loose-envify: 1.4.0
+      react: 18.3.1
+      scheduler: 0.23.2
+
+  react@18.3.1:
+    dependencies:
+      loose-envify: 1.4.0
+
+  scheduler@0.23.2:
+    dependencies:
+      loose-envify: 1.4.0
+
+  typescript@5.9.3: {}
+
+  vscode-uri@3.1.0: {}
+
+  yaml@2.8.2: {}
+
+  zod@4.3.6: {}
