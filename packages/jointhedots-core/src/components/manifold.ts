@@ -153,7 +153,7 @@ export class ComponentEntry<Instance extends Object = any> {
    }
    hasResource(identifier: string): boolean {
       const { manifest } = this
-      if (manifest?.services?.[identifier]) {
+      if (manifest?.apis?.[identifier]) {
          return true
       }
       else if (manifest?.type) {
@@ -211,7 +211,7 @@ export class ComponentResource {
 
                // Fetch resource data
                const { manifest } = component
-               const entry = parseResourceEntry(manifest.services?.[this.resource])
+               const entry = parseResourceEntry(manifest.apis?.[this.resource])
                const type = entry?.type
                if (type === "module") {
                   this.entry = await ComponentsRegistry.resources_loader.load_resource(entry.location)
@@ -243,7 +243,7 @@ export class ComponentResource {
                }
             }
             catch (e) {
-               console.error(`Cannot install service '${this.resource}' of '${component.id}':`, e)
+               console.error(`Cannot install service api '${this.resource}' of '${component.id}':`, e)
                this.entry = null
                this.identifier = null
             }
@@ -278,7 +278,7 @@ export class ComponentResource {
       return this.component.manifest?.specs?.[norm]
    }
    get url(): string {
-      const ref = this.component.manifest?.services?.[this.resource]
+      const ref = this.component.manifest?.apis?.[this.resource]
       if (typeof ref === "string") {
          const base = URI.parse(window.location.href).with({ fragment: null })
          const uri = Utils.joinPath(base, "..", ref.split("#")[0])

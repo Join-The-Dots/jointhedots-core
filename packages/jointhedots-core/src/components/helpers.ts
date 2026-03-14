@@ -19,11 +19,11 @@ export function parseComponentURI(ref: string): URI {
 }
 
 export async function getComponentServicesList(manif: ComponentManifest): Promise<string[]> {
-   const services = manif.services ? Object.keys(manif.services) : []
+   const services = manif.apis ? Object.keys(manif.apis) : []
    if (manif.type) {
       const controller = await acquireComponent(manif.type)?.fetch()
       if (controller) {
-         for (const key in controller?.services) {
+         for (const key in controller?.apis) {
             if (key.startsWith("component.")) {
                const name = key.slice(10)
                if (!services.includes(name)) services.push(name)

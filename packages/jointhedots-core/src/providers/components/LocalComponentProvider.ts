@@ -4,6 +4,67 @@ import { InMemComponentProvider } from "./InMemComponentProvider.ts"
 
 const STORAGE_VERSION = 5
 
+function createStores(db: IDBDatabase) {
+   const componentsStore = db.createObjectStore("components", { keyPath: "id" })
+   componentsStore.createIndex("title", "title", { unique: false })
+
+   const servicesStore = db.createObjectStore("components_services", { keyPath: ["component_id", "service"] })
+   servicesStore.createIndex("component_id", "component_id", { unique: false })
+   servicesStore.createIndex("service", "service", { unique: false })
+
+   const manifestsStore = db.createObjectStore("components_manifests", { keyPath: "component_id" })
+   manifestsStore.createIndex("component_id", "component_id", { unique: false })
+}
+
+function migrateToV3(db: IDBDatabase, transaction: IDBTransaction) {
+   // Migrate components (publication): keyPath component_id -> id
+   if (db.objectStoreNames.contains("components")) {
+      const oldStore = transaction.objectStore("components")
+      const readReq = oldStore.getAll()
+      readReq.onsuccess = () => {
+         const records = readReq.result
+         db.deleteObjectStore("components")
+         const newStore = db.createObjectStore("components", { keyPath: "id" })
+         newStore.createIndex("title", "title", { unique: false })
+         for (const record of records) {
+            if ("component_id" in record && !("id" in record)) {
+               record.id = record.component_id
+               delete record.component_id
+            }
+            newStore.put(record)
+         }
+      }
+   } else {
+      const newStore = db.createObjectStore("components", { keyPath: "id" })
+      newStore.createIndex("title", "title", { unique: false })
+   }
+
+   // Migrate components_manifests: rename services -> apis in stored manifest data
+   if (db.objectStoreNames.contains("components_manifests")) {
+      const store = transaction.objectStore("components_manifests")
+      const readReq = store.getAll()
+      readReq.onsuccess = () => {
+         for (const record of readReq.result) {
+            if (record.manifest && "services" in record.manifest && !("apis" in record.manifest)) {
+               record.manifest.apis = record.manifest.services
+               delete record.manifest.services
+               store.put(record)
+            }
+         }
+      }
+   } else {
+      const newStore = db.createObjectStore("components_manifests", { keyPath: "component_id" })
+      newStore.createIndex("component_id", "component_id", { unique: false })
+   }
+
+   // Ensure components_services store exists
+   if (!db.objectStoreNames.contains("components_services")) {
+      const servicesStore = db.createObjectStore("components_services", { keyPath: ["component_id", "service"] })
+      servicesStore.createIndex("component_id", "component_id", { unique: false })
+      servicesStore.createIndex("service", "service", { unique: false })
+   }
+}
+
 function openComponentDatabase(): Promise<IDBDatabase> {
    return new Promise((resolve, reject) => {
       const request = window.indexedDB.open("LocalComponents", STORAGE_VERSION)
@@ -13,12 +74,25 @@ function openComponentDatabase(): Promise<IDBDatabase> {
          reject(e.target["error"])
       }
 
-      request.onupgradeneeded = () => {
-         console.log("Upgrade LocalComponents to ", STORAGE_VERSION)
-         debugger
+      request.onupgradeneeded = (event) => {
+         const oldVersion = event.oldVersion
+         console.log("Upgrade LocalComponents from", oldVersion, "to", STORAGE_VERSION)
          const db = request.result
+         const transaction = request.transaction
 
-         // Purge and recreate object stores on upgrade.
+         if (oldVersion === 0) {
+            // Fresh install
+            createStores(db)
+            return
+         }
+
+         if (oldVersion < 3) {
+            // Migrate v1/v2: publication component_id -> id, manifest services -> apis
+            migrateToV3(db, transaction)
+            return
+         }
+
+         // For versions >= 3, purge and recreate
          if (db.objectStoreNames.contains("components_manifests")) {
             db.deleteObjectStore("components_manifests")
          }
@@ -28,16 +102,7 @@ function openComponentDatabase(): Promise<IDBDatabase> {
          if (db.objectStoreNames.contains("components")) {
             db.deleteObjectStore("components")
          }
-
-         const componentsStore = db.createObjectStore("components", { keyPath: "id" })
-         componentsStore.createIndex("title", "title", { unique: false })
-
-         const servicesStore = db.createObjectStore("components_services", { keyPath: ["component_id", "service"] })
-         servicesStore.createIndex("component_id", "component_id", { unique: false })
-         servicesStore.createIndex("service", "service", { unique: false })
-
-         const manifestsStore = db.createObjectStore("components_manifests", { keyPath: "component_id" })
-         manifestsStore.createIndex("component_id", "component_id", { unique: false })
+         createStores(db)
       }
 
       request.onsuccess = () => {

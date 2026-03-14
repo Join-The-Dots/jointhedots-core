@@ -29,6 +29,8 @@ export interface ComponentPublication {
    tags?: string[]
 }
 
+export type ComponentServiceID = string
+
 // Component manifest
 export type ComponentManifest<Data extends any = unknown> = {
    $id: string // Compoenent ID (into publication)
@@ -42,11 +44,11 @@ export type ComponentManifest<Data extends any = unknown> = {
    tags?: string[] // Tags for filtering helping (into publication)
    doc?: DocumentationSchema
 
-   // Specifications
-   specs?: Record<string, any>
+   // Service Specifications
+   specs?: Record<ComponentServiceID, any>
 
-   // Services
-   services?: Record<string, ResourceEntry> // Resources providing specific services interfaces
+   // Service Interfaces
+   apis?: Record<ComponentServiceID, ResourceEntry> // Resources providing specific services interfaces
 
    // Configuration
    data?: Data

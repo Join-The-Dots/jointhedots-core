@@ -22,6 +22,9 @@
       "url": "./node_modules/@jointhedots/gear/schemas/component.schema.json"
     }
   ],
+  "search.exclude": {
+    "**/dist": true
+  },
   "typescript.format.semicolons": "remove",
   "editor.insertSpaces": true,
   "editor.detectIndentation": false,
