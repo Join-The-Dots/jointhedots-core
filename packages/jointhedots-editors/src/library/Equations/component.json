@@ -15,7 +15,7 @@
          }
       }
    },
-   "services": {
+   "apis": {
       "view.react": "./EquationComponent#EquationComponent"
    }
 }

@@ -13,7 +13,7 @@
          }
       }
    },
-   "services": {
+   "apis": {
       "view.lexical": "./LayoutContainerNode#LayoutContainerNode",
       "addon.lexical": "./LayoutPlugin"
    }

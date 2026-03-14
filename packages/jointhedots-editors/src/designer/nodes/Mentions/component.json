@@ -11,7 +11,7 @@
          }
       }
    },
-   "services": {
+   "apis": {
       "view.lexical": "./MentionNode#MentionNode",
       "addon.lexical": "./MentionsPlugin"
    }
