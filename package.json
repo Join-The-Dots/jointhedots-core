@@ -1,13 +1,10 @@
 {
    "name": "jointhedots",
-   "version": "2.1.1",
+   "version": "2.1.2",
    "type": "module",
    "license": "MIT",
    "devDependencies": {
-      "@jointhedots/gear": "^1.1.17",
-      "@polycuber/script.cli": "^1.0.5",
-      "@types/mocha": "^10.0.8",
-      "@types/node": "^22.7.4"
+      "@polycuber/script.cli": "^1.0.5"
    },
    "scripts": {
       "prepare": "node install.mjs",

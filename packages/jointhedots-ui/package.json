@@ -16,16 +16,17 @@
    },
    "peerDependencies": {
       "monaco-editor": ">=0.52.2",
-      "react-lightning-design-system": "^5.9.1",
       "react": ">=18.2.0",
-      "react-dom": ">=18.2.0"
+      "react-dom": ">=18.2.0",
+      "react-lightning-design-system": "^5.9.1"
    },
    "devDependencies": {
       "@jointhedots/core": "../jointhedots-core/dist/jointhedots-core",
+      "@jointhedots/gear": "^1.1.17",
       "monaco-editor": ">=0.52.2",
-      "typescript": "^5.9.3",
       "react": "^18.2.0",
-      "react-dom": "^18.2.0"
+      "react-dom": "^18.2.0",
+      "typescript": "^5.9.3"
    },
    "scripts": {
       "watch": "tsc --watch --noEmit",

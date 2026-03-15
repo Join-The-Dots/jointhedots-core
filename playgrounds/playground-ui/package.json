@@ -11,10 +11,10 @@
       "@jointhedots/core": "*",
       "@jointhedots/scripting": "*",
       "@jointhedots/ui": "*",
+      "@octokit/rest": "^21.1.0",
       "@salesforce-ux/design-system": "2.25.4",
       "bootstrap-icons": "^1.11.3",
       "font-awesome": "^4.7.0",
-      "@octokit/rest": "^21.1.0",
       "react-toastify": "^9.1.3"
    },
    "peerDependencies": {
@@ -23,6 +23,7 @@
    },
    "devDependencies": {
       "@jointhedots/core": "../../packages/jointhedots-core/dist/jointhedots-core",
+      "@jointhedots/gear": "^1.1.17",
       "@jointhedots/scripting": "../../packages/jointhedots-scripting/dist/jointhedots-scripting",
       "@jointhedots/ui": "../../packages/jointhedots-ui/dist/jointhedots-ui",
       "typescript": "^5.9.3"

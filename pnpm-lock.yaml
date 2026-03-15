@@ -8,18 +8,9 @@ importers:
 
   .:
     devDependencies:
-      '@jointhedots/gear':
-        specifier: ^1.1.17
-        version: 1.1.17(sass-embedded@1.98.0)
       '@polycuber/script.cli':
         specifier: ^1.0.5
         version: 1.0.5
-      '@types/mocha':
-        specifier: ^10.0.8
-        version: 10.0.10
-      '@types/node':
-        specifier: ^22.7.4
-        version: 22.19.15
 
   packages/jointhedots-core:
     dependencies:
@@ -2262,9 +2253,6 @@ packages:
 
   '@types/geojson@7946.0.16':
     resolution: {integrity: sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==}
-
-  '@types/mocha@10.0.10':
-    resolution: {integrity: sha512-xPyYSz1cMPnJQhl0CLMH68j3gprKZaTjG3s5Vi+fDgx+uhG9NOXwbVt52eFS8ECyXhyKcjDLCBEqBExKuiZb7Q==}
 
   '@types/node@22.19.15':
     resolution: {integrity: sha512-F0R/h2+dsy5wJAUe3tAU6oqa2qbWY5TpNfL/RGmo1y38hiyO1w3x2jPtt76wmuaJI4DQnOBu21cNXQ2STIUUWg==}
@@ -6520,8 +6508,6 @@ snapshots:
       '@types/d3-zoom': 3.0.8
 
   '@types/geojson@7946.0.16': {}
-
-  '@types/mocha@10.0.10': {}
 
   '@types/node@22.19.15':
     dependencies:

@@ -10,6 +10,7 @@
       "zod": "^4.2.1"
    },
    "devDependencies": {
+      "@jointhedots/gear": "^1.1.17",
       "typescript": "^5.9.3"
    },
    "peerDependencies": {

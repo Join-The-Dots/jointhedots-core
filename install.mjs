@@ -14,8 +14,6 @@ function installPackage(path, url) {
 installPackage("packages/jointhedots-core")
 installPackage("packages/jointhedots-scripting")
 installPackage("packages/jointhedots-ui")
-//installPackage("packages/jointhedots-agent")
-//installPackage("packages/jointhedots-editors")
 
 // Install playgrounds
 installPackage("playgrounds/playground-ui")
