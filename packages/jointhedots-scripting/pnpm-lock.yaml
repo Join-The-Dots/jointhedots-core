@@ -28,8 +28,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@jointhedots/gear':
-        specifier: ^1.1.17
-        version: 1.1.17(sass-embedded@1.98.0)
+        specifier: file:\C:\dev\explorer\jointhedots-gear
+        version: file:../../../jointhedots-gear(sass-embedded@1.98.0)
       '@std/assert':
         specifier: npm:@jsr/std__assert@^1.0.19
         version: '@jsr/std__assert@1.0.19'
@@ -526,8 +526,8 @@ packages:
       react: ^18.2.0
       react-dom: ^18.2.0
 
-  '@jointhedots/gear@1.1.17':
-    resolution: {integrity: sha512-jjE+ZWPJdYgM+0zo30eX1FSRpbB1e3Rk/L0Cg+eZDmAyJlcy1RoDtsNh+o/oXRlLNa/PXxQeAnzvlDgJJVw2rw==}
+  '@jointhedots/gear@file:../../../jointhedots-gear':
+    resolution: {directory: ../../../jointhedots-gear, type: directory}
     hasBin: true
     bundledDependencies:
       - '@jspm/core'
@@ -2358,7 +2358,7 @@ snapshots:
       vscode-uri: 3.1.0
       zod: 4.3.6
 
-  '@jointhedots/gear@1.1.17(sass-embedded@1.98.0)':
+  '@jointhedots/gear@file:../../../jointhedots-gear(sass-embedded@1.98.0)':
     dependencies:
       '@aws-sdk/client-s3': 3.1009.0
       '@tailwindcss/postcss': 4.1.18
@@ -3031,7 +3031,7 @@ snapshots:
     dependencies:
       esbuild: 0.27.4
       resolve: 1.22.11
-      sass: 1.97.3
+      sass: 1.98.0
       sass-embedded: 1.98.0
 
   esbuild@0.27.4:
@@ -3465,7 +3465,6 @@ snapshots:
       source-map-js: 1.2.1
     optionalDependencies:
       '@parcel/watcher': 2.5.6
-    optional: true
 
   scheduler@0.23.2:
     dependencies:

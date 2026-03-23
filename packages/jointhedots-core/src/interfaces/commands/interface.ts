@@ -1,7 +1,8 @@
-import type { Serializable } from "child_process"
 import { URI } from "vscode-uri"
 import { acquireComponent } from "../../components/manifold.ts"
 import { Log } from "../../logging/index.ts"
+
+export type Serializable = string | number | boolean | null | Serializable[] | { [key: string]: Serializable }
 
 export type Cmdlet<CmdPayload extends Serializable = Serializable, CmdResult extends Serializable = Serializable> = {
    payload: CmdPayload,

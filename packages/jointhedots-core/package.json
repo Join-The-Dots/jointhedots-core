@@ -1,29 +1,29 @@
 {
-   "name": "@jointhedots/core",
-   "version": "0.0.0",
-   "type": "module",
-   "private": true,
-   "singleton": true,
-   "dependencies": {
-      "json-schema": "^0.4.0",
-      "vscode-uri": "^3.1.0",
-      "zod": "^4.2.1"
-   },
-   "devDependencies": {
-      "@jointhedots/gear": "^1.1.17",
-      "typescript": "^5.9.3"
-   },
-   "peerDependencies": {
-      "react": "^18.2.0",
-      "react-dom": "^18.2.0"
-   },
-   "optionalDependencies": {
-      "hono": "^4.12.5"
-   },
-   "scripts": {
-      "watch": "tsc --watch --noEmit",
-      "build": "jointhedots-gear make --libs @jointhedots/core --dist ./dist",
-      "dev": "jointhedots-gear make --libs @jointhedots/core --devmode --watch --dist ./dist",
-      "deliver": "npm run build && cd ./dist/jointhedots-core && npm publish --access public"
-   }
+  "name": "@jointhedots/core",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "singleton": true,
+  "dependencies": {
+    "json-schema": "^0.4.0",
+    "vscode-uri": "^3.1.0",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@jointhedots/gear": "file:\\C:\\dev\\explorer\\jointhedots-gear",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "optionalDependencies": {
+    "hono": "^4.12.5"
+  },
+  "scripts": {
+    "watch": "tsc --watch --noEmit",
+    "build": "jointhedots-gear make --libs @jointhedots/core --dist ./dist",
+    "dev": "jointhedots-gear make --libs @jointhedots/core --devmode --watch --dist ./dist",
+    "deliver": "npm run build && cd ./dist/@jointhedots-core && npm publish --access public"
+  }
 }
