@@ -52,28 +52,28 @@ const defaultProps: Partial<ButtonProps> = {
    variant: 'neutral',
 }
 
-export class Button extends React.Component<ButtonProps> {
-   static defaultProps = defaultProps;
+export function Button(inProps: ButtonProps) {
+   const props = { ...defaultProps, ...inProps }
 
-   getClassName = (): string => {
-      const isIcon = this.props.variant === 'icon'
+   const getClassName = (): string => {
+      const isIcon = props.variant === 'icon'
 
-      let { iconVariant } = this.props
+      let { iconVariant } = props
       const iconMore = iconVariant === 'more'
       const iconBorder = iconVariant === 'border'
       const iconGlobalHeader = iconVariant === 'global-header'
 
       const showButtonVariant =
-         (this.props.variant !== 'base' &&
+         (props.variant !== 'base' &&
             !iconVariant &&
-            !this.props.inverse &&
-            this.props.variant !== 'link') ||
+            !props.inverse &&
+            props.variant !== 'link') ||
          iconVariant === 'bare'
-      const plainInverseBtn = this.props.inverse && !isIcon
+      const plainInverseBtn = props.inverse && !isIcon
       const plainInverseIcon =
-         this.props.inverse && isIcon && !iconMore && !iconBorder
-      const moreInverseIcon = this.props.inverse && iconMore
-      const borderInverseIcon = this.props.inverse && iconBorder
+         props.inverse && isIcon && !iconMore && !iconBorder
+      const moreInverseIcon = props.inverse && iconMore
+      const borderInverseIcon = props.inverse && iconBorder
 
       // After hijacking `iconVariant` to let `Button` know it's in the header, we reset to container style for the actual button CSS.
       if (iconVariant === 'global-header') {
@@ -82,112 +82,98 @@ export class Button extends React.Component<ButtonProps> {
 
       return classNames(
          {
-            'slds-button': this.props.variant !== 'link',
-            [`slds-button_${this.props.variant}`]: showButtonVariant,
+            'slds-button': props.variant !== 'link',
+            [`slds-button_${props.variant}`]: showButtonVariant,
             'slds-button_inverse': plainInverseBtn,
             'slds-button_icon-inverse': plainInverseIcon || moreInverseIcon,
             'slds-button_icon-border-inverse': borderInverseIcon,
             [`slds-button_icon-${iconVariant}`]: iconVariant && !borderInverseIcon,
             'slds-global-header__button_icon': iconGlobalHeader,
             // If icon has a container, then we apply the icon size to the container not the svg. Icon size is medium by default, so we don't need to explicitly render it here.
-            [`slds-button_icon-${this.props.iconSize}`]:
-               iconVariant && this.props.iconSize !== 'md',
-            'slds-button_reset': this.props.variant === 'link',
-            'slds-text-link': this.props.variant === 'link',
+            [`slds-button_icon-${props.iconSize}`]:
+               iconVariant && props.iconSize !== 'md',
+            'slds-button_reset': props.variant === 'link',
+            'slds-text-link': props.variant === 'link',
          },
-         this.props.className
+         props.className
       )
-   };
+   }
 
-   handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
-      if (this.props.onClick) {
-         this.props.onClick(event, {})
+   const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
+      if (props.onClick) {
+         props.onClick(event, {})
       }
-   };
+   }
 
-   renderIcon = (name: string): React.ReactNode => {
+   const renderIcon = (name: string): React.ReactNode => {
       const iconSize =
-         !this.props.iconSize || this.props.iconVariant
+         !props.iconSize || props.iconVariant
             ? null
-            : this.props.iconSize
+            : props.iconSize
       return (
          <Icon
             className='slds-button__icon'
-            name={this.props.icon} // BREAKING CHANGE we will introduce in 1.0. For the moment, set default prop here if none specified.
-            inverse={this.props.inverse}
+            name={props.icon}
+            inverse={props.inverse}
             size={iconSize}
             style={{ marginRight: 5, marginLeft: 5 }}
          />
       )
-   };
+   }
 
-   renderLabel = (): React.ReactNode => {
-      const iconOnly = this.props.icon
-      const assistiveTextIcon = this.props.assistiveText
+   const renderLabel = (): React.ReactNode => {
+      const iconOnly = props.icon
+      const assistiveTextIcon = props.assistiveText
       return iconOnly && assistiveTextIcon ? (
          <span className="slds-assistive-text">{assistiveTextIcon}</span>
       ) : (
-         this.props.label
+         props.label
       )
-   };
+   }
 
-   renderButton = (): React.ReactElement => {
+   const renderButton = (): React.ReactElement => {
       return (
-         // eslint-disable-next-line react/button-has-type
          <button
-            className={this.getClassName()}
-            disabled={this.props.disabled}
-            id={this.props.id}
-            onBlur={this.props.onBlur}
-            onClick={this.handleClick}
-            onFocus={this.props.onFocus}
-            onKeyDown={this.props.onKeyDown}
-            onKeyPress={this.props.onKeyPress}
-            onKeyUp={this.props.onKeyUp}
-            onMouseDown={this.props.onMouseDown}
-            onMouseEnter={this.props.onMouseEnter}
-            onMouseLeave={this.props.onMouseLeave}
-            onMouseUp={this.props.onMouseUp}
+            className={getClassName()}
+            disabled={props.disabled}
+            id={props.id}
+            onBlur={props.onBlur}
+            onClick={handleClick}
+            onFocus={props.onFocus}
+            onKeyDown={props.onKeyDown}
+            onKeyPress={props.onKeyPress}
+            onKeyUp={props.onKeyUp}
+            onMouseDown={props.onMouseDown}
+            onMouseEnter={props.onMouseEnter}
+            onMouseLeave={props.onMouseLeave}
+            onMouseUp={props.onMouseUp}
             ref={(component) => {
-               if (this.props.buttonRef) {
-                  this.props.buttonRef(component)
+               if (props.buttonRef) {
+                  props.buttonRef(component)
                }
-               if (
-                  component &&
-                  this.props.requestFocus &&
-                  this.props.onRequestFocus
-               ) {
-                  this.props.onRequestFocus(component)
+               if (component && props.requestFocus && props.onRequestFocus) {
+                  props.onRequestFocus(component)
                }
             }}
-            title={this.props.title}
-            // eslint-disable-next-line react/button-has-type
-            type={this.props.type || 'button'}
-            style={this.props.style}
-            {...getHtmlProps(this.props)}
+            title={props.title}
+            type={props.type || 'button'}
+            style={props.style}
+            {...getHtmlProps(props)}
          >
-            {this.props.iconPosition === 'right' ? this.renderLabel() : null}
-
-            {this.props.icon
-               ? this.renderIcon(this.props.icon || '')
+            {props.iconPosition === 'right' ? renderLabel() : null}
+            {props.icon ? renderIcon(props.icon || '') : null}
+            {props.iconPosition === 'left' || !props.iconPosition
+               ? renderLabel()
                : null}
-
-            {this.props.iconPosition === 'left' || !this.props.iconPosition
-               ? this.renderLabel()
-               : null}
-            {this.props.children}
+            {props.children}
          </button>
       )
-   };
-
-   // This is present for backwards compatibility and should be removed at a future breaking change release. Please wrap a `Button` in a `PopoverTooltip` to achieve the same result. There will be an extra trigger `div` wrapping the `Button` though.
-   renderTooltip = (): React.ReactElement => (
-      <Tooltip content={this.props.tooltip}>{this.renderButton}</Tooltip>
-   );
-
-   render(): React.ReactElement {
-      return this.props.tooltip ? this.renderTooltip() : this.renderButton()
    }
+
+   if (props.tooltip) {
+      return <Tooltip content={props.tooltip}>{renderButton}</Tooltip>
+   }
+   return renderButton()
 }
 
 export type ButtonIconProps = {

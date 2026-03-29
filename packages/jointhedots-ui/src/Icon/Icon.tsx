@@ -2,11 +2,10 @@ import React from "react"
 import { ThemeContext, ThemeProvider } from "../theme"
 import { IconUrlCollection } from "./collections/url"
 import { IconBlank, IconError } from "./collections/defaults"
-import { MapLike } from "@jointhedots/core"
 
 export interface IconStyle {
    className?: string
-   style?: MapLike<string | number>
+   style?: Record<string, string | number>
 }
 
 export interface IconElement extends IconStyle {
@@ -33,7 +32,7 @@ export enum IconSize {
 
 export type IconProps = {
    name: string
-   size?: IconSize | string // default is 'sm'
+   size?: keyof typeof IconSize | string // default is 'sm'
    inverse?: boolean
    title?: string
    className?: string
@@ -86,7 +85,7 @@ const IconCollections: { [namespace: string]: IconCollection } = {
 
 const IconParsedCache = new Map<string, IconComposed>()
 
-const IconFlags: MapLike<IconStyle> = {
+const IconFlags: Record<string, IconStyle> = {
    "error": makeColorFlag("red"),
    "warn": makeColorFlag("gold"),
    "info": makeColorFlag("grey"),

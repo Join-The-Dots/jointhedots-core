@@ -1,4 +1,3 @@
-import type { MapLike } from "typescript"
 
 export type CommonSetting = Record<string, any>
 

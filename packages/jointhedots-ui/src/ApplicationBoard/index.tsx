@@ -1,4 +1,4 @@
-import { MapLike, ServicePoint, createComponentFilter, ComponentPublication, acquireServicePoint } from "@jointhedots/core"
+import { ServicePoint, createComponentFilter, ComponentPublication, acquireServicePoint } from "@jointhedots/core"
 import { NavBar } from './NavBar'
 import { Button } from 'react-lightning-design-system'
 import { Box, Grid, NavigationBeacon, SLDSPage } from './Utils'
@@ -13,7 +13,7 @@ export type AppPage = {
    icon?: string
    view?: string | ViewInfos
    description?: string
-   pages?: MapLike<AppPage>
+   pages?: Record<string, AppPage>
 }
 
 export type BaseTooling = {
@@ -42,7 +42,7 @@ export type AppTooling = ServicePointTooling | LinkTooling | NotificationsToolin
 
 export type AppDescriptor = {
    title?: string
-   pages?: MapLike<AppPage>
+   pages?: Record<string, AppPage>
    landingPage?: AppPage
    toolings?: AppTooling[]
    requirements?: ViewRequirements

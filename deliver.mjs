@@ -1,15 +1,8 @@
-import { command, directory } from "@polycuber/script.cli"
-import { dirname } from "node:path"
-
-function publishPackage(path, url) {
-   if (!directory.exists(path) && url) command.exec(`git clone ${url}`, { cwd: dirname(path) })
-   else if (url) command.exec(`git pull`, { cwd: path, ignoreError: true })
-   else if (!directory.exists(path)) throw `Package '${path}'not found`
-   command.exec("pnpm run deliver", { cwd: path })
-}
+import { PackageManager } from "./PackageManager.mjs"
 
 // Publish packages
-publishPackage("packages/jointhedots-core")
-publishPackage("packages/jointhedots-ui")
-publishPackage("packages/jointhedots-scripting")
+PackageManager.add("packages/jointhedots-core")
+PackageManager.add("packages/jointhedots-ui")
+PackageManager.add("packages/jointhedots-scripting")
 
+PackageManager.publish()

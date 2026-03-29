@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import type { MapLike } from 'typescript'
 
 export function useLocation(): Location {
    const [location, setLocation] = useState(window.location)

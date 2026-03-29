@@ -1,8 +1,9 @@
 {
    "name": "jointhedots",
-   "version": "2.1.4",
+   "version": "2.1.6",
    "type": "module",
    "license": "MIT",
+   "packageManager": "pnpm@10.30.3",
    "devDependencies": {
       "@polycuber/script.cli": "^1.0.5"
    },

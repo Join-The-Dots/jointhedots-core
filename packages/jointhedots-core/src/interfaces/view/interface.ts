@@ -1,5 +1,3 @@
-
-import type { MapLike } from "typescript"
 import type { JSONSchema, SecurityRule, SecurityGuard } from "../../schema/schema.ts"
 import { acquireComponent, acquireResource, ComponentEntry } from "../../components/manifold.ts"
 import type { ComponentManifest } from "../../components/components.ts"

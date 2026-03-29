@@ -4,6 +4,7 @@
    "type": "module",
    "private": true,
    "license": "MIT",
+   "packageManager": "pnpm@10.30.3",
    "dependencies": {
       "@emotion/css": "^11.11.2",
       "@emotion/react": "^11.11.1",

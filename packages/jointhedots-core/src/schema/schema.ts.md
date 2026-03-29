@@ -1,4 +1,3 @@
-import { type MapLike } from "../common/types.ts"
 import type { JSONSchema7Type, JSONSchema7Version, JSONSchema7TypeName } from "json-schema"
 
 export type JSONSchema7TypeNameCustom =

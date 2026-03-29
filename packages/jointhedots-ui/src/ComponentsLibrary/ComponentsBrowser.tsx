@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from 'react'
-import { ComponentsRegistry, ComponentPublication, IComponentProvider, MapLike, ComponentFilter, createComponentFilter, acquireComponent, deleteComponent, ComponentManifest } from '@jointhedots/core'
+import { ComponentsRegistry, ComponentPublication, IComponentProvider, ComponentFilter, createComponentFilter, acquireComponent, deleteComponent, ComponentManifest } from '@jointhedots/core'
 import { useAsyncMemo, useAsyncState } from '@jointhedots/core/react'
 import { Stack } from '@jointhedots/ui/Layouts/Stack'
 import { TextInput } from '@jointhedots/ui/utils/TextInput'
@@ -23,7 +23,7 @@ export function getComponentSmallName(id: string) {
    else return id.slice(pos + 1)
 }
 
-export function groupComponentPublications(items: ComponentPublication[]): MapLike<ComponentPublication[]> {
+export function groupComponentPublications(items: ComponentPublication[]): Record<string, ComponentPublication[]> {
    const result = {}
    for (const item of items) {
       const pack = getComponentGroupName(item.id)
