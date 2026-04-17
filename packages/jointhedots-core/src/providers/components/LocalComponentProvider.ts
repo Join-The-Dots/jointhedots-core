@@ -2,122 +2,142 @@ import { createComponentPublication, matchComponentFilter } from "../../componen
 import { type ComponentFilter, type ComponentID, type ComponentManifest, type ComponentPublication, type IComponentProvider } from "../../components/components.ts"
 import { InMemComponentProvider } from "./InMemComponentProvider.ts"
 
-const STORAGE_VERSION = 6
+const DB_NAME = "LocalComponents_v2"
+const DB_VERSION = 1
 
-const STORES = {
-   components: "components_v2",
-   services: "components_services_v2",
-   manifests: "components_manifests_v2",
-} as const
+// Store names that may exist in the old "LocalComponents" database
+const OLD_V1_STORES = ["components", "components_services", "components_manifests"] as const
+const OLD_V2_STORES = ["components_v2", "components_services_v2", "components_manifests_v2"] as const
 
-const OLD_STORES = ["components", "components_services", "components_manifests"] as const
-
-function createV2Stores(db: IDBDatabase) {
-   const componentsStore = db.createObjectStore(STORES.components, { keyPath: "id" })
+function createStores(db: IDBDatabase) {
+   const componentsStore = db.createObjectStore("components", { keyPath: "id" })
    componentsStore.createIndex("title", "title", { unique: false })
 
-   const servicesStore = db.createObjectStore(STORES.services, { keyPath: ["component_id", "service"] })
+   const servicesStore = db.createObjectStore("components_services", { keyPath: ["component_id", "service"] })
    servicesStore.createIndex("component_id", "component_id", { unique: false })
    servicesStore.createIndex("service", "service", { unique: false })
 
-   const manifestsStore = db.createObjectStore(STORES.manifests, { keyPath: "component_id" })
+   const manifestsStore = db.createObjectStore("components_manifests", { keyPath: "component_id" })
    manifestsStore.createIndex("component_id", "component_id", { unique: false })
 }
 
-function migrateOldToV2(db: IDBDatabase, transaction: IDBTransaction) {
-   const hasOldStores = OLD_STORES.some(name => db.objectStoreNames.contains(name))
-   if (!hasOldStores) return
+function readAllFromStore(db: IDBDatabase, storeName: string): Promise<any[]> {
+   return new Promise((resolve, reject) => {
+      const tx = db.transaction([storeName], "readonly")
+      const req = tx.objectStore(storeName).getAll()
+      req.onsuccess = () => resolve(req.result ?? [])
+      req.onerror = (e) => reject(e.target["error"])
+   })
+}
 
-   // Migrate components: keyPath component_id -> id
-   if (db.objectStoreNames.contains("components")) {
-      const oldStore = transaction.objectStore("components")
-      const newStore = transaction.objectStore(STORES.components)
-      const readReq = oldStore.getAll()
-      readReq.onsuccess = () => {
-         for (const record of readReq.result) {
-            if ("component_id" in record && !("id" in record)) {
-               record.id = record.component_id
-               delete record.component_id
-            }
-            newStore.put(record)
-         }
-         db.deleteObjectStore("components")
-      }
+async function bootstrapFromOldDatabase(newDb: IDBDatabase): Promise<void> {
+   let oldDb: IDBDatabase
+   try {
+      oldDb = await new Promise<IDBDatabase>((resolve, reject) => {
+         const req = window.indexedDB.open("LocalComponents")
+         req.onerror = () => reject(req.error)
+         req.onsuccess = () => resolve(req.result)
+      })
+   } catch {
+      return // Old database doesn't exist or can't be opened
    }
 
-   // Migrate components_manifests: rename services -> apis in manifest data
-   if (db.objectStoreNames.contains("components_manifests")) {
-      const oldStore = transaction.objectStore("components_manifests")
-      const newStore = transaction.objectStore(STORES.manifests)
-      const readReq = oldStore.getAll()
-      readReq.onsuccess = () => {
-         for (const record of readReq.result) {
-            if (record.manifest && "services" in record.manifest && !("apis" in record.manifest)) {
-               record.manifest.apis = record.manifest.services
-               delete record.manifest.services
-            }
-            newStore.put(record)
-         }
-         db.deleteObjectStore("components_manifests")
-      }
-   }
+   try {
+      const storeNames = Array.from(oldDb.objectStoreNames)
+      const hasV2 = OLD_V2_STORES.some(n => storeNames.includes(n))
+      const hasV1 = OLD_V1_STORES.some(n => storeNames.includes(n))
+      if (!hasV2 && !hasV1) return
 
-   // Migrate components_services: copy as-is
-   if (db.objectStoreNames.contains("components_services")) {
-      const oldStore = transaction.objectStore("components_services")
-      const newStore = transaction.objectStore(STORES.services)
-      const readReq = oldStore.getAll()
-      readReq.onsuccess = () => {
-         for (const record of readReq.result) {
-            newStore.put(record)
+      // Read from v2 stores if available, otherwise fall back to v1
+      const srcComponents = hasV2 && storeNames.includes("components_v2") ? "components_v2"
+         : storeNames.includes("components") ? "components" : null
+      const srcServices = hasV2 && storeNames.includes("components_services_v2") ? "components_services_v2"
+         : storeNames.includes("components_services") ? "components_services" : null
+      const srcManifests = hasV2 && storeNames.includes("components_manifests_v2") ? "components_manifests_v2"
+         : storeNames.includes("components_manifests") ? "components_manifests" : null
+
+      const [components, services, manifests] = await Promise.all([
+         srcComponents ? readAllFromStore(oldDb, srcComponents) : [],
+         srcServices ? readAllFromStore(oldDb, srcServices) : [],
+         srcManifests ? readAllFromStore(oldDb, srcManifests) : [],
+      ])
+
+      const tx = newDb.transaction(["components", "components_services", "components_manifests"], "readwrite")
+
+      const compStore = tx.objectStore("components")
+      for (const record of components) {
+         // Normalize old v1 keyPath component_id -> id
+         if ("component_id" in record && !("id" in record)) {
+            record.id = record.component_id
+            delete record.component_id
          }
-         db.deleteObjectStore("components_services")
+         compStore.put(record)
       }
+
+      const svcStore = tx.objectStore("components_services")
+      for (const record of services) {
+         svcStore.put(record)
+      }
+
+      const manStore = tx.objectStore("components_manifests")
+      for (const record of manifests) {
+         // Normalize old v1 manifest: rename services -> apis
+         if (record.manifest && "services" in record.manifest && !("apis" in record.manifest)) {
+            record.manifest.apis = record.manifest.services
+            delete record.manifest.services
+         }
+         manStore.put(record)
+      }
+
+      await new Promise<void>((resolve, reject) => {
+         tx.oncomplete = () => resolve()
+         tx.onerror = (e) => reject(e.target["error"])
+      })
+   } finally {
+      oldDb.close()
    }
 }
 
 function openComponentDatabase(): Promise<IDBDatabase> {
    return new Promise((resolve, reject) => {
-      const request = window.indexedDB.open("LocalComponents", STORAGE_VERSION)
+      const request = window.indexedDB.open(DB_NAME, DB_VERSION)
+      let needsBootstrap = false
 
       request.onerror = (e) => {
          console.error('Database error:', e.target["error"])
          reject(e.target["error"])
       }
 
-      request.onupgradeneeded = (event) => {
-         const oldVersion = event.oldVersion
-         console.log("Upgrade LocalComponents from", oldVersion, "to", STORAGE_VERSION)
+      request.onupgradeneeded = () => {
          const db = request.result
-         const transaction = request.transaction
-
-         // Create v2 stores if they don't exist yet
-         if (!db.objectStoreNames.contains(STORES.components)) {
-            createV2Stores(db)
-
-            // Auto-fill v2 stores from old tables when they exist
-            migrateOldToV2(db, transaction)
+         if (!db.objectStoreNames.contains("components")) {
+            createStores(db)
+            needsBootstrap = true
          }
       }
 
-      request.onsuccess = () => {
+      request.onsuccess = async () => {
          const db = request.result
+         db.onerror = (event) => console.error('Database error:', event)
 
-         db.onerror = (event) => {
-            console.error('Database error:', event)
+         if (needsBootstrap) {
+            try {
+               await bootstrapFromOldDatabase(db)
+            } catch (e) {
+               console.error('Migration from LocalComponents failed:', e)
+            }
          }
 
-         resolve(request.result)
+         resolve(db)
       }
-
    })
 }
 
 function getComponentManifest(db: IDBDatabase, component_id: string): Promise<ComponentManifest> {
    return new Promise((resolve, reject) => {
       const results: ComponentPublication[] = []
-      const transaction = db.transaction([STORES.manifests], "readonly")
-      const components_store = transaction.objectStore(STORES.manifests)
+      const transaction = db.transaction(["components_manifests"], "readonly")
+      const components_store = transaction.objectStore("components_manifests")
       const components_req = components_store.getAll(component_id)
       components_req.onsuccess = () => {
          resolve(components_req.result?.[0]?.manifest)
@@ -129,8 +149,8 @@ function getComponentManifest(db: IDBDatabase, component_id: string): Promise<Co
 }
 
 function getComponentPublication(db: IDBDatabase, components_id: string): Promise<ComponentPublication> {
-   const transaction = db.transaction([STORES.components, STORES.services], "readonly")
-   const components_store = transaction.objectStore(STORES.components)
+   const transaction = db.transaction(["components", "components_services"], "readonly")
+   const components_store = transaction.objectStore("components")
    return new Promise((resolve, reject) => {
       const components_req = components_store.get(components_id)
       components_req.onsuccess = () => {
@@ -143,8 +163,8 @@ function getComponentPublication(db: IDBDatabase, components_id: string): Promis
 }
 
 function getComponentsPublications(db: IDBDatabase, components_ids: string[]): Promise<ComponentPublication[]> {
-   const transaction = db.transaction([STORES.components, STORES.services], "readonly")
-   const components_store = transaction.objectStore(STORES.components)
+   const transaction = db.transaction(["components", "components_services"], "readonly")
+   const components_store = transaction.objectStore("components")
    const pendings = []
    for (const components_id of components_ids) {
       pendings.push(new Promise((resolve, reject) => {
@@ -162,8 +182,8 @@ function getComponentsPublications(db: IDBDatabase, components_ids: string[]): P
 
 function filterComponentsPublications(db: IDBDatabase, filter: (value: ComponentPublication) => boolean): Promise<ComponentPublication[]> {
    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([STORES.components], "readonly")
-      const store = transaction.objectStore(STORES.components)
+      const transaction = db.transaction(["components"], "readonly")
+      const store = transaction.objectStore("components")
       const request = store.openCursor()
       const results: any[] = []
       request.onsuccess = () => {
@@ -192,8 +212,8 @@ type ServiceIndexRecord = {
 }
 
 function findComponentsByService(db: IDBDatabase, services: string[], results: Set<ComponentID>): Promise<unknown> {
-   const transaction = db.transaction([STORES.services], "readonly")
-   const components_services_store = transaction.objectStore(STORES.services)
+   const transaction = db.transaction(["components_services"], "readonly")
+   const components_services_store = transaction.objectStore("components_services")
    const service_index = components_services_store.index("service")
    const pendings = []
    for (const service of services) {
@@ -236,12 +256,12 @@ async function searchComponents(db: IDBDatabase, filter: ComponentFilter): Promi
 function storeComponent(db: IDBDatabase, manifest: ComponentManifest): Promise<ComponentPublication> {
    return new Promise(async (resolve, reject) => {
       const entry = await createComponentPublication(manifest)
-      const db_T = db.transaction([STORES.components, STORES.services, STORES.manifests], "readwrite")
+      const db_T = db.transaction(["components", "components_services", "components_manifests"], "readwrite")
 
-      const components_store = db_T.objectStore(STORES.components)
+      const components_store = db_T.objectStore("components")
       components_store.put(entry)
 
-      const components_services = db_T.objectStore(STORES.services)
+      const components_services = db_T.objectStore("components_services")
       for (const srv of entry.services) {
          components_services.put({
             component_id: entry.id,
@@ -249,7 +269,7 @@ function storeComponent(db: IDBDatabase, manifest: ComponentManifest): Promise<C
          })
       }
 
-      const components_manifests = db_T.objectStore(STORES.manifests)
+      const components_manifests = db_T.objectStore("components_manifests")
       components_manifests.put({
          component_id: entry.id,
          manifest: manifest,
@@ -265,17 +285,17 @@ function deleteComponent(db: IDBDatabase, component_id: string): Promise<boolean
    return new Promise(async (resolve, reject) => {
       const entry = await getComponentPublication(db, component_id)
       if (entry) {
-         const db_T = db.transaction([STORES.components, STORES.services, STORES.manifests], "readwrite")
+         const db_T = db.transaction(["components", "components_services", "components_manifests"], "readwrite")
 
-         const components_store = db_T.objectStore(STORES.components)
+         const components_store = db_T.objectStore("components")
          components_store.delete(component_id)
 
-         const components_services = db_T.objectStore(STORES.services)
+         const components_services = db_T.objectStore("components_services")
          for (const srv of entry.services) {
             components_services.delete([component_id, srv])
          }
 
-         const components_manifests = db_T.objectStore(STORES.manifests)
+         const components_manifests = db_T.objectStore("components_manifests")
          components_manifests.delete(component_id)
 
          db_T.onerror = (e) => reject(e.target["error"])
