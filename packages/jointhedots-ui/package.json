@@ -3,6 +3,7 @@
    "version": "0.0.0",
    "type": "module",
    "private": true,
+   "dots": true,
    "singleton": true,
    "packageManager": "pnpm@10.30.3",
    "dependencies": {
@@ -23,7 +24,7 @@
    },
    "devDependencies": {
       "@jointhedots/core": "../jointhedots-core/dist/jointhedots-core",
-      "@jointhedots/gear": "^1.1.18",
+      "@jointhedots/gear": "^1.2.5",
       "monaco-editor": ">=0.52.2",
       "react": "^18.2.0",
       "react-dom": "^18.2.0",

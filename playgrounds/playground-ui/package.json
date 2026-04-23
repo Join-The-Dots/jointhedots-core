@@ -3,6 +3,7 @@
    "version": "0.0.0",
    "type": "module",
    "private": true,
+   "dots": true,
    "license": "MIT",
    "packageManager": "pnpm@10.30.3",
    "dependencies": {
@@ -24,7 +25,7 @@
    },
    "devDependencies": {
       "@jointhedots/core": "../../packages/jointhedots-core/dist/jointhedots-core",
-      "@jointhedots/gear": "^1.1.18",
+      "@jointhedots/gear": "^1.2.5",
       "@jointhedots/scripting": "../../packages/jointhedots-scripting/dist/jointhedots-scripting",
       "@jointhedots/ui": "../../packages/jointhedots-ui/dist/jointhedots-ui",
       "typescript": "^5.9.3"

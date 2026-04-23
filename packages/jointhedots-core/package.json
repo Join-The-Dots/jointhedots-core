@@ -3,6 +3,7 @@
    "version": "0.0.0",
    "type": "module",
    "private": true,
+   "dots": true,
    "singleton": true,
    "packageManager": "pnpm@10.30.3",
    "dependencies": {
@@ -11,7 +12,7 @@
       "zod": "^4.2.1"
    },
    "devDependencies": {
-      "@jointhedots/gear": "^1.1.18",
+      "@jointhedots/gear": "^1.2.5",
       "typescript": "^5.9.3"
    },
    "peerDependencies": {
@@ -25,6 +26,6 @@
       "watch": "tsc --watch --noEmit",
       "build": "jointhedots-gear make --libs @jointhedots/core --dist ./dist",
       "dev": "jointhedots-gear make --libs @jointhedots/core --devmode --watch --dist ./dist",
-      "deliver": "npm run build && cd ./dist/@jointhedots-core && npm publish --access public"
+      "deliver": "npm run build && cd ./dist/jointhedots-core && npm publish --access public"
    }
 }

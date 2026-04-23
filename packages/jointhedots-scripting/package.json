@@ -3,6 +3,7 @@
    "version": "0.0.0",
    "type": "module",
    "private": true,
+   "dots": true,
    "singleton": true,
    "packageManager": "pnpm@10.30.3",
    "dependencies": {
@@ -14,7 +15,7 @@
    },
    "devDependencies": {
       "@jointhedots/core": "../jointhedots-core/dist/jointhedots-core",
-      "@jointhedots/gear": "^1.1.18",
+      "@jointhedots/gear": "^1.2.5",
       "@std/assert": "npm:@jsr/std__assert@^1.0.19",
       "@std/testing": "npm:@jsr/std__testing@^1.0.17",
       "typescript": "^5.9.3"
