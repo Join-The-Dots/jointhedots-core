@@ -120,7 +120,10 @@ export class ComponentEntry<Instance extends Object = any> {
                if (type) {
                   const entry = acquireComponent(type)
                   const controller = await ComponentControllerKey.fetch(entry)
-                  await controller.createComponent(this, this.manifest)
+                  if (controller) {
+                     await controller.createComponent(this, this.manifest)
+                  }
+                  else throw new Error(`Cannot create '${type}' component`)
                }
             }
             catch (e) {
@@ -408,7 +411,10 @@ export async function saveComponent(component: ComponentEntry) {
             }
             else {
                component["__instance__"] = undefined
-               await controller.createComponent(component, manifest)
+               if (controller) {
+                  await controller.createComponent(component, manifest)
+               }
+               else throw new Error(`Cannot create '${component.id}' component`)
             }
          }
          if (component.instance instanceof Object) {

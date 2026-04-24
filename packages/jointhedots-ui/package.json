@@ -34,6 +34,6 @@
       "watch": "tsc --watch --noEmit",
       "build": "jointhedots-gear make --libs @jointhedots/ui --devmode --dist ./dist",
       "dev": "jointhedots-gear make --libs @jointhedots/ui --devmode --watch --dist ./dist",
-      "deliver": "npm run build && cd ./dist/@jointhedots-ui && npm publish --access public"
+      "deliver": "npm run build && cd ./dist/jointhedots-ui && npm publish --access public"
    }
 }
