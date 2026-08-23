@@ -3,8 +3,8 @@ import { ServicePointSetting, ServicePoint, getSettings } from "@jointhedots/cor
 import { Button, ModalContent, ModalHeader } from "react-lightning-design-system"
 import { MissingServiceError, registerErrorDisplayer, useServicesListener } from "@jointhedots/core/react"
 import { ServicePointInput } from "./configurator"
-import Icon from "../Icon"
-import { openDialog } from "../Layouts"
+import Icon from "@jointhedots/icon"
+import { openDialog } from "@jointhedots/layout"
 
 
 function ServiceConfiguratorForm(props: {

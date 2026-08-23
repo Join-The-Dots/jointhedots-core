@@ -8,6 +8,10 @@
    "packageManager": "pnpm@10.30.3",
    "dependencies": {
       "@jointhedots/core": "*",
+      "@jointhedots/button": "*",
+      "@jointhedots/icon": "*",
+      "@jointhedots/input": "*",
+      "@jointhedots/layout": "*",
       "@mui/material": "^6.4.7",
       "@rjsf/core": "^5.23.2",
       "@rjsf/utils": "^5.23.2",

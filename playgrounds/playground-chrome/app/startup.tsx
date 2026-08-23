@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { ErrorBoundary, InvokeURLView } from "@jointhedots/core/react"
 import { ToastContainer } from "react-toastify"
 import 'react-toastify/dist/ReactToastify.css'
-import "@jointhedots/ui/theme"
+import "@jointhedots/theme"
 import "../components/icons-sf-symbols"
 import "../components/icons-fontawesome"
 import "../components/icons"

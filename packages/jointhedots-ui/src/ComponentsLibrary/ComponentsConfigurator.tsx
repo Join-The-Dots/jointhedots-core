@@ -2,8 +2,8 @@ import { ComponentFilter, createComponentFilter, acquireComponent, ComponentPubl
 import { ComponentBrowser, ComponentsList } from "./ComponentsBrowser"
 import { createComponent } from "./ComponentsEditor"
 import { useAsyncState } from "@jointhedots/core/react"
-import { openContextualMenu } from "../Layouts"
-import { Button } from "../Inputs"
+import { openContextualMenu } from "@jointhedots/layout"
+import { Button } from "@jointhedots/button"
 
 
 export function CreateComponentSelector(props: {

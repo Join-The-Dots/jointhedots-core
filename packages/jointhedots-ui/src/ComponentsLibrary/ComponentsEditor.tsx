@@ -11,8 +11,8 @@ import { ModalContent, Button } from "react-lightning-design-system"
 import Form from "@rjsf/core"
 import validator from '@rjsf/validator-ajv8'
 import { CodeEditorHOC, StandardLanguageProvider } from "../CodeEditor"
-import { createPanel } from "../Layouts"
-import { ButtonIcon } from "../Inputs"
+import { createPanel } from "@jointhedots/layout"
+import { ButtonIcon } from "@jointhedots/button"
 import { getComponentIcon } from "./ComponentsBrowser"
 
 const JSONEditor = CodeEditorHOC(new StandardLanguageProvider("json"))

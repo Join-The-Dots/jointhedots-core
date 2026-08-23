@@ -1,6 +1,6 @@
-import Icon from "@jointhedots/ui/Icon"
+import Icon from "@jointhedots/icon"
 import { renderRoot } from "../components/config"
-import { ButtonIcon } from "@jointhedots/ui/Inputs"
+import { ButtonIcon } from "@jointhedots/button"
 
 const icon_0 = "bi:house-door-fill[primary]|bi:exclamation-triangle-fill[badge,error]"
 

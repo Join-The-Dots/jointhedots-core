@@ -1,0 +1,4 @@
+overrides:
+   "@jointhedots/button": "file:../../../jointhedots-ui/packages/button"
+   "@jointhedots/input": "file:../../../jointhedots-ui/packages/input"
+   "@jointhedots/layout": "file:../../../jointhedots-ui/packages/layout"

@@ -1,7 +1,8 @@
 import React, { useState } from "react"
-import { createFloatingDock, usePanel } from "@jointhedots/ui/Layouts"
+import { createFloatingDock, usePanel } from "@jointhedots/layout"
 import { renderRoot } from "../components/config"
-import { Button, InputData } from "@jointhedots/ui/Inputs"
+import { Button } from "@jointhedots/button"
+import { InputData } from "@jointhedots/input"
 import { z } from "@jointhedots/core"
 
 function Input2(props: {

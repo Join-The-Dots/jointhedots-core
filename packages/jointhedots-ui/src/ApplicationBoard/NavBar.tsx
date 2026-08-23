@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createComponentFilter, ComponentPublication, acquireServicePoint } from "@jointhedots/core"
-import { ItemRowShort, LabelButton } from '@jointhedots/ui/Items'
+import { ItemRowShort, LabelButton } from '@jointhedots/layout'
 import { AppDescriptor, AppPage, AppTooling } from '.'
 import { ComponentsFilteredList } from '../ComponentsLibrary'
 import { ServicePointStatus } from '../ServicePoint'
 import { useCurrentView } from '@jointhedots/core/react'
 import { NotificationsBell } from '../Notifications'
-import Icon from "@jointhedots/ui/Icon"
+import Icon from "@jointhedots/icon"
 import { getViewReferenceFrom, gotoURLView, ViewInfos } from '@jointhedots/core/view'
 
 export const useOutsideClick = (callback: () => void) => {

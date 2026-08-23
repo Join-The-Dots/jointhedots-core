@@ -1,5 +1,5 @@
 // App.jsx
-import { Button } from "@jointhedots/ui/Inputs"
+import { Button } from "@jointhedots/button"
 import React, { useEffect } from "react"
 
 const CLIENT_ID = "Ov23lisD79eMabcUX7SQ" // Replace with actual client ID

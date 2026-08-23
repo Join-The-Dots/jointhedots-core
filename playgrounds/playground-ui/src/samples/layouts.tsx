@@ -1,6 +1,6 @@
 import { renderRoot } from "../components/config"
-import { Button } from "@jointhedots/ui/Inputs"
-import { createFloatingDock, OverflowStack, usePanel } from "@jointhedots/ui/Layouts"
+import { Button } from "@jointhedots/button"
+import { createFloatingDock, OverflowStack, usePanel } from "@jointhedots/layout"
 
 function renderContent(count: number) {
    const items = []

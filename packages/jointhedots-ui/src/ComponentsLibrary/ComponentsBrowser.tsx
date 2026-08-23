@@ -1,14 +1,14 @@
 import React, { useCallback, useEffect, useMemo } from 'react'
 import { ComponentsRegistry, ComponentPublication, IComponentProvider, ComponentFilter, createComponentFilter, acquireComponent, deleteComponent, ComponentManifest } from '@jointhedots/core'
 import { useAsyncMemo, useAsyncState } from '@jointhedots/core/react'
-import { Stack } from '@jointhedots/ui/Layouts/Stack'
-import { TextInput } from '@jointhedots/ui/utils/TextInput'
-import { ItemRowRich, ItemRowShort, LabelSelected, ToolingProps } from '../Items'
+import { Stack } from '@jointhedots/layout'
+import { TextInput } from '@jointhedots/input'
+import { ItemRowRich, ItemRowShort, LabelSelected, ToolingProps } from '@jointhedots/layout'
 import { askQuestion } from '../Dialog'
 import { editComponent } from './ComponentsEditor'
-import { createPanel } from '../Layouts'
+import { createPanel } from '@jointhedots/layout'
 import { ComponentInfos } from './ComponentsInfos'
-import Icon from '../Icon'
+import Icon from "@jointhedots/icon"
 import './index.scss'
 
 export function getComponentGroupName(id: string) {

@@ -3,9 +3,8 @@ import {
    acquireComponent, ILogDispatcher, LogInfos, LogObject, queryLogInfos,
    queryLogObjects, QueryLogResult, registerLogCollector, unregisterLogCollector,
 } from "@jointhedots/core"
-import { Button, ButtonIcon } from "../Inputs"
-import { usePanel } from "../Layouts"
-import { ItemRowRich } from "../Items"
+import { Button, ButtonIcon } from "@jointhedots/button"
+import { usePanel, ItemRowRich } from "@jointhedots/layout"
 import { executeCommand } from "@jointhedots/core/commands"
 import { EmptyListPlaceholder } from "../EmptyListPlaceholder"
 import "./style.scss"

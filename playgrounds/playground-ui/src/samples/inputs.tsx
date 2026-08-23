@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { renderRoot } from "../components/config"
 import { CommonTypes, type JSONSchema } from "@jointhedots/core"
-import { InputData } from "@jointhedots/ui/Inputs"
-import { Button, ButtonIcon } from "@jointhedots/ui/Inputs"
+import { InputData } from "@jointhedots/input"
+import { Button, ButtonIcon } from "@jointhedots/button"
 
 const toolings_1 = [
    {

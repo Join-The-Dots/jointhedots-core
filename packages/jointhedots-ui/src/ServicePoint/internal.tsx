@@ -5,14 +5,12 @@ import {
    createComponentFilter, listenServicePoints, unlistenServicePoints,
    failedComponentPublication, acquireComponent,
 } from "@jointhedots/core"
-import { ItemIcon, ItemRowShort, LabelDecoration, LabelSelected } from "../Items"
+import { ItemIcon, ItemRowShort, LabelDecoration, LabelSelected, createFloatingDock, Stack, usePanel, Popup } from "@jointhedots/layout"
 import { useAsyncState } from "@jointhedots/core/react"
 import { NewComponentButton, ComponentItem, ComponentItemDisplay, CreateComponentSelector } from "../ComponentsLibrary"
-import { Button } from "../Inputs"
+import { Button } from "@jointhedots/button"
 
 import { useNotifications } from "../Notifications"
-import { createFloatingDock, Stack, usePanel } from "../Layouts"
-import { Popup } from "../Layouts/Popup"
 import { ComponentCard } from "../ComponentsLibrary/ComponentsInfos"
 import { ButtonGroup } from "@salesforce/design-system-react"
 

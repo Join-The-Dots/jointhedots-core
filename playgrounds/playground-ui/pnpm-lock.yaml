@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@jointhedots/button': file:../../../jointhedots-ui/packages/button
+  '@jointhedots/input': file:../../../jointhedots-ui/packages/input
+  '@jointhedots/layout': file:../../../jointhedots-ui/packages/layout
+
 importers:
 
   .:
@@ -17,9 +22,21 @@ importers:
       '@emotion/styled':
         specifier: ^11.11.0
         version: 11.14.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.4))(@types/react@19.2.14)(react@19.2.4)
+      '@jointhedots/button':
+        specifier: file:../../../jointhedots-ui/packages/button
+        version: file:../../../jointhedots-ui/packages/button(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@jointhedots/core':
         specifier: '*'
         version: 2.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@jointhedots/icon':
+        specifier: '*'
+        version: 0.1.0(postcss@8.5.8)(react@19.2.4)
+      '@jointhedots/input':
+        specifier: file:../../../jointhedots-ui/packages/input
+        version: file:../../../jointhedots-ui/packages/input(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@jointhedots/layout':
+        specifier: file:../../../jointhedots-ui/packages/layout
+        version: file:../../../jointhedots-ui/packages/layout(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@jointhedots/scripting':
         specifier: '*'
         version: 2.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -29,15 +46,6 @@ importers:
       '@octokit/rest':
         specifier: ^21.1.0
         version: 21.1.1
-      '@salesforce-ux/design-system':
-        specifier: 2.25.4
-        version: 2.25.4(postcss@8.5.8)
-      bootstrap-icons:
-        specifier: ^1.11.3
-        version: 1.13.1
-      font-awesome:
-        specifier: ^4.7.0
-        version: 4.7.0
       react:
         specifier: '>=18.2.0'
         version: 19.2.4
@@ -478,6 +486,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@jointhedots/button@file:../../../jointhedots-ui/packages/button':
+    resolution: {directory: ../../../jointhedots-ui/packages/button, type: directory}
+    peerDependencies:
+      react: '>=18.2.0'
+
   '@jointhedots/core@2.1.0':
     resolution: {integrity: sha512-TtUXOaTpXz7vRw5Ea8gQXEXcz9weVBx3ug8/XsRaZtyPlLoKdOt1GVTHT7pi1b+2keE0tStHy8aoQtmmbUavNw==}
     peerDependencies:
@@ -491,8 +504,29 @@ packages:
       - '@deno/esbuild-plugin'
       - '@jspm/core'
 
+  '@jointhedots/icon@0.1.0':
+    resolution: {integrity: sha512-ZM3L4dL6xyCXmUemDH4DTol6vQURFQ5NTPcJ0BfbYmkNqeukfGA7g1jL6Jt6OqHwbpev8uv8pfEuDwWHocGE5A==}
+    peerDependencies:
+      react: '>=18.2.0'
+
+  '@jointhedots/input@file:../../../jointhedots-ui/packages/input':
+    resolution: {directory: ../../../jointhedots-ui/packages/input, type: directory}
+    peerDependencies:
+      react: '>=18.2.0'
+
+  '@jointhedots/layout@file:../../../jointhedots-ui/packages/layout':
+    resolution: {directory: ../../../jointhedots-ui/packages/layout, type: directory}
+    peerDependencies:
+      react: '>=18.2.0'
+      react-dom: '>=18.2.0'
+
   '@jointhedots/scripting@2.1.0':
     resolution: {integrity: sha512-TY5A7wnpPk/gzJwNua4KibF5ZLEaJkR/pNqCGoq+CNBKYLD5ItWOHemBsxC1nDMsEjWpKqpKGqlUdGjJX2gRYA==}
+
+  '@jointhedots/theme@0.1.0':
+    resolution: {integrity: sha512-gVl2ZQ53ERwM1tfru1/f/K/pv95dflSstW5W7iS3o5GRrETkTENQGkNEhacQJucE+bKIJji5eD8MlwBDUqA9Ow==}
+    peerDependencies:
+      react: '>=18.2.0'
 
   '@jointhedots/ui@2.1.0':
     resolution: {integrity: sha512-rSh2FsIDv5+TeGVwXJHXy6zSemn+9Lh9aRj0/jyZ4BGLBjTuGencIVhaXDxugpRJ9BcsDG67nGTcEDXEt91h/A==}
@@ -765,11 +799,6 @@ packages:
     engines: {node: '>=14'}
     peerDependencies:
       '@rjsf/utils': ^5.24.x
-
-  '@salesforce-ux/design-system@2.25.4':
-    resolution: {integrity: sha512-I1obCGvnsB4/L7C4WR5Nl5c92tGkpN9xO7up6B9l/NUWavS1NejQ+W+reV02ee/q6j+LOrArrAnVGI12QpquWw==}
-    peerDependencies:
-      postcss: ^8.3.5
 
   '@salesforce-ux/design-system@2.29.0':
     resolution: {integrity: sha512-5Dt5BDAhjWMq01z9ire04MA4CSGe+indhfH/LvESK06e3Si3EuEcL6TTnDYejXttcLntAQVxn/+p+L1LwxCN4A==}
@@ -1171,6 +1200,9 @@ packages:
 
   find-root@1.1.0:
     resolution: {integrity: sha512-NKfW6bec6GfKc0SGx1e07QZY9PE99u0Bft/0rzSD5k3sO/vwkVUpDUKVm5Gpp5Ue3YfShPFTX2070tDs5kB9Ng==}
+
+  flag-icons@7.5.0:
+    resolution: {integrity: sha512-kd+MNXviFIg5hijH766tt+3x76ele1AXlo4zDdCxIvqWZhKt4T83bOtxUOOMlTx/EcFdUMH5yvQgYlFh1EqqFg==}
 
   font-awesome@4.7.0:
     resolution: {integrity: sha512-U6kGnykA/6bFmg1M/oT9EkFeIYv7JlX3bozwQJWiiLz6L0w3F5vBVPxHlwyX/vtNq1ckcpRKOB9f2Qal/VtFpg==}
@@ -2306,6 +2338,17 @@ snapshots:
   '@img/sharp-win32-x64@0.34.5':
     optional: true
 
+  '@jointhedots/button@file:../../../jointhedots-ui/packages/button(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@jointhedots/icon': 0.1.0(postcss@8.5.8)(react@19.2.4)
+      '@salesforce-ux/design-system': 2.29.0(postcss@8.5.8)
+      '@salesforce/design-system-react': 0.10.65(@salesforce-ux/design-system@2.29.0(postcss@8.5.8))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      classnames: 2.5.1
+      react: 19.2.4
+    transitivePeerDependencies:
+      - postcss
+      - react-dom
+
   '@jointhedots/core@2.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       json-schema: 0.4.0
@@ -2338,6 +2381,37 @@ snapshots:
       - sass-embedded
       - supports-color
 
+  '@jointhedots/icon@0.1.0(postcss@8.5.8)(react@19.2.4)':
+    dependencies:
+      '@jointhedots/theme': 0.1.0(postcss@8.5.8)(react@19.2.4)
+      '@salesforce-ux/design-system': 2.29.0(postcss@8.5.8)
+      bootstrap-icons: 1.13.1
+      flag-icons: 7.5.0
+      font-awesome: 4.7.0
+      react: 19.2.4
+    transitivePeerDependencies:
+      - postcss
+
+  '@jointhedots/input@file:../../../jointhedots-ui/packages/input(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@jointhedots/core': 2.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@jointhedots/icon': 0.1.0(postcss@8.5.8)(react@19.2.4)
+      react: 19.2.4
+    transitivePeerDependencies:
+      - postcss
+      - react-dom
+
+  '@jointhedots/layout@file:../../../jointhedots-ui/packages/layout(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@jointhedots/button': file:../../../jointhedots-ui/packages/button(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@jointhedots/core': 2.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@jointhedots/icon': 0.1.0(postcss@8.5.8)(react@19.2.4)
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      react-toastify: 11.0.5(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+    transitivePeerDependencies:
+      - postcss
+
   '@jointhedots/scripting@2.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@jointhedots/core': 2.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -2348,6 +2422,13 @@ snapshots:
     transitivePeerDependencies:
       - react
       - react-dom
+
+  '@jointhedots/theme@0.1.0(postcss@8.5.8)(react@19.2.4)':
+    dependencies:
+      '@salesforce-ux/design-system': 2.29.0(postcss@8.5.8)
+      react: 19.2.4
+    transitivePeerDependencies:
+      - postcss
 
   '@jointhedots/ui@2.1.0(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.4))(@types/react@19.2.14)(react@19.2.4))(@types/react@19.2.14)(monaco-editor@0.55.1)(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react-lightning-design-system@5.9.1(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)':
     dependencies:
@@ -2622,10 +2703,6 @@ snapshots:
       ajv-formats: 2.1.1(ajv@8.18.0)
       lodash: 4.17.23
       lodash-es: 4.17.23
-
-  '@salesforce-ux/design-system@2.25.4(postcss@8.5.8)':
-    dependencies:
-      postcss: 8.5.8
 
   '@salesforce-ux/design-system@2.29.0(postcss@8.5.8)':
     dependencies:
@@ -3048,6 +3125,8 @@ snapshots:
       - supports-color
 
   find-root@1.1.0: {}
+
+  flag-icons@7.5.0: {}
 
   font-awesome@4.7.0: {}
 
