@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { ServicePointSetting, ServicePoint, getSettings } from "@jointhedots/core"
-import { Button, ModalContent, ModalHeader } from "react-lightning-design-system"
 import { MissingServiceError, registerErrorDisplayer, useServicesListener } from "@jointhedots/core/react"
 import { ServicePointInput } from "./configurator"
-import Icon from "@jointhedots/icon"
 import { openDialog } from "@jointhedots/layout"
+import { Button } from "@jointhedots/button"
 
 
 function ServiceConfiguratorForm(props: {
@@ -50,11 +49,9 @@ function ServiceConfiguratorForm(props: {
       <div style={{
          fontSize: "150%",
          borderBottom: "dotted thin #aaaa",
-      }}>Following services are required</div>
+       }}>Following services are required</div>
       {list}
-      <Button type="brand" onClick={apply} >
-         {"Apply"}
-      </Button>
+      <Button variant="primary" label="Apply" onClick={apply} />
    </div >
 }
 
@@ -85,10 +82,12 @@ export function DefaultServiceConfigurator(props: {
          </div>
          : sizing == 1
             ? <div style={{ maxWidth: 400, padding: 5, margin: "auto" }}>
-               <Button type="destructive" onClick={onSettings} >
-                  <Icon name="bi:exclamation-diamond" />
-                  {"Settings"}
-               </Button>
+               <Button
+                  variant="error"
+                  icon="bi:exclamation-diamond"
+                  label="Settings"
+                  onClick={onSettings}
+               />
             </div>
             : null
       }

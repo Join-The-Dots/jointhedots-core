@@ -1,7 +1,12 @@
 import React from 'react'
 import * as Monaco from "monaco-editor"
 import { editor as Editor, languages as Lang, Uri } from "monaco-editor"
+import { ThemeContext, ThemeProvider, getGlobalTheme } from "@jointhedots/theme"
 import "./index.scss"
+
+function monacoThemeName(theme: ThemeProvider) {
+   return theme.isDark ? "vs-dark" : "vs-light"
+}
 
 export interface CodeLanguageProvider<T> {
    readonly language: string
@@ -52,24 +57,33 @@ export class StandardLanguageProvider<T> implements CodeLanguageProvider<T> {
 
 export function CodeEditorHOC<T>(provider: CodeLanguageProvider<T>) {
    return class MonacoEditor extends React.Component<CodePropsType<T>> {
-      element: HTMLDivElement
-      editor: Editor.IStandaloneCodeEditor
-      model: Editor.ITextModel
-      setting = false
+       element: HTMLDivElement
+       editor: Editor.IStandaloneCodeEditor
+       model: Editor.ITextModel
+       setting = false
+       appliedTheme = monacoThemeName(getGlobalTheme())
 
-      constructor(props) {
-         super(props)
-         this.getSnapshotBeforeUpdate({})
-      }
-      override getSnapshotBeforeUpdate(_prevProps) {
-         const { value } = this.props
-         if (value !== this.model?.getValue?.()) {
-            this.setValue(value)
-         }
-         return null
-      }
-      override componentDidUpdate() {
-      }
+       static contextType = ThemeContext
+       declare context: ThemeProvider
+
+       constructor(props) {
+          super(props)
+          this.getSnapshotBeforeUpdate({})
+       }
+       override getSnapshotBeforeUpdate(_prevProps) {
+          const { value } = this.props
+          if (value !== this.model?.getValue?.()) {
+             this.setValue(value)
+          }
+          return null
+       }
+       override componentDidUpdate() {
+          const theme = monacoThemeName(this.context || getGlobalTheme())
+          if (theme !== this.appliedTheme) {
+             this.appliedTheme = theme
+             Editor.setTheme(theme)
+          }
+       }
       override componentWillUnmount() {
          this.unmountEditor()
          //this.model?.dispose()
@@ -108,11 +122,10 @@ export function CodeEditorHOC<T>(provider: CodeLanguageProvider<T>) {
             this.element.style.height = "100%"
             this.element.style.width = "100%"
             this.element.style.overflow = 'hidden'
-
-
+            this.appliedTheme = monacoThemeName(this.context || getGlobalTheme())
             this.editor = Editor.create(element, {
                model: this.model,
-               theme: "vs-light",
+               theme: this.appliedTheme,
                minimap: { enabled: false },
                lineNumbersMinChars: 3,
                glyphMargin: false,

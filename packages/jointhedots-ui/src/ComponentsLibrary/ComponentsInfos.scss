@@ -1,0 +1,9 @@
+.ComponentCard-waiting {
+   display: inline-block;
+   animation: ComponentCard-spin 1s linear infinite;
+}
+
+@keyframes ComponentCard-spin {
+   from { transform: rotate(0deg); }
+   to { transform: rotate(360deg); }
+}

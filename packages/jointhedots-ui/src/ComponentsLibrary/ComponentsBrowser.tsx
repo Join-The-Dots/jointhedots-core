@@ -2,13 +2,13 @@ import React, { useCallback, useEffect, useMemo } from 'react'
 import { ComponentsRegistry, ComponentPublication, IComponentProvider, ComponentFilter, createComponentFilter, acquireComponent, deleteComponent, ComponentManifest } from '@jointhedots/core'
 import { useAsyncMemo, useAsyncState } from '@jointhedots/core/react'
 import { Stack } from '@jointhedots/layout'
-import { TextInput } from '@jointhedots/input'
+import { InputData, TextInputSchema } from '@jointhedots/input'
 import { ItemRowRich, ItemRowShort, LabelSelected, ToolingProps } from '@jointhedots/layout'
 import { askQuestion } from '../Dialog'
 import { editComponent } from './ComponentsEditor'
 import { createPanel } from '@jointhedots/layout'
 import { ComponentInfos } from './ComponentsInfos'
-import Icon from "@jointhedots/icon"
+import { Icon } from "@jointhedots/icon"
 import './index.scss'
 
 export function getComponentGroupName(id: string) {
@@ -237,9 +237,10 @@ export function ComponentBrowser(props: {
       <Stack.FixedDock>
          <Stack gap={3}>
             <Stack.FlexDock>
-               <TextInput
+               <InputData
                   label="Search"
                   value={filter.query}
+                  schema={TextInputSchema("Search", "text")}
                   onChange={(query) => {
                      setFilter(createComponentFilter({ ...filter, query }))
                   }}

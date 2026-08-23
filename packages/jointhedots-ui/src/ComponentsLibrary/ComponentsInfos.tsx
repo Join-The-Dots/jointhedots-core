@@ -1,7 +1,8 @@
 import { acquireComponent, EditorKey, ComponentPublication } from "@jointhedots/core"
 import { NotificationsList } from "../Notifications"
 import { useAsyncMemo } from "@jointhedots/core/react"
-import { Spinner } from "@salesforce/design-system-react"
+import { Icon } from "@jointhedots/icon"
+import "./ComponentsInfos.scss"
 
 
 export function ComponentCard(props: {
@@ -21,7 +22,7 @@ export function ComponentCard(props: {
    return <>
       {infos !== undefined ? <>
          {infos.preview && <infos.preview manifest={infos.manifest} />}
-      </> : <Spinner />
+      </> : <Icon name="bi:arrow-repeat" className="ComponentCard-waiting" />
       }
    </>
 }

@@ -7,17 +7,15 @@
    "singleton": true,
    "packageManager": "pnpm@10.30.3",
    "dependencies": {
-      "@jointhedots/core": "*",
       "@jointhedots/button": "*",
-      "@jointhedots/icon": "*",
+      "@jointhedots/core": "*",
+      "@jointhedots/icon": "^0.1.1",
       "@jointhedots/input": "*",
       "@jointhedots/layout": "*",
-      "@mui/material": "^6.4.7",
+      "@jointhedots/theme": "^0.1.1",
       "@rjsf/core": "^5.23.2",
-      "@rjsf/utils": "^5.23.2",
       "@rjsf/validator-ajv8": "^5.23.2",
       "@salesforce-ux/design-system": "^2.29.0",
-      "@salesforce/design-system-react": "^0.10.65",
       "react-toastify": "^11.0.5"
    },
    "peerDependencies": {

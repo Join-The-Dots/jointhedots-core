@@ -5,10 +5,12 @@ import {
 } from "@jointhedots/core"
 import { useAsyncMemo } from "@jointhedots/core/react"
 
-import { blue, cyan, deepOrange, green, pink, purple, deepPurple, orange } from '@mui/material/colors'
 import { ServicePointEditable, useServiceDescriptor } from "./internal"
 
-export const DefaultColorsMap = [green, pink, blue, cyan, deepOrange, purple, deepPurple, orange].map(x => x["A700"])
+export const DefaultColorsMap = [
+   "#00c853", "#c2185b", "#2962ff", "#00b8d4",
+   "#dd2c00", "#aa00ff", "#6200ea", "#ff6d00",
+]
 
 export function ServicePointStatus(props: {
    servicePoint: ServicePoint
@@ -52,20 +54,16 @@ export function ServicePointInput(props: {
       , [], [value.providers]
    )
 
-   return <div className={failure ? "slds-form-element slds-has-error" : "slds-form-element"}>
-      <label className="slds-form-element__label">
+   return <div style={{ display: "flex", flexDirection: "column", gap: 4, padding: "4px 0" }}>
+      <label style={{ color: "var(--jtd-muted)" }}>
          {label || value.id}
       </label>
-      <div className="slds-form-element__control">
-         <div className="slds-input">
-            <ServicePointEditable
-               servicePoint={value}
-               providers={providers}
-               onChange={onChange}
-            />
-         </div>
-         {failure && <div className="slds-form-element__help" id="error-id">{failure.message}</div>}
-      </div>
+      <ServicePointEditable
+         servicePoint={value}
+         providers={providers}
+         onChange={onChange}
+      />
+      {failure && <div style={{ color: "var(--jtd-error)" }}>{failure.message}</div>}
    </div>
 }
 

@@ -7,11 +7,11 @@ import { Button, ButtonIcon } from "@jointhedots/button"
 const toolings_1 = [
    {
       icon: "bi:house",
-      onClick: () => { }
+      onActivate: () => { }
    },
    {
       icon: "bi:house",
-      onClick: () => { }
+      onActivate: () => { }
    },
 ]
 
@@ -47,11 +47,11 @@ function ApplicationRoot() {
       />
       <div>
          <Button icon="bi:house" label="Click here" />
-         <Button icon="bi:house" label="Click here" iconPosition="right" variant="destructive" />
-         <Button icon="bi:house" label="Click here" variant="brand" />
+         <Button icon="bi:house" label="Click here" iconPosition="right" variant="error" />
+         <Button icon="bi:house" label="Click here" variant="primary" />
          <ButtonIcon icon="bi:house" />
          <ButtonIcon icon="bi:house" variant="primary" />
-         <ButtonIcon icon="bi:house" variant="secondary" />
+         <ButtonIcon icon="bi:house" variant="neutral" />
          <ButtonIcon icon="bi:house" variant="watermark" />
       </div>
    </>

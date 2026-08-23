@@ -1,5 +1,6 @@
 import React from "react"
 import ReactDOM from 'react-dom/client'
+import "@jointhedots/theme"
 import "@jointhedots/icon/bootstrap"
 import "@jointhedots/icon/font-awesome"
 import "@jointhedots/icon/salesforce"

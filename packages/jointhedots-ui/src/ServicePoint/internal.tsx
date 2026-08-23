@@ -12,7 +12,6 @@ import { Button } from "@jointhedots/button"
 
 import { useNotifications } from "../Notifications"
 import { ComponentCard } from "../ComponentsLibrary/ComponentsInfos"
-import { ButtonGroup } from "@salesforce/design-system-react"
 
 const service_display: ComponentItemDisplay = {
    grouped: false,
@@ -159,7 +158,7 @@ export function ServiceConnexionSelector(props: {
                   </div>
                })}
                {hasSelectMode
-                  ? <ButtonGroup>
+                  ? <Stack gap={3}>
                      <NewComponentButton
                         label="New Connexion"
                         service={service}
@@ -169,10 +168,10 @@ export function ServiceConnexionSelector(props: {
                         style={{ flex: 1 }}
                         icon="bi:pencil-square"
                         label="Selection"
-                        variant={edited ? "brand" : undefined}
+                        variant={edited ? "primary" : undefined}
                         onClick={() => setEdited(!edited)}
                      />
-                  </ButtonGroup>
+                  </Stack>
                   : <NewComponentButton
                      label="New Connexion"
                      service={service}
@@ -232,7 +231,7 @@ export function ServicePointEditable(props: {
    }, [servicePoint])
 
    if (!servicePoint) {
-      return <Button variant="destructive">
+      return <Button variant="error">
          Invalid service point
       </Button>
    }

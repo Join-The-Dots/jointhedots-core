@@ -24,13 +24,13 @@ importers:
         version: 11.14.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.4))(@types/react@19.2.14)(react@19.2.4)
       '@jointhedots/button':
         specifier: file:../../../jointhedots-ui/packages/button
-        version: file:../../../jointhedots-ui/packages/button(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: file:../../../jointhedots-ui/packages/button(postcss@8.5.8)(react@19.2.4)
       '@jointhedots/core':
         specifier: '*'
         version: 2.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@jointhedots/icon':
-        specifier: '*'
-        version: 0.1.0(postcss@8.5.8)(react@19.2.4)
+        specifier: ^0.1.1
+        version: 0.1.1(postcss@8.5.8)(react@19.2.4)
       '@jointhedots/input':
         specifier: file:../../../jointhedots-ui/packages/input
         version: file:../../../jointhedots-ui/packages/input(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -40,6 +40,9 @@ importers:
       '@jointhedots/scripting':
         specifier: '*'
         version: 2.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@jointhedots/theme':
+        specifier: ^0.1.1
+        version: 0.1.1(react@19.2.4)
       '@jointhedots/ui':
         specifier: '*'
         version: 2.1.0(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.4))(@types/react@19.2.14)(react@19.2.4))(@types/react@19.2.14)(monaco-editor@0.55.1)(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react-lightning-design-system@5.9.1(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
@@ -102,6 +105,10 @@ packages:
     resolution: {integrity: sha512-05WQkdpL9COIMz4LjTxGpPNCdlpyimKppYNoJ5Di5EUObifl8t4tuLuUBBZEpoLYOmfvIWrsp9fCl0HoPRVTdA==}
     engines: {node: '>=6.9.0'}
 
+  '@babel/runtime@7.29.7':
+    resolution: {integrity: sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==}
+    engines: {node: '>=6.9.0'}
+
   '@babel/template@7.28.6':
     resolution: {integrity: sha512-YA6Ma2KsCdGb+WC6UpBVFJGXL58MDA6oyONbjyF/+5sBgxY/dwkhLogbMT2GXXyU84/IhRw/2D1Os1B/giz+BQ==}
     engines: {node: '>=6.9.0'}
@@ -114,8 +121,8 @@ packages:
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
 
-  '@bufbuild/protobuf@2.11.0':
-    resolution: {integrity: sha512-sBXGT13cpmPR5BMgHE6UEEfEaShh5Ror6rfN3yEK5si7QVrtZg8LEPQb0VVhiLRUslD2yLnXtnRzG035J/mZXQ==}
+  '@bufbuild/protobuf@2.14.0':
+    resolution: {integrity: sha512-C3UGsiCwSprE2NKIIFA3hCDlpXTMCAXRZuEVp88L1GY36Y41+rYL5fryE+nOFhp4p4JPQvdV8PQ4DWgHgeTE+w==}
 
   '@emnapi/runtime@1.9.0':
     resolution: {integrity: sha512-QN75eB0IH2ywSpRpNddCRfQIhmJYBCJ1x5Lb3IscKAL8bMnVAKnRg8dCoXbHzVLLH7P38N2Z3mtulB7W0J0FKw==}
@@ -504,8 +511,8 @@ packages:
       - '@deno/esbuild-plugin'
       - '@jspm/core'
 
-  '@jointhedots/icon@0.1.0':
-    resolution: {integrity: sha512-ZM3L4dL6xyCXmUemDH4DTol6vQURFQ5NTPcJ0BfbYmkNqeukfGA7g1jL6Jt6OqHwbpev8uv8pfEuDwWHocGE5A==}
+  '@jointhedots/icon@0.1.1':
+    resolution: {integrity: sha512-QT9mUn2J4NKnufgBLscgDJI0pFTF0zCHh01UlClaOwyE2+hfLsGKfbiSgiEiC7KSUgSRNFDCg4oa47UTWWS1Hg==}
     peerDependencies:
       react: '>=18.2.0'
 
@@ -523,8 +530,8 @@ packages:
   '@jointhedots/scripting@2.1.0':
     resolution: {integrity: sha512-TY5A7wnpPk/gzJwNua4KibF5ZLEaJkR/pNqCGoq+CNBKYLD5ItWOHemBsxC1nDMsEjWpKqpKGqlUdGjJX2gRYA==}
 
-  '@jointhedots/theme@0.1.0':
-    resolution: {integrity: sha512-gVl2ZQ53ERwM1tfru1/f/K/pv95dflSstW5W7iS3o5GRrETkTENQGkNEhacQJucE+bKIJji5eD8MlwBDUqA9Ow==}
+  '@jointhedots/theme@0.1.1':
+    resolution: {integrity: sha512-7k3mWkFIO37/Be1G6jM47HOH1XGr3/NxiKxLRo2bbSNT36BrJA6VSih/jfT7ZGMhAbODXO6p30ZeYK0Egjjy5A==}
     peerDependencies:
       react: '>=18.2.0'
 
@@ -1086,8 +1093,8 @@ packages:
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
-  dayjs@1.11.20:
-    resolution: {integrity: sha512-YbwwqR/uYpeoP4pu043q+LTDLFBLApUP6VxRihdfNTqu4ubqMlGDLd6ErXhEgsyvY0K6nCs7nggYumAN+9uEuQ==}
+  dayjs@1.11.23:
+    resolution: {integrity: sha512-QDTCU0M0MxR3hQfnlDJfwekQiaanm1ubOD231u73WBckQ/fsamwRLiE2GBz6D3a/xF1NgfiDLJjXBa1hYOYTtQ==}
 
   debounce@1.2.1:
     resolution: {integrity: sha512-XRRe6Glud4rd/ZGQfiV1ruXSfbvfJedlV9Y6zOlP+2K04vBYiJEte6stfFkCP03aMnY5tsipamumUjL14fofug==}
@@ -1267,6 +1274,9 @@ packages:
 
   immutable@5.1.5:
     resolution: {integrity: sha512-t7xcm2siw+hlUM68I+UEOK+z84RzmN59as9DZ7P1l0994DKUWV7UXBMQZVxaoMSRQ+PBZbHCOoBt7a2wxOMt+A==}
+
+  immutable@5.1.9:
+    resolution: {integrity: sha512-m8nVez3rwrgmWxtLMt1ZYXB2Lv7OKYn/disyxAlSDYAlKSlFoPPfIAmAM/M5xqL4m4C/wAPw7S2/CNaUii1Hxg==}
 
   import-fresh@3.3.1:
     resolution: {integrity: sha512-TR3KfrTZTYLPB6jUjfx6MF9WcWrHL9su5TObK4ZkYgBdWKPOFoSoQIdEuTuR82pmtxH2spWG9h6etwfr1pLBqQ==}
@@ -2041,6 +2051,8 @@ snapshots:
 
   '@babel/runtime@7.28.6': {}
 
+  '@babel/runtime@7.29.7': {}
+
   '@babel/template@7.28.6':
     dependencies:
       '@babel/code-frame': 7.29.0
@@ -2064,7 +2076,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@bufbuild/protobuf@2.11.0': {}
+  '@bufbuild/protobuf@2.14.0': {}
 
   '@emnapi/runtime@1.9.0':
     dependencies:
@@ -2338,16 +2350,13 @@ snapshots:
   '@img/sharp-win32-x64@0.34.5':
     optional: true
 
-  '@jointhedots/button@file:../../../jointhedots-ui/packages/button(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@jointhedots/button@file:../../../jointhedots-ui/packages/button(postcss@8.5.8)(react@19.2.4)':
     dependencies:
-      '@jointhedots/icon': 0.1.0(postcss@8.5.8)(react@19.2.4)
-      '@salesforce-ux/design-system': 2.29.0(postcss@8.5.8)
-      '@salesforce/design-system-react': 0.10.65(@salesforce-ux/design-system@2.29.0(postcss@8.5.8))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@jointhedots/icon': 0.1.1(postcss@8.5.8)(react@19.2.4)
       classnames: 2.5.1
       react: 19.2.4
     transitivePeerDependencies:
       - postcss
-      - react-dom
 
   '@jointhedots/core@2.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
@@ -2381,9 +2390,9 @@ snapshots:
       - sass-embedded
       - supports-color
 
-  '@jointhedots/icon@0.1.0(postcss@8.5.8)(react@19.2.4)':
+  '@jointhedots/icon@0.1.1(postcss@8.5.8)(react@19.2.4)':
     dependencies:
-      '@jointhedots/theme': 0.1.0(postcss@8.5.8)(react@19.2.4)
+      '@jointhedots/theme': 0.1.1(react@19.2.4)
       '@salesforce-ux/design-system': 2.29.0(postcss@8.5.8)
       bootstrap-icons: 1.13.1
       flag-icons: 7.5.0
@@ -2395,7 +2404,8 @@ snapshots:
   '@jointhedots/input@file:../../../jointhedots-ui/packages/input(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@jointhedots/core': 2.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@jointhedots/icon': 0.1.0(postcss@8.5.8)(react@19.2.4)
+      '@jointhedots/icon': 0.1.1(postcss@8.5.8)(react@19.2.4)
+      '@jointhedots/layout': file:../../../jointhedots-ui/packages/layout(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react: 19.2.4
     transitivePeerDependencies:
       - postcss
@@ -2403,9 +2413,9 @@ snapshots:
 
   '@jointhedots/layout@file:../../../jointhedots-ui/packages/layout(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
-      '@jointhedots/button': file:../../../jointhedots-ui/packages/button(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@jointhedots/button': file:../../../jointhedots-ui/packages/button(postcss@8.5.8)(react@19.2.4)
       '@jointhedots/core': 2.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@jointhedots/icon': 0.1.0(postcss@8.5.8)(react@19.2.4)
+      '@jointhedots/icon': 0.1.1(postcss@8.5.8)(react@19.2.4)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       react-toastify: 11.0.5(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -2423,12 +2433,9 @@ snapshots:
       - react
       - react-dom
 
-  '@jointhedots/theme@0.1.0(postcss@8.5.8)(react@19.2.4)':
+  '@jointhedots/theme@0.1.1(react@19.2.4)':
     dependencies:
-      '@salesforce-ux/design-system': 2.29.0(postcss@8.5.8)
       react: 19.2.4
-    transitivePeerDependencies:
-      - postcss
 
   '@jointhedots/ui@2.1.0(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.14)(react@19.2.4))(@types/react@19.2.14)(react@19.2.4))(@types/react@19.2.14)(monaco-editor@0.55.1)(postcss@8.5.8)(react-dom@19.2.4(react@19.2.4))(react-lightning-design-system@5.9.1(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)':
     dependencies:
@@ -2976,7 +2983,7 @@ snapshots:
 
   csstype@3.2.3: {}
 
-  dayjs@1.11.20: {}
+  dayjs@1.11.23: {}
 
   debounce@1.2.1: {}
 
@@ -3187,6 +3194,8 @@ snapshots:
       safer-buffer: 2.1.2
 
   immutable@5.1.5: {}
+
+  immutable@5.1.9: {}
 
   import-fresh@3.3.1:
     dependencies:
@@ -3449,10 +3458,10 @@ snapshots:
 
   react-lightning-design-system@5.9.1(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       '@types/react': 19.2.14
       classnames: 2.5.1
-      dayjs: 1.11.20
+      dayjs: 1.11.23
       keycoder: 1.1.1
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
@@ -3608,9 +3617,9 @@ snapshots:
 
   sass-embedded@1.98.0:
     dependencies:
-      '@bufbuild/protobuf': 2.11.0
+      '@bufbuild/protobuf': 2.14.0
       colorjs.io: 0.5.2
-      immutable: 5.1.5
+      immutable: 5.1.9
       rxjs: 7.8.2
       supports-color: 8.1.1
       sync-child-process: 1.0.2

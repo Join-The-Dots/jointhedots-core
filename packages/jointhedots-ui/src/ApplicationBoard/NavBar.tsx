@@ -6,7 +6,7 @@ import { ComponentsFilteredList } from '../ComponentsLibrary'
 import { ServicePointStatus } from '../ServicePoint'
 import { useCurrentView } from '@jointhedots/core/react'
 import { NotificationsBell } from '../Notifications'
-import Icon from "@jointhedots/icon"
+import { Icon } from "@jointhedots/icon"
 import { getViewReferenceFrom, gotoURLView, ViewInfos } from '@jointhedots/core/view'
 
 export const useOutsideClick = (callback: () => void) => {
